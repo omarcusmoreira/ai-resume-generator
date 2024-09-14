@@ -40,7 +40,7 @@
 // //     {
 // //       headers: {
 // //         'Content-Type': 'application/json',
-// //         'Authorization': `Bearer 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`,
+// //         'Authorization': `Bearer "
 // //       },
 // //     }
 // //   );
