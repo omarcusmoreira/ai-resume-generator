@@ -1,24 +1,22 @@
-'use client'
-import { useState, ChangeEvent } from 'react';
+'use client';
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PlusCircle, Save, Upload, Trash2 } from "lucide-react";
+import { PlusCircle, Save, Trash2 } from "lucide-react";
 import { ConfirmationModal } from '@/components/ui/confirmationModal';
-import { useAppState } from '@/hooks/useAppState';
-import { ProfileWizardComponent } from '@/components/profile-wizard';
-import { ResumeState } from '@/types';
+import { useFirestore } from '@/hooks/useFirestore';
+import { ProfileType, ProfileSectionType } from '@/types';
+import ProfileWizardComponent from '@/components/profile-wizard';
 
-export default function ProfilePage() {
-  const [appState, setAppState, saveState, isLoading] = useAppState();
-  const [activeProfile, setActiveProfile] = useState<number | null>(null);
+export default function Profiles() {
+  const { appState, loading, deleteProfile, updateProfile } = useFirestore();
+  const [activeProfile, setActiveProfile] = useState<number | null>(0);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
-  if (isLoading) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
@@ -26,60 +24,21 @@ export default function ProfilePage() {
     setIsWizardOpen(true);
   };
 
-  const handleSaveNewProfile = (newProfile: ResumeState) => {
-    const profile = {
-      name: newProfile.profileName,
-      sections: [
-        { title: "Qualification Summary", content: newProfile.qualificationSummary, aiEnhanced: "" },
-        { title: "Professional Experience", content: newProfile.professionalExperience, aiEnhanced: "" },
-        { title: "Academic Background", content: newProfile.academicBackground, aiEnhanced: "" },
-        { title: "Idioms", content: newProfile.idioms.map(i => `${i.name}: ${i.level}`).join(', '), aiEnhanced: "" },
-        { title: "Extracurricular", content: newProfile.extracurricular, aiEnhanced: "" },
-      ]
-    };
-    setAppState({
-      ...appState,
-      profiles: [...appState.profiles, profile]
-    });
-    setIsWizardOpen(false);
+  const handleContentChange = (profileIndex: number, sectionKey: keyof ProfileSectionType, content: string) => {
+    if (activeProfile === null || !appState?.profiles) return;
+    const updatedProfiles = appState.profiles[profileIndex];
+    const section = updatedProfiles.sections;
+
+    section[sectionKey].content = content;
+    section[sectionKey].aiEnhanced = `AI enhanced: ${content}`;
+
+    updateProfile(updatedProfiles);
   };
 
-  const handleContentChange = (sectionIndex: number, content: string) => {
-    if (activeProfile === null) return;
-    const updatedProfiles = [...appState.profiles];
-    updatedProfiles[activeProfile].sections[sectionIndex].content = content;
-    updatedProfiles[activeProfile].sections[sectionIndex].aiEnhanced = `AI enhanced: ${content}`;
-    setAppState({
-      ...appState,
-      profiles: updatedProfiles
-    });
-  };
-
-  const handleSaveProfile = () => {
-    saveState();
-    console.log("Saving profile:", activeProfile !== null ? appState.profiles[activeProfile] : "No active profile");
-  };
-
-  const handleSavePersonalInfo = () => {
-    saveState();
-    console.log("Saving personal info:", appState.personalInfo);
-  };
-
-  const handlePictureUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAppState({
-          ...appState,
-          personalInfo: {
-            ...appState.personalInfo,
-            picture: reader.result as string
-          }
-        });
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleSaveProfile = async (profileIndex: number) => {
+    if (activeProfile === null || !appState?.profiles) return;
+    const updatedProfiles = appState.profiles[profileIndex];
+    await updateProfile(updatedProfiles); // Ensure appState is passed correctly
   };
 
   const handleDeleteProfile = () => {
@@ -87,142 +46,59 @@ export default function ProfilePage() {
   };
 
   const confirmDeleteProfile = () => {
-    if (activeProfile === null) return;
-    const updatedProfiles = appState.profiles.filter((_, index) => index !== activeProfile);
-    setAppState({
-      ...appState,
-      profiles: updatedProfiles
-    });
+    if (activeProfile === null || !appState?.profiles) return;
+    const updatedProfiles = appState.userType.profiles.filter((_:ProfileType, index: number) => index !== activeProfile);
+    deleteProfile(updatedProfiles);
     setActiveProfile(updatedProfiles.length > 0 ? Math.min(activeProfile, updatedProfiles.length - 1) : null);
     setIsDeleteModalOpen(false);
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-heading">Profile Manager</h1>
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-2xl text-heading">Personal Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2 flex items-center justify-center mb-4">
-              <div className="relative">
-                <Avatar className="w-32 h-32">
-                  <AvatarImage src={appState.personalInfo.picture} alt="Profile picture" />
-                  <AvatarFallback>
-                    {appState.personalInfo.picture ? '' : 'Upload'}
-                  </AvatarFallback>
-                </Avatar>
-                <label htmlFor="picture-upload" className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer">
-                  <Upload className="h-4 w-4" />
-                </label>
-                <input
-                  id="picture-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handlePictureUpload}
-                />
-              </div>
-            </div>
-            {Object.entries(appState.personalInfo).map(([key, value]) => {
-              if (key === 'picture') return null;
-              return (
-                <div key={key}>
-                  <label htmlFor={key} className="block text-sm font-medium text-gray-700 mb-1">
-                    {key === 'birthDate' ? 'Birth Date' : key.charAt(0).toUpperCase() + key.slice(1)}
-                  </label>
-                  <Input
-                    id={key}
-                    value={value}
-                    onChange={(e) => setAppState({
-                      ...appState,
-                      personalInfo: {
-                        ...appState.personalInfo,
-                        [key]: e.target.value
-                      }
-                    })}
-                    placeholder={`Enter your ${key === 'birthDate' ? 'birth date' : key}`}
-                    type={key === 'birthDate' ? 'date' : 'text'}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-end">
-          <Button onClick={handleSavePersonalInfo} className="text-button text-white">
-            <Save className="mr-2 h-4 w-4" />
-            Save Personal Info
-          </Button>
-        </CardFooter>
-      </Card>
+    <div className="container mx-auto p-8">
       {isWizardOpen ? (
         <ProfileWizardComponent 
           isOpen={isWizardOpen} 
           onClose={() => setIsWizardOpen(false)} 
-          onSave={handleSaveNewProfile} 
         />
-      ) : appState.profiles.length > 0 ? (
+      ) : appState?.profiles && appState.profiles.length > 0 ? (
         <Tabs value={activeProfile?.toString() || ""} onValueChange={(value) => setActiveProfile(parseInt(value))}>
           <div className="flex items-center mb-4">
             <TabsList>
-              {appState.profiles.map((profile, index) => (
-                <TabsTrigger key={index} value={index.toString()}>{profile.name}</TabsTrigger>
+              {appState.profiles.map((profile: ProfileType, index: number) => (
+                <TabsTrigger key={index} value={index.toString()}>{profile.profileName}</TabsTrigger>
               ))}
             </TabsList>
             <Button variant="outline" size="icon" className="ml-2" onClick={handleAddProfile}>
               <PlusCircle className="h-4 w-4" />
             </Button>
           </div>
-          {appState.profiles.map((profile, profileIndex) => (
+          {appState.profiles.map((profile: ProfileType, profileIndex: number) => (
             <TabsContent key={profileIndex} value={profileIndex.toString()}>
               <Card>
                 <CardHeader>
-                  <CardTitle>
-                    <Input 
-                      value={profile.name} 
-                      onChange={(e) => {
-                        const updatedProfiles = [...appState.profiles];
-                        updatedProfiles[profileIndex].name = e.target.value;
-                        setAppState({
-                          ...appState,
-                          profiles: updatedProfiles
-                        });
-                      }}
-                      className="text-xl font-bold"
-                    />
-                  </CardTitle>
+                  <CardTitle>{profile.profileName}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {profile.sections.map((section, sectionIndex) => (
-                    <div key={sectionIndex} className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">{section.title}</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Textarea
-                            placeholder={`Enter your ${section.title.toLowerCase()}...`}
-                            value={section.content}
-                            onChange={(e) => handleContentChange(sectionIndex, e.target.value)}
-                            className="min-h-[100px]"
-                          />
-                        </div>
-                        <div>
-                          <div className="p-2 bg-muted rounded-md min-h-[100px]">
-                            {section.aiEnhanced || "AI enhanced content will appear here."}
-                          </div>
-                        </div>
-                      </div>
+                  {Object.entries(profile.sections).map(([sectionKey, section]) => (
+                    <div key={sectionKey}>
+                      <label htmlFor={`${profileIndex}-${sectionKey}`} className="block text-sm font-medium text-gray-700 mb-1">
+                        {sectionKey}
+                      </label>
+                      <Textarea
+                        id={`${profileIndex}-${sectionKey}`}
+                        value={section.content}
+                        onChange={(e) => handleContentChange(profileIndex, sectionKey as keyof ProfileSectionType, e.target.value)}
+                        placeholder={`Enter ${sectionKey}`}
+                      />
                     </div>
                   ))}
                 </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button onClick={handleSaveProfile} className="text-button text-white">
+                <CardFooter className="flex justify-end">
+                  <Button onClick={() => handleSaveProfile(profileIndex)} className="text-button text-white">
                     <Save className="mr-2 h-4 w-4" />
                     Save Profile
                   </Button>
-                  <Button variant="destructive" onClick={handleDeleteProfile} className="text-button">
+                  <Button variant="destructive" onClick={handleDeleteProfile} className="ml-2">
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete Profile
                   </Button>
@@ -232,15 +108,7 @@ export default function ProfilePage() {
           ))}
         </Tabs>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-10">
-            <p className="text-lg mb-4">No profiles created yet.</p>
-            <Button onClick={handleAddProfile} className="text-button">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create New Profile
-            </Button>
-          </CardContent>
-        </Card>
+        <div>No profiles available. Please add a profile.</div>
       )}
       <ConfirmationModal
         isOpen={isDeleteModalOpen}

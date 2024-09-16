@@ -1,225 +1,197 @@
 'use client'
 
-import { useState, useReducer } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-type ResumeState = {
-  profileName: string
-  keywords: string
-  qualificationSummary: string
-  professionalExperience: string
-  academicBackground: string
-  idioms: { name: string; level: string }[]
-  extracurricular: string
-}
-
-type Action =
-  | { type: 'UPDATE_FIELD'; field: keyof ResumeState; value: string }
-  | { type: 'ADD_IDIOM'; idiom: { name: string; level: string } }
-  | { type: 'UPDATE_IDIOM'; index: number; field: 'name' | 'level'; value: string }
-
-const initialState: ResumeState = {
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ProfileType } from '@/types'
+import { useAuth } from '@/context/AuthContext'
+import { useFirestore} from '@/hooks/useFirestore'
+import { v4 } from 'uuid'
+ 
+const initialState: ProfileType = {
+  id: '',
   profileName: '',
-  keywords: '',
-  qualificationSummary: '',
-  professionalExperience: '',
-  academicBackground: '',
-  idioms: [{ name: '', level: '' }],
-  extracurricular: '',
-}
-
-function resumeReducer(state: ResumeState, action: Action): ResumeState {
-  switch (action.type) {
-    case 'UPDATE_FIELD':
-      return { ...state, [action.field]: action.value }
-    case 'ADD_IDIOM':
-      return { ...state, idioms: [...state.idioms, action.idiom] }
-    case 'UPDATE_IDIOM':
-      return {
-        ...state,
-        idioms: state.idioms.map((idiom, index) =>
-          index === action.index ? { ...idiom, [action.field]: action.value } : idiom
-        ),
-      }
-    default:
-      return state
-  }
+  sections: {
+    academicBackground: { content: '', aiEnhanced: '' },
+    keywords: { content: '', aiEnhanced: '' },
+    summary: { content: '', aiEnhanced: '' },
+    professionalExperience: { content: '', aiEnhanced: '' },
+    idioms: { content: '', aiEnhanced: '' },
+    extraCurricular: { content: '', aiEnhanced: '' },
+  },
 }
 
 type ProfileWizardComponentProps = {
-  isOpen: boolean
-  onClose: () => void
-  onSave: (state: ResumeState) => void
-}
+   isOpen: boolean, 
+   onClose: () => void,
+  }
 
-export function ProfileWizardComponent({ isOpen, onClose, onSave }: ProfileWizardComponentProps) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [state, dispatch] = useReducer(resumeReducer, initialState)
+export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizardComponentProps) {
+  const [step, setStep] = useState(1)
+  const [profile, setProfile] = useState<ProfileType>(initialState)
 
-  const steps = [
-    { title: "Let's get started!", component: Step1 },
-    { title: "Qualification Summary", component: Step2 },
-    { title: "Professional Experience", component: Step3 },
-    { title: "Academic Background", component: Step4 },
-    { title: "Idioms", component: Step5 },
-    { title: "Extracurricular/Certifications", component: Step6 },
-  ]
+  const totalSteps = 6
+
+  const { user } = useAuth();
+
+  const { addProfile } = useFirestore();
 
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-    } else {
-      onSave(state)
+    if (step < totalSteps) {
+      setStep(step + 1)
     }
   }
 
   const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
+    if (step > 1) {
+      setStep(step - 1)
     }
   }
 
-  const CurrentStepComponent = steps[currentStep].component
+  const handleInputChange = (section: keyof ProfileType['sections'], value: string) => {
+    setProfile(prev => ({
+      ...prev,
+      sections: {
+        ...prev.sections,
+        [section]: { ...prev.sections[section], content: value },
+      },
+    }))
+  }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] bg-white">
-        <DialogHeader className="flex flex-col space-y-1.5 text-center sm:text-left mt-4">
-          <div className="flex items-center">
-            <DialogTitle className="flex-grow">{steps[currentStep].title}</DialogTitle>
-            <Stepper currentStep={currentStep} totalSteps={steps.length} />
+  const handleProfileNameChange = (value: string) => {
+    setProfile(prev => ({ ...prev, profileName: value }))
+  }
+
+  const handleAIEnhance = (section: keyof ProfileType['sections']) => {
+    // Simulating AI enhancement (replace with actual AI call)
+    const enhancedContent = `AI enhanced: ${profile.sections[section].content}`
+    setProfile(prev => ({
+      ...prev,
+      sections: {
+        ...prev.sections,
+        [section]: { ...prev.sections[section], aiEnhanced: enhancedContent },
+      },
+    }))
+  }
+
+  const handleFinish = () => {
+    if (user) {
+      const profileWithId = { ...profile, id: v4() }
+      addProfile(profileWithId)
+      onClose();
+    }
+  }
+
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div className="space-y-4">
+            <Input
+              placeholder="Profile Name"
+              value={profile.profileName}
+              onChange={(e) => handleProfileNameChange(e.target.value)}
+            />
+            <div className="flex space-x-2">
+              <Input
+                placeholder="Keywords"
+                value={profile.sections.keywords.content}
+                onChange={(e) => handleInputChange('keywords', e.target.value)}
+              />
+              <Button onClick={() => handleAIEnhance('keywords')}>AI Enhance</Button>
+            </div>
           </div>
-        </DialogHeader>
-        <CurrentStepComponent state={state} dispatch={dispatch} />
-        <div className="flex justify-between mt-4">
-          <Button onClick={handleBack} disabled={currentStep === 0}>
-            Back
-          </Button>
-          <Button onClick={handleNext}>
-            {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-function Stepper({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) {
-  return (
-    <div className="flex items-center space-x-1">
-      {Array.from({ length: totalSteps }).map((_, index) => (
-        <div
-          key={index}
-          className={`w-2 h-2 rounded-full ${
-            index <= currentStep ? 'bg-primary' : 'bg-gray-300'
-          }`}
-        />
-      ))}
-    </div>
-  )
-}
-
-function Step1({ state, dispatch }: { state: ResumeState; dispatch: React.Dispatch<Action> }) {
-  return (
-    <div className="space-y-4">
-      <Input
-        placeholder="Profile Name"
-        value={state.profileName}
-        onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'profileName', value: e.target.value })}
-        required
-      />
-      <Input
-        placeholder="Keywords (optional)"
-        value={state.keywords}
-        onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'keywords', value: e.target.value })}
-      />
-    </div>
-  )
-}
-
-function Step2({ state, dispatch }: { state: ResumeState; dispatch: React.Dispatch<Action> }) {
-  return (
-    <Textarea
-      placeholder="Summarize your qualifications..."
-      value={state.qualificationSummary}
-      onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'qualificationSummary', value: e.target.value })}
-      required
-    />
-  )
-}
-
-function Step3({ state, dispatch }: { state: ResumeState; dispatch: React.Dispatch<Action> }) {
-  return (
-    <Textarea
-      placeholder="Describe your professional experience..."
-      value={state.professionalExperience}
-      onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'professionalExperience', value: e.target.value })}
-      required
-    />
-  )
-}
-
-function Step4({ state, dispatch }: { state: ResumeState; dispatch: React.Dispatch<Action> }) {
-  return (
-    <Textarea
-      placeholder="Describe your academic background..."
-      value={state.academicBackground}
-      onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'academicBackground', value: e.target.value })}
-      required
-    />
-  )
-}
-
-function Step5({ state, dispatch }: { state: ResumeState; dispatch: React.Dispatch<Action> }) {
-  return (
-    <div className="space-y-4">
-      {state.idioms.map((idiom, index) => (
-        <div key={index} className="flex space-x-2">
-          <Input
-            placeholder="Idiom name"
-            value={idiom.name}
-            onChange={(e) =>
-              dispatch({ type: 'UPDATE_IDIOM', index, field: 'name', value: e.target.value })
-            }
-            required
+        )
+      case 2:
+        return (
+          <Textarea
+            placeholder="Qualification Summary"
+            value={profile.sections.summary.content}
+            onChange={(e) => handleInputChange('summary', e.target.value)}
           />
-          <Select
-            value={idiom.level}
-            onValueChange={(value) =>
-              dispatch({ type: 'UPDATE_IDIOM', index, field: 'level', value })
-            }
-            required
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select level" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="beginner">Beginner</SelectItem>
-              <SelectItem value="intermediate">Intermediate</SelectItem>
-              <SelectItem value="advanced">Advanced</SelectItem>
-              <SelectItem value="fluent">Fluent/Native</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      ))}
-      <Button onClick={() => dispatch({ type: 'ADD_IDIOM', idiom: { name: '', level: '' } })}>
-        Add Idiom
-      </Button>
-    </div>
-  )
-}
+        )
+      case 3:
+        return (
+          <Textarea
+            placeholder="Professional Experience"
+            value={profile.sections.professionalExperience.content}
+            onChange={(e) => handleInputChange('professionalExperience', e.target.value)}
+          />
+        )
+      case 4:
+        return (
+          <Textarea
+            placeholder="Academic Background"
+            value={profile.sections.academicBackground.content}
+            onChange={(e) => handleInputChange('academicBackground', e.target.value)}
+          />
+        )
+      case 5:
+        return (
+          <Textarea
+            placeholder="Idioms"
+            value={profile.sections.idioms.content}
+            onChange={(e) => handleInputChange('idioms', e.target.value)}
+          />
+        )
+      case 6:
+        return (
+          <Textarea
+            placeholder="Extracurricular/Certifications"
+            value={profile.sections.extraCurricular.content}
+            onChange={(e) => handleInputChange('extraCurricular', e.target.value)}
+          />
+        )
+      case 7:
+        return (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Review Your Profile</h3>
+            <p>Profile Name: {profile.profileName}</p>
+            <p>Keywords: {profile.sections.keywords.content}</p>
+            <p>Summary: {profile.sections.summary.content}</p>
+            <p>Professional Experience: {profile.sections.professionalExperience.content}</p>
+            <p>Academic Background: {profile.sections.academicBackground.content}</p>
+            <p>Idioms: {profile.sections.idioms.content}</p>
+            <p>Extracurricular/Certifications: {profile.sections.extraCurricular.content}</p>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
 
-function Step6({ state, dispatch }: { state: ResumeState; dispatch: React.Dispatch<Action> }) {
   return (
-    <Textarea
-      placeholder="List your extracurricular activities and certifications..."
-      value={state.extracurricular}
-      onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'extracurricular', value: e.target.value })}
-      required
-    />
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[425px] bg-white">
+          <DialogHeader>
+            <DialogTitle>Registration Wizard - Step {step}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {renderStepContent()}
+          </div>
+          <div className="flex justify-between items-center mt-4">
+            <div className="flex space-x-1">
+              {Array.from({ length: totalSteps }, (_, i) => (
+                <div
+                  key={i}
+                  className={`w-2 h-2 rounded-full ${
+                    i + 1 <= step ? 'bg-primary' : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+            <div className="space-x-2">
+              <Button onClick={handleBack} disabled={step === 1}>
+                Back
+              </Button>
+              <Button onClick={step === totalSteps ? handleFinish : handleNext}>
+                {step === totalSteps ? 'Finish' : 'Next'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
   )
 }
