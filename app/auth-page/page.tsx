@@ -41,7 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { BrainCircuit, Mail, Lock, User, HeartHandshake } from 'lucide-react'
+import { Mail, Lock, User, HeartHandshake } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function AuthPage() {
