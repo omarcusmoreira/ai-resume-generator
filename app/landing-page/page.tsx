@@ -115,20 +115,20 @@ export default function LandingPage() {
         </nav>
       </header>
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 flex justify-center">
-          <div className="container px-4 md:px-6">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 flex justify-center bg-cover bg-center" style={{ backgroundImage: "url('/hero_image.jpg')" }}>
+          <div className="container px-4 md:px-6 relative z-10">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-                  Supercharge Your Job Search with AI
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-white">
+                Potencialize sua busca de emprego com IA
                 </h1>
-                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-                  Create tailored resumes, manage your profile, and track your job applications with the power of AI.
+                <p className="mx-auto max-w-[700px] text-gray-200 md:text-xl">
+                Crie currículos personalizados, gerencie seu perfil e acompanhe suas candidaturas com o poder da IA.
                 </p>
               </div>
               <div className="space-x-4">
-                <Button>Get Started</Button>
-                <Button variant="outline">Learn More</Button>
+                <Button className="bg-white text-black hover:bg-gray-200">Get Started</Button>
+                <Button variant="outline" className="text-white border-white hover:bg-white hover:text-black">Learn More</Button>
               </div>
             </div>
           </div>

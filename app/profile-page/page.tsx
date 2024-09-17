@@ -1,122 +1,129 @@
-'use client';
-import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, Save, Trash2 } from "lucide-react";
-import { ConfirmationModal } from '@/components/ui/confirmationModal';
-import { useFirestore } from '@/hooks/useFirestore';
-import { ProfileType, ProfileSectionType } from '@/types';
-import ProfileWizardComponent from '@/components/profile-wizard';
+'use client'
 
-export default function Profiles() {
-  const { appState, loading, deleteProfile, updateProfile } = useFirestore();
-  const [activeProfile, setActiveProfile] = useState<number | null>(0);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Card, CardHeader, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Plus, Sparkles, TrashIcon } from "lucide-react"
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  const handleAddProfile = () => {
-    setIsWizardOpen(true);
-  };
-
-  const handleContentChange = (profileIndex: number, sectionKey: keyof ProfileSectionType, content: string) => {
-    if (activeProfile === null || !appState?.profiles) return;
-    const updatedProfiles = appState.profiles[profileIndex];
-    const section = updatedProfiles.sections;
-
-    section[sectionKey].content = content;
-    section[sectionKey].aiEnhanced = `AI enhanced: ${content}`;
-
-    updateProfile(updatedProfiles);
-  };
-
-  const handleSaveProfile = async (profileIndex: number) => {
-    if (activeProfile === null || !appState?.profiles) return;
-    const updatedProfiles = appState.profiles[profileIndex];
-    await updateProfile(updatedProfiles); // Ensure appState is passed correctly
-  };
-
-  const handleDeleteProfile = () => {
-    setIsDeleteModalOpen(true);
-  };
-
-  const confirmDeleteProfile = () => {
-    if (activeProfile === null || !appState?.profiles) return;
-    const updatedProfiles = appState.userType.profiles.filter((_:ProfileType, index: number) => index !== activeProfile);
-    deleteProfile(updatedProfiles);
-    setActiveProfile(updatedProfiles.length > 0 ? Math.min(activeProfile, updatedProfiles.length - 1) : null);
-    setIsDeleteModalOpen(false);
-  };
-
+export default function ProfilePage() {
   return (
-    <div className="container mx-auto p-8">
-      {isWizardOpen ? (
-        <ProfileWizardComponent 
-          isOpen={isWizardOpen} 
-          onClose={() => setIsWizardOpen(false)} 
-        />
-      ) : appState?.profiles && appState.profiles.length > 0 ? (
-        <Tabs value={activeProfile?.toString() || ""} onValueChange={(value) => setActiveProfile(parseInt(value))}>
-          <div className="flex items-center mb-4">
-            <TabsList>
-              {appState.profiles.map((profile: ProfileType, index: number) => (
-                <TabsTrigger key={index} value={index.toString()}>{profile.profileName}</TabsTrigger>
-              ))}
-            </TabsList>
-            <Button variant="outline" size="icon" className="ml-2" onClick={handleAddProfile}>
-              <PlusCircle className="h-4 w-4" />
+    <div className="flex flex-col min-h-screen">
+      <header className="p-4 md:p-6 border-b">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Job Application Profiles</h1>
+          <div className="flex items-center gap-2">
+            <Button variant="outline">Add New Profile</Button>
+            <Button variant="ghost" size="icon">
+              <Plus className="w-5 h-5" />
+              <span className="sr-only">Add New Profile</span>
             </Button>
           </div>
-          {appState.profiles.map((profile: ProfileType, profileIndex: number) => (
-            <TabsContent key={profileIndex} value={profileIndex.toString()}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>{profile.profileName}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {Object.entries(profile.sections).map(([sectionKey, section]) => (
-                    <div key={sectionKey}>
-                      <label htmlFor={`${profileIndex}-${sectionKey}`} className="block text-sm font-medium text-gray-700 mb-1">
-                        {sectionKey}
-                      </label>
-                      <Textarea
-                        id={`${profileIndex}-${sectionKey}`}
-                        value={section.content}
-                        onChange={(e) => handleContentChange(profileIndex, sectionKey as keyof ProfileSectionType, e.target.value)}
-                        placeholder={`Enter ${sectionKey}`}
-                      />
-                    </div>
-                  ))}
-                </CardContent>
-                <CardFooter className="flex justify-end">
-                  <Button onClick={() => handleSaveProfile(profileIndex)} className="text-button text-white">
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Profile
-                  </Button>
-                  <Button variant="destructive" onClick={handleDeleteProfile} className="ml-2">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Profile
-                  </Button>
-                </CardFooter>
-              </Card>
+        </div>
+      </header>
+      <main className="flex-grow p-4 md:p-6 overflow-y-auto">
+        <div className="max-w-6xl mx-auto">
+          <Tabs defaultValue="profiles" className="w-full">
+            <TabsList className="grid grid-cols-5 mb-6">
+              <TabsTrigger value="profiles">Profiles</TabsTrigger>
+              <TabsTrigger value="product-manager">Product Manager</TabsTrigger>
+              <TabsTrigger value="profile-3" disabled>Profile 3</TabsTrigger>
+              <TabsTrigger value="profile-4" disabled>Profile 4</TabsTrigger>
+              <TabsTrigger value="profile-5" disabled>Profile 5</TabsTrigger>
+            </TabsList>
+            <TabsContent value="profiles">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                  <ProfileCard />
+                </div>
+                <div className="space-y-6">
+                  <EnhancedTextCard />
+                </div>
+              </div>
             </TabsContent>
-          ))}
-        </Tabs>
-      ) : (
-        <div>No profiles available. Please add a profile.</div>
-      )}
-      <ConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={confirmDeleteProfile}
-        title="Delete Profile"
-        description="Are you sure you want to delete this profile? This action cannot be undone."
-      />
+            <TabsContent value="product-manager">
+              {/* Similar structure for Product Manager tab */}
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
     </div>
-  );
+  )
+}
+
+function ProfileCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <Input defaultValue="Software Engineer" className="text-xl font-bold" />
+          <Button variant="ghost" size="icon">
+            <TrashIcon className="w-5 h-5" />
+            <span className="sr-only">Delete Profile</span>
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {renderProfileField("Keywords", "keywords", "software engineer, full-stack, javascript, react, node.js")}
+        {renderProfileField("Qualification Summary", "qualification-summary", "Experienced software engineer with a strong background in full-stack web development...", true)}
+        {renderProfileField("Professional Experience", "professional-experience", "- Developed and maintained multiple web applications...", true)}
+        {renderProfileField("Academic Background", "academic-background", "Bachelor's degree in Computer Science...", true)}
+        {renderProfileField("Idioms", "idioms", "Fluent in English and Spanish...", true)}
+        {renderProfileField("Extracurricular", "extracurricular", "Actively involved in local community service projects...", true)}
+      </CardContent>
+    </Card>
+  )
+}
+
+function EnhancedTextCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="text-xl font-bold">Enhanced Text</div>
+      </CardHeader>
+      <CardContent>
+        <div>
+          <Label htmlFor="enhanced-column">Enhanced Column</Label>
+          <p className="mt-1">
+            Developed and implemented a custom data visualization tool to enhance reporting capabilities.
+            Created a machine learning model to improve customer churn prediction.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function renderProfileField(label: string, id: string, defaultValue: string, isTextarea: boolean = false) {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <Label htmlFor={id}>{label}</Label>
+          <Button variant="ghost" size="icon" onClick={() => {}}>
+            <Sparkles className="h-5 w-5" />
+            <span className="sr-only">Enhance</span>
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isTextarea ? (
+          <Textarea
+            id={id}
+            rows={3}
+            className="mt-1"
+            defaultValue={defaultValue}
+          />
+        ) : (
+          <Input
+            id={id}
+            className="mt-1"
+            defaultValue={defaultValue}
+          />
+        )}
+      </CardContent>
+    </Card>
+  )
 }

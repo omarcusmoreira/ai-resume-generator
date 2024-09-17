@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { CreditCard, HelpCircle, LogOut, Settings, User, Sparkles, HeartHandshake } from 'lucide-react'
+import { CreditCard, LogOut, Settings, Sparkles, HeartHandshake, Crown, Bug } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { signOut } from 'firebase/auth'
 import { auth } from '@/firebaseConfig'
@@ -69,9 +69,9 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
           </p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <div className="bg-secondary p-3 rounded-md mx-1 my-2">
-          <p className="text-sm font-medium">Running out of messages?</p>
-          <p className="text-xs text-muted-foreground mb-2">Upgrade to Premium for higher limits.</p>
+        <div className="bg-pink-50 p-3 rounded-md mx-1 my-2">
+          <p className="text-sm font-medium">Acabou as mensagens?</p>
+          <p className="text-xs text-muted-foreground mb-2">Faça um upgrade para Premium para aumentar o limite de mensagens.</p>
           <Button className="w-full" variant="default">
             <Sparkles className="mr-2 h-4 w-4" />
             Virar Premium
@@ -80,11 +80,15 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <CreditCard className="mr-2 h-4 w-4" />
-          Informações de Cobrança
+          Cobrança
         </DropdownMenuItem>
         <DropdownMenuItem>
-          <Settings className="mr-2 h-4 w-4" />
+          <Crown   className="mr-2 h-4 w-4" />
           Preços
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Bug   className="mr-2 h-4 w-4" />
+          Relatar Problema
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-red-500 focus:text-red-500 focus:bg-red-100" onClick={handleLogout}>
@@ -94,8 +98,8 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
         <DropdownMenuSeparator />
         <div className="p-2">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">MeContrata.Ai</p>
-            <HeartHandshake />
+            <p className="text-xs font-medium text-muted-foreground">MeContrata.Ai</p>
+            <HeartHandshake className="h-4 w-4 text-muted-foreground" />
           </div>
         </div>
       </DropdownMenuContent>
