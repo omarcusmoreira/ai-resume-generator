@@ -22,6 +22,7 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
         try {
             await signOut(auth);
             router.push('/');
+            console.log('User signed out');
         } catch (error) {
             console.error('Error signing out:', error);
         }
@@ -94,8 +95,8 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
           Discord
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-red-500 focus:text-red-500 focus:bg-red-100">
-          <LogOut className="mr-2 h-4 w-4" onClick={handleLogout}/>
+        <DropdownMenuItem className="text-red-500 focus:text-red-500 focus:bg-red-100" onClick={handleLogout}>
+          <LogOut className="mr-2 h-4 w-4"/>
           Sign Out
         </DropdownMenuItem>
         <DropdownMenuSeparator />
