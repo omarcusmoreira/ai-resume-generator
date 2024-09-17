@@ -74,30 +74,22 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
           <p className="text-xs text-muted-foreground mb-2">Upgrade to Premium for higher limits.</p>
           <Button className="w-full" variant="default">
             <Sparkles className="mr-2 h-4 w-4" />
-            Upgrade to Premium
+            Virar Premium
           </Button>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <CreditCard className="mr-2 h-4 w-4" />
-          Billing
+          Informações de Cobrança
         </DropdownMenuItem>
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />
-          Pricing
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <User className="mr-2 h-4 w-4" />
-          v0.dev
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <HelpCircle className="mr-2 h-4 w-4" />
-          Discord
+          Preços
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-red-500 focus:text-red-500 focus:bg-red-100" onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4"/>
-          Sign Out
+          Sair
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <div className="p-2">
