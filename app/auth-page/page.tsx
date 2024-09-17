@@ -41,7 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { BrainCircuit, Mail, Lock, User } from 'lucide-react'
+import { BrainCircuit, Mail, Lock, User, HeartHandshake } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function AuthPage() {
@@ -169,10 +169,10 @@ export default function AuthPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
-            <BrainCircuit className="h-10 w-10 text-primary" />
+            <HeartHandshake className="h-10 w-10 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold text-center">
-            AI Resume Pro
+            MeContrata.Ai
           </CardTitle>
           <CardDescription className="text-center">
             Faça login ou crie uma conta para começar
