@@ -1,33 +1,18 @@
 'use client'
 
-// import { useState } from 'react'
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
-// import { Textarea } from "@/components/ui/textarea"
 import { FileCode2, Images, Mail, NotebookPen, PlusSquare, Sparkles, Users } from "lucide-react"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useFirestore } from '@/hooks/useFirestore'
-// import ProfileWizardComponent, {  } from '@/components/profile-wizard'
 import { Card } from '@/components/ui/card'
-// import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-// import Sidebar from '@/components/Sidebar/page'
-import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
 
 export default function GenerateResumePage() {
-  const { appState, loading, error  } = useFirestore()
-//   const [jobDescription] = useState('')
-//   const [selectedProfile] = useState<string | null>(null)
-
-//   const handleGenerateResume = async () => {
-//     if (selectedProfile && jobDescription) {
-//       const profile = appState?.profiles.find(p => p.profileName === selectedProfile)
-//       if (profile) {
-//         // Replace the following line with your actual resume generation logic
-//         // const resume = await generateCompletion(profile, jobDescription)
-//         // setGeneratedResume(resume)
-//         console.log('Generating resume for profile:', profile, 'with job description:', jobDescription)
-//       }
-//     }
-//   }
+  const { appState, loading, error } = useFirestore()
+  const [inputText, setInputText] = useState('')
+  const [selectedPrompt, setSelectedPrompt] = useState<number | null>(null)
 
   if (loading) {
     return <div className="p-8">Loading...</div>
@@ -37,57 +22,88 @@ export default function GenerateResumePage() {
     return <div className="p-8 text-red-500">Error: {error}</div>
   }
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputText(e.target.value.slice(0, 1000)) // Limit to 1000 characters
+  }
+
+  const prompts = [
+    'Gerar um currículo para vagas selecionadas por algorítmos de recrutamento.',
+    'Gerar um currículo tradicional para envio direto para recrutadores.',
+    'Escrever uma carta de apresentação para enviar para recrutadores.',
+    'Criar um plano de estudos para preparar para uma entrevista.'
+  ]
+
   return (
-   
-      <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col">
+      <div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
+        <Card className="w-full max-w-3xl p-4 md:p-6">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Olá, <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 inline-block text-transparent bg-clip-text">{appState?.userType.personalInfo.name || 'Usuário'}</span></h1>
+          <h2 className="text-xl md:text-2xl font-semibold mb-4">Vamos criar seu currículo?</h2>
+          <p className="text-gray-500 mb-6 md:mb-8">Escolha um dos prompts abaixo, selecione um perfil desejado e cole a descrição do cargo para criar seu currículo.</p>
 
-{/* Content area */}
-<div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
-  <Card className="w-full max-w-3xl p-4 md:p-6">
-    <h1 className="text-3xl md:text-4xl font-bold mb-2">Olá, <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 inline-block text-transparent bg-clip-text">{appState?.userType.personalInfo.name || 'Usuário'}</span></h1>
-    <h2 className="text-xl md:text-2xl font-semibold mb-4">Vamos criar seu currículo?</h2>
-    <p className="text-gray-500 mb-6 md:mb-8">Escolha um dos prompts abaixo, selecione um perfil desejado e cole a descrição do cargo para criar seu currículo.</p>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 md:mb-8">
-      {[
-        'Gerar um currículo para vagas selecionadas por algorítmos de recrutamento',
-        'Gerar um currículo tradicional para envio direto para recrutadores.',
-        'Escrever uma carta de apresentação para enviar para recrutadores.',
-        'Criar um plano de estudos para preparar para uma entrevista.'].map((prompt, index) => (
-          <Card key={index} className="p-3 md:p-4 flex items-start space-x-3">
-          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
-            {index === 0 && <FileCode2 className="h-4 w-4 text-purple-600" />}
-            {index === 1 && <Users className="h-4 w-4 text-purple-600" />}
-            {index === 2 && <Mail className="h-4 w-4 text-purple-600" />}
-            {index === 3 && <NotebookPen className="h-4 w-4 text-purple-600" />}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 md:mb-8">
+            {prompts.map((prompt, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                className={cn(
+                  "h-auto p-3 md:p-4 flex items-start space-x-3 justify-start",
+                  selectedPrompt === index && "border-2 border-purple-500 bg-purple-100"
+                )}
+                onClick={() => setSelectedPrompt(index)}
+              >
+                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
+                  {index === 0 && <FileCode2 className="h-4 w-4 text-purple-600" />}
+                  {index === 1 && <Users className="h-4 w-4 text-purple-600" />}
+                  {index === 2 && <Mail className="h-4 w-4 text-purple-600" />}
+                  {index === 3 && <NotebookPen className="h-4 w-4 text-purple-600" />}
+                </div>
+                <p className="text-sm text-left text-wrap">{prompt}</p>
+              </Button>
+            ))}
           </div>
-          <p className="text-sm">{prompt}</p>
+
+          <Button variant="outline" className="mb-6 md:mb-8 w-full md:w-auto">
+            <PlusSquare className="mr-2 h-4 w-4" /> Criar Perfil
+          </Button>
+
+          <div className="relative">
+            <div className="absolute top-2 right-2 z-10">
+              <Select>
+                <SelectTrigger className="w-auto h-8 px-2 rounded-full bg-primary text-primary-foreground">
+                  <SelectValue placeholder="Escolha um perfil" />
+                </SelectTrigger>
+                <SelectContent> 
+                  {appState?.profiles.map((profile, index) => (
+                    <SelectItem key={index} value={profile.id}>{profile.profileName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {inputText === '' && <div className="absolute top-2 left-2 text-sm text-gray-400 pointer-events-none">
+              Cole a descrição da vaga aqui
+            </div>}
+            <Textarea 
+              className="min-h-[100px] pr-24 resize-none pt-10 pl-2 pb-10"
+              value={inputText}
+              onChange={handleInputChange}
+              style={{ height: 'auto', minHeight: '100px' }}
+              rows={Math.max(3, inputText.split('\n').length)}
+            />
+            <div className="absolute bottom-2 right-2 flex items-center space-x-2">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Images className="h-4 w-4" />
+              </Button>
+              <Button variant="ai" size="icon" className="h-8 w-8 rounded-full bg-primary text-primary-foreground">
+                <Sparkles className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="absolute bottom-2 left-2 text-xs text-gray-400">
+              {inputText.length}/1000
+            </div>
+          </div>
         </Card>
-      ))}
-    </div>
-
-    <Button variant="outline" className="mb-6 md:mb-8 w-full md:w-auto">
-      <PlusSquare className="mr-2 h-4 w-4" /> Criar Prompt
-    </Button>
-
-    <div className="relative">
-      <Input placeholder="Ask whatever you want...." className="pr-24" />
-      <div className="absolute inset-y-0 right-0 flex items-center">
-        <Button variant="ghost" size="sm" className="h-full hidden sm:inline-flex">
-          <PlusSquare className="h-4 w-4 mr-2" />
-          <span className="hidden md:inline">Escolher Perfil</span>
-        </Button>
-        <Button variant="ghost" size="sm" className="h-full hidden sm:inline-flex">
-          <Images className="h-4 w-4 mr-2" />
-          <span className="hidden md:inline">Usar Imagem</span>
-        </Button>
-        <Button size="sm" className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
-          <Sparkles className="h-4 w-4" />
-        </Button>
       </div>
     </div>
-  </Card>
-</div>
-</div>
-)
+  )
 }
