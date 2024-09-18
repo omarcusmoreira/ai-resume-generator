@@ -89,6 +89,8 @@ export default function AuthPage() {
       console.log('Login successful')
 
       router.push('/')
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Login error', error)
       setLoginError(error.message || 'Erro ao fazer login.')
@@ -152,6 +154,7 @@ export default function AuthPage() {
       await saveUser(userState)
 
       router.push('/')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Sign-up error', error)
       setSignupError(error.message || 'Erro ao criar conta.')
@@ -199,6 +202,7 @@ export default function AuthPage() {
 
 
       router.push('/')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Google sign-in error', error)
       // Optionally, set an error state to display to the user
