@@ -15,7 +15,6 @@ import { signOut } from 'firebase/auth'
 import { auth } from '@/firebaseConfig'
 import Link from 'next/link'
 import AvatarPlaceholder from '@/public/avatar_placeholder.png'
-import Image from 'next/image'
 
 export default function UserMenu({profilePicture, userName, plan}: {profilePicture: string, userName: string, plan: string}) {
     const router = useRouter();
@@ -39,10 +38,11 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
               src={profilePicture}
               alt="User Profile"
               className={`h-6 w-6 rounded-full mb-2 ${
-                  plan === 'pro' ? 'border-2 border-purple-500' :
-                          plan === 'premium' ? 'border-2 border-pink-500' :
-                          'border-2 border-purple-500'
-                      }`}
+                plan === 'free' ? 'border-2 border-gray-800' :
+                plan === 'premium' ? 'border-2 border-pink-700' :
+                plan === 'pro' ? 'border-2 border-purple-700' :
+                  'border-2 border-black'
+              }`}
           />
           ) : (
             <AvatarImage
