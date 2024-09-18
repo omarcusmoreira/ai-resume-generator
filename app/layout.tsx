@@ -43,9 +43,11 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen bg-gray-100">
     {/* Sidebar for desktop */}
+    {pathname !== '/auth-page' && (
     <div className="hidden md:block w-10 bg-gray-100 border-r border-gray-200">
       <Sidebar />
     </div>
+    )}
 
       <div className="flex-1 overflow-auto">
             {/* Mobile header */}

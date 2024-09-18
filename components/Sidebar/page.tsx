@@ -22,16 +22,16 @@ const Sidebar = () => {
         }
     };
 
-if (loading) {
-    return <div className="w-64 bg-white shadow-md">Loading...</div>;
-}
-
-if (error) {
-    return <div className="w-64 bg-white shadow-md">Error: {error}</div>;
+    if (loading) {
+        return <div className="w-64 bg-white shadow-md">Loading...</div>;
     }
 
+    if (error) {
+        return <div className="w-64 bg-white shadow-md">Error: {error}</div>;
+    }
+    
     return (
-        <div className="h-full flex flex-col items-center justify-between py-4">
+        <div className="h-full flex flex-col items-center justify-between py-4" >
             <div className="space-y-6 flex flex-col items-center">
                 <Link href="/generate-resume" passHref>
                     <Button variant={pathname === "/generate-resume" ? "default" : "outline"} size="icon" className="w-6 h-6">

@@ -8,12 +8,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { CreditCard, LogOut, Settings, Sparkles, HeartHandshake, Crown, Bug } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { signOut } from 'firebase/auth'
 import { auth } from '@/firebaseConfig'
 import Link from 'next/link'
+import AvatarPlaceholder from '@/public/avatar_placeholder.png'
+import Image from 'next/image'
 
 export default function UserMenu({profilePicture, userName, plan}: {profilePicture: string, userName: string, plan: string}) {
     const router = useRouter();
@@ -32,22 +34,27 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
         <Avatar className="h-6 w-6 cursor-pointer hover:opacity-80 transition-opacity mb-4 rounded-full">
-                {profilePicture ? (
-                        <AvatarImage
-                            src={profilePicture}
-                            alt="User Profile"
-                            className={`h-6 w-6 rounded-full mb-2 ${
-                                plan === 'pro' ? 'border-2 border-purple-500' :
-                                        plan === 'premium' ? 'border-2 border-pink-500' :
-                                        'border-2 border-purple-500'
-                                    }`}
-                                    />
-                                ) : (
-								<AvatarFallback className="h-20 w-20 rounded-full">
-                  {userName ? userName[0].toUpperCase()
-                    : 'U'}
-                </AvatarFallback>
-            )}
+          {profilePicture ?  (
+            <AvatarImage
+              src={profilePicture}
+              alt="User Profile"
+              className={`h-6 w-6 rounded-full mb-2 ${
+                  plan === 'pro' ? 'border-2 border-purple-500' :
+                          plan === 'premium' ? 'border-2 border-pink-500' :
+                          'border-2 border-purple-500'
+                      }`}
+          />
+          ) : (
+            <AvatarImage
+            src={AvatarPlaceholder.src}
+            alt="User Profile"
+            className={`h-6 w-6 rounded-full mb-2 ${
+                plan === 'pro' ? 'border-2 border-purple-500' :
+                plan === 'premium' ? 'border-2 border-pink-500' :
+                'border-2 border-purple-500'
+              }`}
+            />
+          )}
 			</Avatar>
         </Button>
       </DropdownMenuTrigger>

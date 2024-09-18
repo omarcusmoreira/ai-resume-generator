@@ -7,6 +7,8 @@ import { Timestamp } from 'firebase/firestore'
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth'
 import { auth } from '@/firebaseConfig'
 
@@ -34,99 +36,108 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Mail, Lock, User, HeartHandshake } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={props.width}
+    height={props.height}
+    viewBox="0 0 48 48"
+    {...props}
+  >
+    <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
+    <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+    <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
+    <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
+  </svg>
+)
+
 export default function AuthPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [name, setName] = useState('')
-  const [cpf, setCpf] = useState('')
-  const [plan, setPlan] = useState('')
+  // State Variables for Login
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
+
+  // State Variables for Sign Up
+  const [signupName, setSignupName] = useState('')
+  const [signupEmail, setSignupEmail] = useState('')
+  const [signupPassword, setSignupPassword] = useState('')
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState('')
+  const [signupError, setSignupError] = useState('')
+
   const [rememberMe, setRememberMe] = useState(false)
-  const [passwordError, setPasswordError] = useState('')
-  const [cpfError, setCpfError] = useState('')
-  const [planError, setPlanError] = useState('')
 
   const router = useRouter()
 
-  const {
-    saveUser,
-  } = useFirestore()
+  const { saveUser } = useFirestore()
 
+  // Handle Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoginError('') // Reset error state
+
+    if (!loginEmail || !loginPassword) {
+      setLoginError('Por favor, preencha todos os campos.')
+      return
+    }
+
     try {
-      await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      )
+      await signInWithEmailAndPassword(auth, loginEmail, loginPassword)
 
       console.log('Login successful')
 
       router.push('/')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error', error)
-      // Optionally, set an error state to display to the user
+      setLoginError(error.message || 'Erro ao fazer login.')
     }
   }
 
+  // Handle Sign Up
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (password !== confirmPassword) {
-      setPasswordError('As senhas não coincidem')
-      return
-    }
-    setPasswordError('')
+    setSignupError('') // Reset error state
 
-    if (!validateCPF(cpf)) {
-      setCpfError('CPF inválido')
+    // Basic Validation
+    if (!signupName || !signupEmail || !signupPassword || !signupConfirmPassword) {
+      setSignupError('Por favor, preencha todos os campos.')
       return
     }
-    setCpfError('')
 
-    if (!plan) {
-      setPlanError('Por favor, selecione um plano')
+    if (signupPassword !== signupConfirmPassword) {
+      setSignupError('As senhas não coincidem.')
       return
     }
-    setPlanError('')
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
-        email,
-        password
+        signupEmail,
+        signupPassword
       )
       const user = userCredential.user
 
       console.log('Sign-up successful')
 
-      // Initialize AdminInfo
+      // Initialize AdminInfo without 'plan'
       const adminInfo: AdminInfoType = {
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
-        plan: plan,
+        plan: 'free',
       }
 
-      // Initialize PersonalInfo
+      // Initialize PersonalInfo without 'cpf'
       const personalInfo: PersonalInfoType = {
-        name: name,
-        cpf: cpf,
+        name: signupName,
         birthDate: '',
         linkedinURL: '',
-        email: email,
+        email: signupEmail,
         phone: '',
         city: '',
         profilePicture: '',
+        cpf: '',
       }
 
       // Initialize UserState
@@ -136,32 +147,62 @@ export default function AuthPage() {
         personalInfo: personalInfo,
       }
 
-
       console.log('newAppState', user)
       // Save AppState to Firestore and localStorage
       await saveUser(userState)
 
       router.push('/')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign-up error', error)
-      // Optionally, set an error state to display to the user
+      setSignupError(error.message || 'Erro ao criar conta.')
     }
   }
 
-  const validateCPF = (cpf: string) => {
-    const cleanCPF = cpf.replace(/[^\d]+/g, '')
-    if (cleanCPF.length !== 11 || !!cleanCPF.match(/(\d)\1{10}/))
-      return false
-    // Here you can add a more robust CPF validation if needed
-    return true
-  }
+  // Handle Google Sign-In
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider()
+    try {
+      const result = await signInWithPopup(auth, provider)
+      const user = result.user
 
-  const formatCPF = (value: string) => {
-    const cleanCPF = value.replace(/\D/g, '')
-    return cleanCPF.replace(
-      /(\d{3})(\d{3})(\d{3})(\d{2})/,
-      '$1.$2.$3-$4'
-    )
+      console.log('Google sign-in successful')
+
+
+        // Initialize AdminInfo
+        const adminInfo: AdminInfoType = {
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+          plan: 'free',
+        }
+
+        // Initialize PersonalInfo
+        const personalInfo: PersonalInfoType = {
+          name: user.displayName || '',
+          birthDate: '',
+          linkedinURL: '',
+          email: user.email || '',
+          phone: '',
+          city: '',
+          profilePicture: user.photoURL || '',
+          cpf: '',
+        }
+
+        // Initialize UserState
+        const userState: UserDataType = {
+          userId: user.uid,
+          adminInfo: adminInfo,
+          personalInfo: personalInfo,
+        }
+
+        // Save to Firestore
+        await saveUser(userState)
+
+
+      router.push('/')
+    } catch (error: any) {
+      console.error('Google sign-in error', error)
+      // Optionally, set an error state to display to the user
+    }
   }
 
   return (
@@ -187,34 +228,33 @@ export default function AuthPage() {
             <TabsContent value="login">
               <form onSubmit={handleLogin}>
                 <div className="space-y-4">
+                  {loginError && (
+                    <p className="text-red-500 text-sm">{loginError}</p>
+                  )}
                   <div className="space-y-2">
-                    <Label htmlFor="email">E-mail</Label>
+                    <Label htmlFor="loginEmail">E-mail</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                       <Input
-                        id="email"
+                        id="loginEmail"
                         placeholder="m@exemplo.com"
                         type="email"
-                        value={email}
-                        onChange={(e) =>
-                          setEmail(e.target.value)
-                        }
+                        value={loginEmail}
+                        onChange={(e) => setLoginEmail(e.target.value)}
                         className="pl-10"
                         required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
+                    <Label htmlFor="loginPassword">Senha</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                       <Input
-                        id="password"
+                        id="loginPassword"
                         type="password"
-                        value={password}
-                        onChange={(e) =>
-                          setPassword(e.target.value)
-                        }
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
                         className="pl-10"
                         required
                       />
@@ -228,15 +268,21 @@ export default function AuthPage() {
                         setRememberMe(checked as boolean)
                       }
                     />
-                    <Label
-                      htmlFor="rememberMe"
-                      className="ml-2"
-                    >
+                    <Label htmlFor="rememberMe" className="ml-2">
                       Lembrar-me
                     </Label>
                   </div>
                   <Button type="submit" className="w-full">
                     Entrar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full flex items-center justify-center"
+                    onClick={handleGoogleSignIn}
+                  >
+                    <GoogleIcon className="mr-2 h-5 w-5" />
+                    Entrar com Google
                   </Button>
                 </div>
               </form>
@@ -245,122 +291,79 @@ export default function AuthPage() {
               <form onSubmit={handleSignUp}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nome</Label>
+                    <Label htmlFor="signupName">Nome</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                       <Input
-                        id="name"
+                        id="signupName"
                         placeholder="Seu nome"
                         type="text"
-                        value={name}
-                        onChange={(e) =>
-                          setName(e.target.value)
-                        }
+                        value={signupName}
+                        onChange={(e) => setSignupName(e.target.value)}
                         className="pl-10"
                         required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">E-mail</Label>
+                    <Label htmlFor="signupEmail">E-mail</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                       <Input
-                        id="email"
+                        id="signupEmail"
                         placeholder="m@exemplo.com"
                         type="email"
-                        value={email}
-                        onChange={(e) =>
-                          setEmail(e.target.value)
-                        }
+                        value={signupEmail}
+                        onChange={(e) => setSignupEmail(e.target.value)}
                         className="pl-10"
                         required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="cpf">CPF</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      <Input
-                        id="cpf"
-                        placeholder="123.456.789-00"
-                        type="text"
-                        value={cpf}
-                        onChange={(e) =>
-                          setCpf(formatCPF(e.target.value))
-                        }
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                    {cpfError && (
-                      <p className="text-red-500 text-sm">
-                        {cpfError}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="plan">Plano</Label>
-                    <Select
-                      onValueChange={(value) => setPlan(value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um plano" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="basic">Básico</SelectItem>
-                        <SelectItem value="premium">Premium</SelectItem>
-                        <SelectItem value="pro">Pro</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {planError && (
-                      <p className="text-red-500 text-sm">
-                        {planError}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
+                    <Label htmlFor="signupPassword">Senha</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                       <Input
-                        id="password"
+                        id="signupPassword"
                         type="password"
-                        value={password}
-                        onChange={(e) =>
-                          setPassword(e.target.value)
-                        }
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
                         className="pl-10"
                         required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">
+                    <Label htmlFor="signupConfirmPassword">
                       Confirmar Senha
                     </Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                       <Input
-                        id="confirmPassword"
+                        id="signupConfirmPassword"
                         type="password"
-                        value={confirmPassword}
-                        onChange={(e) =>
-                          setConfirmPassword(e.target.value)
-                        }
+                        value={signupConfirmPassword}
+                        onChange={(e) => setSignupConfirmPassword(e.target.value)}
                         className="pl-10"
                         required
                       />
                     </div>
-                    {passwordError && (
-                      <p className="text-red-500 text-sm">
-                        {passwordError}
-                      </p>
-                    )}
                   </div>
+                  {signupError && (
+                    <p className="text-red-500 text-sm">{signupError}</p>
+                  )}
                   <Button type="submit" className="w-full">
                     Cadastrar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full flex items-center justify-center"
+                    onClick={handleGoogleSignIn}
+                  >
+                    <GoogleIcon className="mr-2 h-5 w-5" />
+                    Cadastrar com Google
                   </Button>
                 </div>
               </form>
