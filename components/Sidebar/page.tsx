@@ -29,7 +29,7 @@ const Sidebar = () => {
     if (error) {
         return <div className="w-64 bg-white shadow-md">Error: {error}</div>;
     }
-    
+
     return (
         <div className="h-full flex flex-col items-center justify-between py-4" >
             <div className="space-y-6 flex flex-col items-center">
@@ -38,9 +38,9 @@ const Sidebar = () => {
                         <PlusSquare className={pathname === "/generate-resume" ? "h-4 w-4 text-purple-500" : "h-4 w-4 text-gray-500"} />
                     </Button>
                 </Link>
-                <Link href="/profile-page" passHref>
+                <Link href="/profile-management" passHref>
                     <Button variant="ghost" size="icon" className="w-6 h-6">
-                        <Users className={pathname === "/profiles" ? "h-4 w-4 text-purple-500" : "h-4 w-4 text-gray-500"} />
+                        <Users className={pathname === "/profile-management" ? "h-4 w-4 text-purple-500" : "h-4 w-4 text-gray-500"} />
                     </Button>
                 </Link>
                 <Button variant="ghost" size="icon" className="w-6 h-6">
