@@ -180,8 +180,8 @@ export default function ProfileManagement() {
                     className="text-2xl font-bold bg-transparent border-none hover:bg-gray-100 focus:bg-white"
                     aria-label="Profile name"
                     />
-                  <Button variant="destructive" onClick={() => deleteProfile(profile.id)} aria-label="Delete profile">
-                    <Trash2 className="h-4 w-4" />
+                  <Button variant="ghost" onClick={() => deleteProfile(profile.id)} aria-label="Delete profile">
+                    <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
                 <div className="w-full">
@@ -200,7 +200,7 @@ export default function ProfileManagement() {
                     <div key={section} className="grid md:grid-cols-2 gap-4">
                       <Card>
                         <CardHeader className="py-2">
-                          <CardTitle className="text-sm font-medium">{sectionTitles[section]}</CardTitle>
+                          <CardTitle className="text-sm font-semibold">{sectionTitles[section]}</CardTitle>
                         </CardHeader>
                         <CardContent className="p-4 space-y-2">
                           <Textarea
@@ -211,7 +211,7 @@ export default function ProfileManagement() {
                             aria-label={`${sectionTitles[section]} content`}
                             />
                           <div className="flex justify-end">
-                            <Button onClick={() => enhanceContent(profile.id, section)}>
+                            <Button variant="ai" onClick={() => enhanceContent(profile.id, section)}>
                               {profile.sections[section].enhanced ? (
                                 <>
                                   <RefreshCw className="mr-2 h-4 w-4" /> Update
@@ -227,7 +227,7 @@ export default function ProfileManagement() {
                       </Card>
                       <Card className="flex flex-col">
                         <CardHeader className="py-2">
-                          <CardTitle className="text-sm font-medium">{sectionTitles[section]} (Enhanced)</CardTitle>
+                          <CardTitle className="text-sm text-foreground-muted font-semibold">{sectionTitles[section]} (Enhanced)</CardTitle>
                         </CardHeader>
                         <CardContent className="p-4 flex-grow">
                           {profile.sections[section].enhanced ? (

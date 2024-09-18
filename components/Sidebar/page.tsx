@@ -53,7 +53,7 @@ const Sidebar = () => {
                     <Settings className="h-4 w-4 text-gray-300" />
                 </Button>
                 <Button variant="ghost" size="icon" className="w-6 h-6" onClick={handleLogout}>
-                    .....
+                    <p className="text-gray-300">.....</p>
                 </Button>
             </div>
             <UserMenu profilePicture={appState?.userType.personalInfo.profilePicture} userName={appState?.userType.personalInfo.name} plan={appState?.userType.adminInfo.plan} />
