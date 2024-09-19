@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { FileCode2, Images, Mail, NotebookPen, PlusSquare, Sparkles, Users } from "lucide-react"
+import { FileCode2, Images, Linkedin, Mail, NotebookPen, PlusSquare, Sparkles, Users } from "lucide-react"
 import { useFirestore } from '@/hooks/useFirestore'
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -30,7 +30,7 @@ export default function GenerateResumePage() {
     'Gerar um currículo para vagas selecionadas por algorítmos de recrutamento.',
     'Gerar um currículo tradicional para envio direto para recrutadores.',
     'Escrever uma carta de apresentação para enviar para recrutadores.',
-    'Criar um plano de estudos para preparar para uma entrevista.'
+    'Criar Biografia profissional para LinkedIn.'
   ]
 
   return (
@@ -56,7 +56,7 @@ export default function GenerateResumePage() {
                   {index === 0 && <FileCode2 className="h-4 w-4 text-purple-600" />}
                   {index === 1 && <Users className="h-4 w-4 text-purple-600" />}
                   {index === 2 && <Mail className="h-4 w-4 text-purple-600" />}
-                  {index === 3 && <NotebookPen className="h-4 w-4 text-purple-600" />}
+                  {index === 3 && <Linkedin className="h-4 w-4 text-purple-600" />}
                 </div>
                 <p className="text-sm text-left text-wrap">{prompt}</p>
               </Button>

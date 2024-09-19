@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ClipboardCopy, Trash2, Plus, Wand2, RefreshCw, Save, Loader2 } from 'lucide-react'
+import { ClipboardCopy, Trash2, Plus, Wand2, RefreshCw, Save, Loader2, UserRoundX } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,6 +13,16 @@ import { ProfileType, ProfileSectionType } from '@/types'
 import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
 import { toast } from "@/hooks/use-toast"
 import { deleteProfile } from '@/services/firestoreService'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const sectionTitles: Record<keyof ProfileSectionType, string> = {
   keywords: 'Keywords',
@@ -29,6 +39,7 @@ export default function ProfileManagement() {
   const [isWizardOpen, setIsWizardOpen] = useState(false)
   const [localProfileData, setLocalProfileData] = useState<Record<string, ProfileType>>({})
   const [enhancingSection, setEnhancingSection] = useState<string | null>(null)
+  const [profileToDelete, setProfileToDelete] = useState<string | null>(null)
 
   useEffect(() => {
     if (appState?.profiles && appState?.profiles.length > 0 && !activeProfileId) {
@@ -56,10 +67,17 @@ export default function ProfileManagement() {
   }
 
   const handleDeleteProfile = (id: string) => {
-    console.log('Deleting profile:', id);
-    deleteProfile(id)
-    if (activeProfileId === id) {
-      setActiveProfileId(appState?.profiles?.[0]?.id || null)
+    setProfileToDelete(id)
+  }
+
+  const confirmDeleteProfile = () => {
+    if (profileToDelete) {
+      console.log('Deleting profile:', profileToDelete)
+      deleteProfile(profileToDelete)
+      if (activeProfileId === profileToDelete) {
+        setActiveProfileId(appState?.profiles?.[0]?.id || null)
+      }
+      setProfileToDelete(null)
     }
   }
 
@@ -270,8 +288,12 @@ export default function ProfileManagement() {
             ))}
           </Tabs>
         ) : (
-          <div className="text-center">
-            <p>No profiles found. Create a new profile to get started.</p>
+          <div className="flex flex-col items-center justify-center h-[70vh] pb-12">
+            <div className="flex flex-col items-center justify-center p-8">
+              <UserRoundX className="h-24 w-24 text-gray-200 mb-4" />
+              <h2 className="text-3xl font-bold mb-2 text-gray-700 text-center">Nenhum perfil encontrado</h2>
+              <p className="text-xl text-gray-500 text-center">Você ainda não tem nenhum perfil cadastrado. Crie um perfil para começar.</p>
+            </div>
           </div>
         )}
       </Card>
@@ -279,6 +301,22 @@ export default function ProfileManagement() {
         isOpen={isWizardOpen} 
         onClose={() => setIsWizardOpen(false)}
       />
+      <AlertDialog open={!!profileToDelete} onOpenChange={() => setProfileToDelete(null)}>
+        <AlertDialogContent className="bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Confirmar exclusão
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Ao apagar um perfil, todos os currículos atrelados a ele também serão deletados. Deseja continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteProfile} className="bg-red-500 text-white hover:bg-red-600">Continuar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
