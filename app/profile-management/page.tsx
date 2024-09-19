@@ -81,7 +81,7 @@ export default function ProfileManagement() {
     try {
       // Simulating AI enhancement
       await new Promise(resolve => setTimeout(resolve, 1000))
-      const profile = appState?.profiles?.find(p => p.id === profileId)
+      const profile = localProfileData[profileId]
       if (profile) {
         const enhancedContent = `Enhanced ${profile.sections?.[sectionKey]?.content || ''}`
         const updatedProfile = {
