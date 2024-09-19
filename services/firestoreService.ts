@@ -118,11 +118,12 @@ export const getProfiles = async (): Promise<ProfileType[]> => {
 };
 
 // Add new profile
-export const addProfile = async (profile: ProfileType): Promise<void> => {
+export const addProfile = async (profile: ProfileType): Promise<string> => {
   const userId = getUserId();
   const profilesCollection = collection(db, 'users', userId, 'profiles');
   const docRef = await addDoc(profilesCollection, profile);
   await updateDoc(docRef, { id: docRef.id });
+  return docRef.id;
 };
 
 // Update an existing profile

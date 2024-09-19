@@ -148,8 +148,9 @@
     const handleAddProfile = useCallback(async (profile: ProfileType) => {
       if (!user || !appState) return;
       try {
-        await firestoreAddProfile(profile);
-        const updatedProfiles = [...appState.profiles, profile];
+        const profileId =  await firestoreAddProfile(profile);
+        const updatedProfileWithId = { ...profile, id: profileId };
+        const updatedProfiles = [...appState.profiles, updatedProfileWithId];
         setAppState({
           ...appState,
           profiles: updatedProfiles,

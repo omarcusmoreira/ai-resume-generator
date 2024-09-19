@@ -8,11 +8,13 @@ import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
 
 export default function GenerateResumePage() {
   const { appState, loading, error } = useFirestore()
   const [inputText, setInputText] = useState('')
   const [selectedPrompt, setSelectedPrompt] = useState<number | null>(null)
+  const [isProfileWizardOpen, setIsProfileWizardOpen] = useState(false)
 
   if (loading) {
     return <div className="p-8">Loading...</div>
@@ -63,7 +65,11 @@ export default function GenerateResumePage() {
             ))}
           </div>
 
-          <Button variant="outline" className="mb-6 md:mb-8 w-full md:w-auto">
+          <Button 
+            variant="outline" 
+            className="mb-6 md:mb-8 w-full md:w-auto"
+            onClick={() => setIsProfileWizardOpen(true)}
+          >
             <PlusSquare className="mr-2 h-4 w-4" /> Perfil
           </Button>
 
@@ -104,6 +110,11 @@ export default function GenerateResumePage() {
           </div>
         </Card>
       </div>
+
+      <ProfileWizardComponent 
+        isOpen={isProfileWizardOpen} 
+        onClose={() => setIsProfileWizardOpen(false)}
+      />
     </div>
   )
 }
