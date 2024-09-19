@@ -3,8 +3,8 @@ import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, 
   collection, addDoc, Timestamp, getDocs 
 } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-import { AppState, ProfileType, ResumeType, OpportunityType, AdminInfoType, PersonalInfoType, UserDataType } from '@/types';
+import { getAuth,  } from 'firebase/auth';
+import { ProfileType, ResumeType, OpportunityType, AdminInfoType, PersonalInfoType, UserDataType } from '@/types';
 
 // Helper function to get the current user's ID
 const getUserId = () => {
@@ -121,7 +121,8 @@ export const getProfiles = async (): Promise<ProfileType[]> => {
 export const addProfile = async (profile: ProfileType): Promise<void> => {
   const userId = getUserId();
   const profilesCollection = collection(db, 'users', userId, 'profiles');
-  await addDoc(profilesCollection, profile);
+  const docRef = await addDoc(profilesCollection, profile);
+  await updateDoc(docRef, { id: docRef.id });
 };
 
 // Update an existing profile

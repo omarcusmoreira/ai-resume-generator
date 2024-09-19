@@ -64,7 +64,7 @@ export default function GenerateResumePage() {
           </div>
 
           <Button variant="outline" className="mb-6 md:mb-8 w-full md:w-auto">
-            <PlusSquare className="mr-2 h-4 w-4" /> Criar Perfil
+            <PlusSquare className="mr-2 h-4 w-4" /> Perfil
           </Button>
 
           <div className="relative">

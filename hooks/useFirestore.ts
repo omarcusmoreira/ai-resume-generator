@@ -77,6 +77,7 @@
           const fetchedUserData = await getUser();
           const fetchedProfiles = await getProfiles();
 
+          console.log('Fetched profiles:', fetchedProfiles);
           setUserData(fetchedUserData);
           setProfiles(fetchedProfiles);
 
@@ -163,16 +164,33 @@
 
     const handleUpdateProfile = useCallback(async (profile: ProfileType) => {
       if (!user || !appState) return;
+      console.log('Updating profile:', profile);
       try {
-        console.log('Updating profile:', profile);
-        await firestoreUpdateProfile(profile.id, profile);
-        const updatedProfiles = appState.profiles.map(p => p.id === profile.id ? profile : p);
-        setAppState({
-          ...appState,
-          profiles: updatedProfiles,
-        });
+        if (profile.id) {
+          await firestoreUpdateProfile(profile.id, profile);
+          const updatedProfiles = appState.profiles.map(p => p.id === profile.id ? profile : p);
+          setAppState({
+            ...appState,
+            profiles: updatedProfiles,
+          });
+        } else {
+          await firestoreAddProfile(profile);
+          const updatedProfiles = [...appState.profiles, profile];
+          setAppState({
+            ...appState,
+            profiles: updatedProfiles,
+          });
+        }
+        console.log('Profile updated/added successfully:', profile);
+        
+        // Refresh profile list
+        const refreshedProfiles = await getProfiles();
+        setAppState(prevState => ({
+          ...prevState!,
+          profiles: refreshedProfiles,
+        }));
       } catch (err) {
-        setError('Failed to update profile.');
+        setError('Failed to update/add profile.');
         console.error(err);
       }
     }, [user, appState]);

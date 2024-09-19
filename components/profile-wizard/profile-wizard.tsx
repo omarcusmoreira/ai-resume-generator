@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ProfileType } from '@/types'
 import { useAuth } from '@/context/AuthContext'
 import { useFirestore} from '@/hooks/useFirestore'
-import { v4 } from 'uuid'
  
 const initialState: ProfileType = {
   id: '',
@@ -78,7 +77,7 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
 
   const handleFinish = () => {
     if (user) {
-      const profileWithId = { ...profile, id: v4() }
+      const profileWithId = { ...profile }
       addProfile(profileWithId)
       onClose();
     }
