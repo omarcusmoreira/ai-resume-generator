@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { FileCode2, Images, Linkedin, Mail, NotebookPen, PlusSquare, Sparkles, Users } from "lucide-react"
+import { FileCode2, Images, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
 import { useFirestore } from '@/hooks/useFirestore'
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
