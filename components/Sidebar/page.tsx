@@ -38,9 +38,9 @@ const Sidebar = () => {
                         <PlusSquare className={pathname === "/generate-resume" ? "h-4 w-4 text-purple-500" : "h-4 w-4 text-gray-500"} />
                     </Button>
                 </Link>
-                <Link href="/profile-management" passHref>
+                <Link href="/profile-manager" passHref>
                     <Button variant="ghost" size="icon" className="w-6 h-6">
-                        <Users className={pathname === "/profile-management" ? "h-4 w-4 text-purple-500" : "h-4 w-4 text-gray-500"} />
+                        <Users className={pathname === "/profile-manager" ? "h-4 w-4 text-purple-500" : "h-4 w-4 text-gray-500"} />
                     </Button>
                 </Link>
                 <Button variant="ghost" size="icon" className="w-6 h-6">

@@ -145,7 +145,7 @@
     }, [user, appState]);
 
     // Profile Methods
-    const handleAddProfile = useCallback(async (profile: ProfileType) => {
+    const handleAddProfile = async (profile: ProfileType) => {
       if (!user || !appState) return;
       try {
         const profileId =  await firestoreAddProfile(profile);
@@ -160,8 +160,8 @@
       } catch (err) {
         setError('Failed to add profile.');
         console.error(err);
-      }
-    }, [user, appState]);
+      };
+    };
 
     const handleUpdateProfile = useCallback(async (profile: ProfileType) => {
       if (!user || !appState) return;

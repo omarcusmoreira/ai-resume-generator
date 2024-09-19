@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ClipboardCopy, Trash2, Plus, Wand2, RefreshCw, Save, Loader2, UserRoundX } from 'lucide-react'
+import { ClipboardCopy, Trash2, Wand2, RefreshCw, Save, Loader2, UserRoundX } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -156,7 +156,6 @@ export default function ProfileManagement() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Gerenciamento de perfis</h1>
           <Button onClick={handleAddProfile} disabled={!!appState?.profiles && appState?.profiles.length >= 5}>
-            <Plus className="mr-2 h-4 w-4" /> Perfil
           </Button>
         </div>
         {appState?.profiles && appState?.profiles.length > 0 ? (
