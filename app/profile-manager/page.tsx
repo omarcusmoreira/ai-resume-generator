@@ -9,15 +9,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Plus, Pencil, Check, X, Link as LinkIcon } from 'lucide-react'
+import { Plus, Pencil, Check, X, Link as LinkIcon, Trash2 } from 'lucide-react'
 import { PersonalInfoType, ProfileSectionType, ProfileType } from '@/types'
 import { useFirestore } from '@/hooks/useFirestore'
 import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
 import { useRouter } from 'next/navigation'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+
+const ProfileSectionTitle: Record<keyof ProfileSectionType, string> = {
+  keywords: "Keywords",
+  summary: "Resumo de Qualificações",
+  professionalExperience: "Experiência Profissional",
+  academicBackground: "Formação Acadêmica",
+  idioms: "Idiomas",
+  extraCurricular: "Atividades Complementares/Certificações"
+}
 
 export default function ProfileManagement() {
   const router = useRouter()
-  const { appState, updateProfile } = useFirestore()
+  const { appState, updateProfile, deleteProfile } = useFirestore()
   const [personalInfo, setPersonalInfo] = useState<PersonalInfoType | null>(null)
   const [profiles, setProfiles] = useState<ProfileType[]>([])
   const [activeProfile, setActiveProfile] = useState<string>('')
@@ -117,6 +127,16 @@ export default function ProfileManagement() {
     router.push('/user-info')
   }
 
+  const handleDeleteProfile = async (profileId: string) => {
+    await deleteProfile(profileId);
+    if (profiles.length > 1) {
+      const newActiveProfile = profiles.find(p => p.id !== profileId)?.id;
+      if (newActiveProfile) {
+        setActiveProfile(newActiveProfile);
+      }
+    }
+  }
+
   if (!personalInfo || profiles.length === 0) {
     return <div>Loading...</div>
   }
@@ -136,7 +156,8 @@ export default function ProfileManagement() {
             ))}
           </TabsList>
           <Button onClick={handleAddProfile} disabled={profiles.length >= 5}>
-              <Plus className="mr-2 h-4 w-4" /> Perfil
+            <Plus className="h-4 w-4 md:mr-2" /> 
+            <p className="hidden md:block">Perfil</p>
           </Button>
         </div>
         {profiles.map((profile) => (
@@ -179,43 +200,48 @@ export default function ProfileManagement() {
                     </p>
                   </div>
                 </div>
-                {Object.entries(profile.sections).map(([key, section]) => (
-                  <div key={key} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-xl font-semibold">{key.charAt(0).toUpperCase() + key.slice(1)}</h3>
-                      {editingSection !== key ? (
-                        <Button variant="ghost" size="sm" onClick={() => setEditingSection(key as keyof ProfileSectionType)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
+                {Object.keys(ProfileSectionTitle).map((key) => {
+                  const section = profile.sections[key as keyof ProfileSectionType];
+                  return (
+                    <div key={key} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-md font-semibold">
+                          {ProfileSectionTitle[key as keyof ProfileSectionType]}
+                        </h3>
+                        {editingSection !== key ? (
+                          <Button variant="ghost" size="sm" onClick={() => setEditingSection(key as keyof ProfileSectionType)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <div className="flex space-x-2">
+                            <Button variant="ghost" size="sm" onClick={saveProfileChanges}>
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={cancelProfileChanges}>
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      {editingSection === key ? (
+                        <Textarea
+                          value={localProfileChanges?.sections[key as keyof ProfileSectionType]?.content || section.content}
+                          onChange={(e) => handleSectionChange(profile.id, key as keyof ProfileSectionType, e.target.value)}
+                          onBlur={saveProfileChanges}
+                          rows={5}
+                          className="w-full"
+                        />
                       ) : (
-                        <div className="flex space-x-2">
-                          <Button variant="ghost" size="sm" onClick={saveProfileChanges}>
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={cancelProfileChanges}>
-                            <X className="h-4 w-4" />
-                          </Button>
+                        <p className="whitespace-pre-line">{section.content}</p>
+                      )}
+                      {section.aiEnhanced && (
+                        <div className="mt-2 p-2 bg-blue-50 rounded">
+                          <p className="text-sm text-blue-800">AI Enhanced: {section.aiEnhanced}</p>
                         </div>
                       )}
                     </div>
-                    {editingSection === key ? (
-                      <Textarea
-                        value={localProfileChanges?.sections[key as keyof ProfileSectionType]?.content || section.content}
-                        onChange={(e) => handleSectionChange(profile.id, key as keyof ProfileSectionType, e.target.value)}
-                        onBlur={saveProfileChanges}
-                        rows={5}
-                        className="w-full"
-                      />
-                    ) : (
-                      <p className="whitespace-pre-line">{section.content}</p>
-                    )}
-                    {section.aiEnhanced && (
-                      <div className="mt-2 p-2 bg-blue-50 rounded">
-                        <p className="text-sm text-blue-800">AI Enhanced: {section.aiEnhanced}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Keywords</h3>
                   <div className="flex flex-wrap gap-2">
@@ -258,6 +284,27 @@ export default function ProfileManagement() {
                   </div>
                 </div>
               </CardContent>
+              <div className="absolute bottom-4 right-4">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="icon">
+                      <Trash2 className="h-4 w-4 text-white" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Atenção, ao deletar um perfil todos os currículos atrelados a ele serão perdidos. Deseja continuar?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDeleteProfile(profile.id)}>Continuar</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </Card>
           </TabsContent>
         ))}

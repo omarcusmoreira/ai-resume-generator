@@ -66,7 +66,7 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
   const [step, setStep] = useState(1)
   const [profile, setProfile] = useState<ProfileType>(initialState)
 
-  const totalSteps = 7
+  const totalSteps = 6
 
   const { user } = useAuth();
 

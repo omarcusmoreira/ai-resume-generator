@@ -46,6 +46,7 @@
     saveUser: (user: UserDataType) => Promise<void>;
     updateUser: (user: UserDataType) => Promise<void>;
     deleteAppState: () => Promise<void>;
+    refreshProfiles: () => Promise<void>;
   }
 
   export const useFirestore = (): UseFirestoreReturn => {
@@ -55,6 +56,25 @@
     const [appState, setAppState] = useState<AppState | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
+    const refreshProfiles = useCallback(async () => {
+      if (!user) return;
+      try {
+        const refreshedProfiles = await getProfiles();
+        setAppState(prevState => {
+          if (JSON.stringify(prevState?.profiles) !== JSON.stringify(refreshedProfiles)) {
+            return {
+              ...prevState!,
+              profiles: refreshedProfiles,
+            };
+          }
+          return prevState;
+        });
+        setProfiles(refreshedProfiles);
+      } catch (err) {
+        console.error('Failed to refresh profiles:', err);
+      }
+    }, [user, getProfiles]);
 
     // Fetch AppState from Firestore and synchronize with localStorage
     useEffect(() => {
@@ -145,152 +165,110 @@
     }, [user, appState]);
 
     // Profile Methods
-    const handleAddProfile = async (profile: ProfileType) => {
+    const handleAddProfile = useCallback(async (profile: ProfileType) => {
       if (!user || !appState) return;
       try {
-        const profileId =  await firestoreAddProfile(profile);
-        const updatedProfileWithId = { ...profile, id: profileId };
-        const updatedProfiles = [...appState.profiles, updatedProfileWithId];
-        setAppState({
-          ...appState,
-          profiles: updatedProfiles,
-
-        });
-        console.log('AppState saved to localStorage', appState);
+        await firestoreAddProfile(profile);
+        await refreshProfiles();
       } catch (err) {
         setError('Failed to add profile.');
         console.error(err);
-      };
-    };
+      }
+    }, [user, appState, refreshProfiles]);
 
     const handleUpdateProfile = useCallback(async (profile: ProfileType) => {
       if (!user || !appState) return;
-      console.log('Updating profile:', profile);
       try {
         if (profile.id) {
           await firestoreUpdateProfile(profile.id, profile);
-          const updatedProfiles = appState.profiles.map(p => p.id === profile.id ? profile : p);
-          setAppState({
-            ...appState,
-            profiles: updatedProfiles,
-          });
         } else {
           await firestoreAddProfile(profile);
-          const updatedProfiles = [...appState.profiles, profile];
-          setAppState({
-            ...appState,
-            profiles: updatedProfiles,
-          });
         }
-        console.log('Profile updated/added successfully:', profile);
-        
-        // Refresh profile list
-        const refreshedProfiles = await getProfiles();
-        setAppState(prevState => ({
-          ...prevState!,
-          profiles: refreshedProfiles,
-        }));
+        await refreshProfiles();
       } catch (err) {
         setError('Failed to update/add profile.');
         console.error(err);
       }
-    }, [user, appState]);
+    }, [user, appState, refreshProfiles]);
 
     const handleDeleteProfile = useCallback(async (profileId: string) => {
       if (!user || !appState) return;
       try {
         await firestoreDeleteProfile(profileId);
-        const updatedProfiles = appState.profiles.filter(p => p.id !== profileId);
-        setAppState({
-          ...appState,
-          profiles: updatedProfiles,
-        });
+        await refreshProfiles();
       } catch (err) {
         setError('Failed to delete profile.');
         console.error(err);
       }
-    }, [user, appState]);
+    }, [user, appState, refreshProfiles]);
 
     // Resume Methods
     const handleAddResume = useCallback(async (profileId: string, resume: ResumeType) => {
       if (!user || !appState) return;
       try {
         await firestoreAddResume(profileId, resume);
-      const updatedProfiles = appState.profiles.map(profile => {
-        if (profile.id === profileId) {
-          return {
-            ...profile,
-            resumes: profile.resumes ? [...profile.resumes, resume] : [resume],
-          };
-        }
-        return profile;
-      });
-      setAppState({
-        ...appState,
-          ...appState,
-          profiles: updatedProfiles,
-      });
+        await refreshProfiles();
       } catch (err) {
         setError('Failed to add resume.');
         console.error(err);
       }
-    }, [user, appState]);
+    }, [user, appState, refreshProfiles]);
 
     const handleUpdateResume = useCallback(async (profileId: string, resumeId: string, resume: Partial<ResumeType>) => {
       if (!user || !appState) return;
       try {
         await firestoreUpdateResume(profileId, resumeId, resume);
-        // Optionally update local state here
+        await refreshProfiles();
       } catch (err) {
         setError('Failed to update resume.');
         console.error(err);
       }
-    }, [user, appState]);
+    }, [user, appState, refreshProfiles]);
 
     const handleDeleteResume = useCallback(async (profileId: string, resumeId: string) => {
       if (!user || !appState) return;
       try {
         await firestoreDeleteResume(profileId, resumeId);
-        // Optionally update local state here
+        await refreshProfiles();
       } catch (err) {
         setError('Failed to delete resume.');
         console.error(err);
       }
-    }, [user, appState]);
+    }, [user, appState, refreshProfiles]);
 
     // Opportunity Methods
     const handleAddOpportunity = useCallback(async (profileId: string, opportunity: OpportunityType) => {
       if (!user || !appState) return;
       try {
         await firestoreAddOpportunity(profileId, opportunity);
-        // Optionally update local state here
+        await refreshProfiles();
       } catch (err) {
         setError('Failed to add opportunity.');
         console.error(err);
       }
-    }, [user, appState]);
+    }, [user, appState, refreshProfiles]);
 
     const handleUpdateOpportunity = useCallback(async (profileId: string, opportunityId: string, opportunity: Partial<OpportunityType>) => {
       if (!user || !appState) return;
       try {
         await firestoreUpdateOpportunity(profileId, opportunityId, opportunity);
-        // Optionally update local state here
+        await refreshProfiles();
       } catch (err) {
         setError('Failed to update opportunity.');
         console.error(err);
       }
-    }, [user, appState]);
+    }, [user, appState, refreshProfiles]);
 
     const handleDeleteOpportunity = useCallback(async (profileId: string, opportunityId: string) => {
       if (!user || !appState) return;
       try {
         await firestoreDeleteOpportunity(profileId, opportunityId);
-        // Optionally update local state here
+        await refreshProfiles();
       } catch (err) {
         setError('Failed to delete opportunity.');
         console.error(err);
       }
-    }, [user, appState]);
+    }, [user, appState, refreshProfiles]);
 
     // General Methods
 
@@ -359,5 +337,6 @@
       saveUser: handleSaveUser,
       updateUser: handleUpdateUser,
       deleteAppState: handleDeleteAppState,
+      refreshProfiles,
     };
   };

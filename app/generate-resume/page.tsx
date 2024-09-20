@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { FileCode2, Images, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
 import { useFirestore } from '@/hooks/useFirestore'
@@ -11,10 +11,19 @@ import { cn } from "@/lib/utils"
 import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
 
 export default function GenerateResumePage() {
-  const { appState, loading, error } = useFirestore()
+  const { appState, loading, error, refreshProfiles } = useFirestore()
   const [inputText, setInputText] = useState('')
   const [selectedPrompt, setSelectedPrompt] = useState<number | null>(null)
   const [isProfileWizardOpen, setIsProfileWizardOpen] = useState(false)
+  const [profiles, setProfiles] = useState(appState?.profiles || [])
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      await refreshProfiles()
+      setProfiles(appState?.profiles || [])
+    }
+    fetchProfiles()
+  }, [refreshProfiles, appState])
 
   if (loading) {
     return <div className="p-8">Loading...</div>
@@ -26,6 +35,12 @@ export default function GenerateResumePage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputText(e.target.value.slice(0, 1000)) // Limit to 1000 characters
+  }
+
+  const handleProfileWizardClose = async () => {
+    setIsProfileWizardOpen(false)
+    await refreshProfiles()
+    setProfiles(appState?.profiles || [])
   }
 
   const prompts = [
@@ -80,8 +95,12 @@ export default function GenerateResumePage() {
                   <SelectValue placeholder="Escolha um perfil" />
                 </SelectTrigger>
                 <SelectContent> 
-                  {appState?.profiles.map((profile, index) => (
-                    <SelectItem key={index} value={profile.id}>{profile.profileName}</SelectItem>
+                  {profiles.map((profile, index) => (
+                    profile.id ? (
+                      <SelectItem key={index} value={profile.id}>
+                        {profile.profileName || `Profile ${index + 1}`}
+                      </SelectItem>
+                    ) : null
                   ))}
                 </SelectContent>
               </Select>
@@ -113,7 +132,7 @@ export default function GenerateResumePage() {
 
       <ProfileWizardComponent 
         isOpen={isProfileWizardOpen} 
-        onClose={() => setIsProfileWizardOpen(false)}
+        onClose={handleProfileWizardClose}
       />
     </div>
   )
