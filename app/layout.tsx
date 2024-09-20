@@ -5,10 +5,12 @@ import "./globals.css";
 import { AuthProvider } from '@/context/AuthContext';
 import Sidebar from "@/components/Sidebar/page";
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, PlusSquare, Settings, Users } from 'lucide-react';
+import { LayoutDashboard, PlusSquare, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../public/assets/images/logo_quadrado.ico';
+import UserMenu from '@/components/UserMenu/page';
+import { useFirestore } from '@/hooks/useFirestore';
 
 export default function RootLayout({
   children,
@@ -26,8 +28,10 @@ export default function RootLayout({
   );
 }
 
+
 function LayoutWithAuth({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { appState } = useFirestore();
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -59,9 +63,9 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
             <Button variant="ghost" size="icon" className="w-8 h-8">
               <LayoutDashboard className="h-5 w-5 text-gray-500" />
             </Button>
-            <Button variant="ghost" size="icon" className="w-8 h-8">
-              <Settings className="h-5 w-5 text-gray-500" />
-            </Button>
+            <div className="w-10 h-10 flex items-center justify-center">
+              <UserMenu profilePicture={appState?.userType.personalInfo.profilePicture} userName={appState?.userType.personalInfo.name} plan={appState?.userType.adminInfo.plan} />
+            </div>
           </nav>
         )}
       </div>

@@ -37,7 +37,7 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
             <AvatarImage
               src={profilePicture}
               alt="User Profile"
-              className={`h-6 w-6 rounded-full mb-2 ${
+              className={`h-6 w-6 rounded-full ${
                 plan === 'free' ? 'border-2 border-gray-800' :
                 plan === 'premium' ? 'border-2 border-pink-700' :
                 plan === 'pro' ? 'border-2 border-purple-700' :
