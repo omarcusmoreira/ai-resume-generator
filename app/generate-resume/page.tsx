@@ -9,21 +9,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
+import { completeAi } from '@/hooks/useAi'
 
 export default function GenerateResumePage() {
   const { appState, loading, error, refreshProfiles } = useFirestore()
   const [inputText, setInputText] = useState('')
   const [selectedPrompt, setSelectedPrompt] = useState<number | null>(null)
   const [isProfileWizardOpen, setIsProfileWizardOpen] = useState(false)
-  const [profiles, setProfiles] = useState(appState?.profiles || [])
+  // Remove this line:
+  // const [profiles, setProfiles] = useState(appState?.profiles || [])
+  const [selectedProfile, setSelectedProfile] = useState<string | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   useEffect(() => {
-    const fetchProfiles = async () => {
-      await refreshProfiles()
-      setProfiles(appState?.profiles || [])
+    if (!appState?.profiles) {
+      refreshProfiles()
     }
-    fetchProfiles()
-  }, [refreshProfiles, appState])
+  }, [appState?.profiles])
 
   if (loading) {
     return <div className="p-8">Loading...</div>
@@ -37,10 +39,9 @@ export default function GenerateResumePage() {
     setInputText(e.target.value.slice(0, 1000)) // Limit to 1000 characters
   }
 
-  const handleProfileWizardClose = async () => {
+  const handleProfileWizardClose = () => {
     setIsProfileWizardOpen(false)
-    await refreshProfiles()
-    setProfiles(appState?.profiles || [])
+    refreshProfiles()
   }
 
   const prompts = [
@@ -49,6 +50,30 @@ export default function GenerateResumePage() {
     'Escrever uma carta de apresentação para enviar para recrutadores.',
     'Criar Biografia profissional para LinkedIn.'
   ]
+
+  const handleGenerateResume = async () => {
+    if (!selectedProfile || !inputText) {
+      console.error('Please select a profile and enter a job description')
+      return
+    }
+
+    setIsGenerating(true)
+
+    try {
+      const profile = appState?.profiles?.find(p => p.id === selectedProfile)
+      if (!profile) {
+        throw new Error('Selected profile not found')
+      }
+
+      const { completion } = await completeAi(inputText, profile, appState?.userType.personalInfo)
+      console.log('Generated Resume:', completion)
+      // TODO: Handle the generated resume (e.g., display it to the user)
+    } catch (error) {
+      console.error('Error generating resume:', error)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
 
   return (
     <div className="flex-1 flex flex-col">
@@ -90,12 +115,12 @@ export default function GenerateResumePage() {
 
           <div className="relative">
             <div className="absolute top-2 right-2 z-10">
-              <Select>
+              <Select onValueChange={(value) => setSelectedProfile(value)}>
                 <SelectTrigger className="w-auto h-8 px-2 rounded-full bg-primary text-primary-foreground">
                   <SelectValue placeholder="Escolha um perfil" />
                 </SelectTrigger>
                 <SelectContent> 
-                  {profiles.map((profile, index) => (
+                  {appState?.profiles?.map((profile, index) => (
                     profile.id ? (
                       <SelectItem key={index} value={profile.id}>
                         {profile.profileName || `Profile ${index + 1}`}
@@ -119,8 +144,18 @@ export default function GenerateResumePage() {
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Images className="h-4 w-4" />
               </Button>
-              <Button variant="ai" size="icon" className="h-8 w-8 rounded-full bg-primary text-primary-foreground">
-                <Sparkles className="h-4 w-4" />
+              <Button 
+                variant="ai" 
+                size="icon" 
+                className="h-8 w-8 rounded-full bg-primary text-primary-foreground"
+                onClick={handleGenerateResume}
+                disabled={isGenerating || !selectedProfile || !inputText}
+              >
+                {isGenerating ? (
+                  <span className="animate-spin">✨</span>
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
               </Button>
             </div>
             <div className="absolute bottom-2 left-2 text-xs text-gray-400">
