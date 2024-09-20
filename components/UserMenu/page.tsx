@@ -32,7 +32,7 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-        <Avatar className="h-6 w-6 cursor-pointer hover:opacity-80 transition-opacity mb-4 rounded-full">
+        <Avatar className="h-6 w-6 cursor-pointer hover:opacity-80 transition-opacity rounded-full">
           {profilePicture ?  (
             <AvatarImage
               src={profilePicture}
