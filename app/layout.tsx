@@ -4,10 +4,11 @@ import { usePathname } from 'next/navigation'; // Import usePathname
 import "./globals.css";
 import { AuthProvider } from '@/context/AuthContext';
 import Sidebar from "@/components/Sidebar/page";
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
-import { useState } from 'react';
+import { LayoutDashboard, PlusSquare, Settings, Users } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import logo from '../public/assets/images/logo_quadrado.ico';
 
 export default function RootLayout({
   children,
@@ -26,10 +27,7 @@ export default function RootLayout({
 }
 
 function LayoutWithAuth({ children }: { children: React.ReactNode }) {
-
   const pathname = usePathname();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -40,24 +38,32 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
         </div>
       )}
       <div className="flex-1 overflow-auto">
-        {/* Mobile header */}
-        {pathname !== '/auth-page' && pathname !== '/landing-page' && (
-          <header className="md:hidden flex items-center justify-between p-2 border-b border-gray-200">
-            <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[200px] sm:w-[240px] bg-white">
-                <Sidebar />
-              </SheetContent>
-            </Sheet>
-            <h1 className="text-l font-semibold">MeContrata.Ai</h1>
-            <div className="w-8" /> {/* Placeholder for balance */}
-          </header>
-        )}
         {children}
+        
+        {/* Floating bottom navbar for mobile */}
+        {pathname !== '/auth-page' && pathname !== '/landing-page' && (
+          <nav className="z-50 md:hidden fixed bottom-4 left-4 right-4 bg-pink-50 border-2 border-purple-200 rounded-full shadow-lg p-2 flex justify-around items-center">
+            <Link href="/generate-resume" passHref>
+              <Button variant="ghost" size="icon" className="w-8 h-8">
+                <PlusSquare className={pathname === "/generate-resume" ? "h-5 w-5 text-purple-500" : "h-5 w-5 text-gray-500"} />
+              </Button>
+            </Link>
+            <Link href="/profile-manager" passHref>
+              <Button variant="ghost" size="icon" className="w-8 h-8">
+                <Users className={pathname === "/profile-manager" ? "h-5 w-5 text-purple-500" : "h-5 w-5 text-gray-500"} />
+              </Button>
+            </Link>
+            <div className="w-10 h-10 relative">
+              <Image src={logo} alt="Logo" layout="fill" objectFit="contain" />
+            </div>
+            <Button variant="ghost" size="icon" className="w-8 h-8">
+              <LayoutDashboard className="h-5 w-5 text-gray-500" />
+            </Button>
+            <Button variant="ghost" size="icon" className="w-8 h-8">
+              <Settings className="h-5 w-5 text-gray-500" />
+            </Button>
+          </nav>
+        )}
       </div>
     </div>
   );
