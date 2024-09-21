@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { FileCode2, Images, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
 import { useFirestore } from '@/hooks/useFirestore'
@@ -9,23 +9,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
-import { completeAi } from '@/hooks/useAi'
+import { generateATSResume, generateTraditionalResume, generateCoverLetter } from '@/hooks/useAi'
+import { useRouter } from 'next/navigation'
+import { ResumeType } from '@/types'
+import { v4 } from 'uuid'
 
 export default function GenerateResumePage() {
-  const { appState, loading, error, refreshProfiles } = useFirestore()
+  const { appState, loading, error, addResume, refreshProfiles } = useFirestore()
   const [inputText, setInputText] = useState('')
   const [selectedPrompt, setSelectedPrompt] = useState<number | null>(null)
   const [isProfileWizardOpen, setIsProfileWizardOpen] = useState(false)
-  // Remove this line:
-  // const [profiles, setProfiles] = useState(appState?.profiles || [])
   const [selectedProfile, setSelectedProfile] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
-
-  useEffect(() => {
-    if (!appState?.profiles) {
-      refreshProfiles()
-    }
-  }, [appState?.profiles])
+  const router = useRouter()
 
   if (loading) {
     return <div className="p-8">Loading...</div>
@@ -65,15 +61,46 @@ export default function GenerateResumePage() {
         throw new Error('Selected profile not found')
       }
 
-      const { completion } = await completeAi(inputText, profile, appState?.userType.personalInfo)
-      console.log('Generated Resume:', completion)
-      // TODO: Handle the generated resume (e.g., display it to the user)
+      if (selectedPrompt === 0) {
+
+        const resumeId = v4();
+        try {
+          const { completion } = await generateATSResume(inputText, profile, appState?.userType.personalInfo)
+          const resume = {
+            id: resumeId,
+            markdownContent: completion,
+          } as ResumeType
+          try {
+            await addResume(resumeId, resume, profile.profileName);
+            console.log('added resume to firestore from generate-resume.tsx')
+            router.push(`/resume-render?resumeId=${resumeId}`);
+          } catch (error) {
+            console.error('Error generating resume:', error)
+          } finally {
+            setIsGenerating(false)
+          }
+        } catch (error) {
+          console.error('Error generating resume:', error)
+        } finally {
+          setIsGenerating(false)
+        }
+      } else if (selectedPrompt === 1) {
+        const { completion } = await generateTraditionalResume(inputText, profile, appState?.userType.personalInfo)
+        console.log('Generated Resume:', completion)
+      } else if (selectedPrompt === 2) {
+        const { completion } = await generateCoverLetter(inputText, profile, appState?.userType.personalInfo)
+        console.log('Generated Cover Letter:', completion)
+      }
+
     } catch (error) {
       console.error('Error generating resume:', error)
     } finally {
       setIsGenerating(false)
+
     }
   }
+
+  console.log('appState?.profiles', appState?.profiles)
 
   return (
     <div className="flex-1 flex flex-col">
@@ -93,6 +120,7 @@ export default function GenerateResumePage() {
                   selectedPrompt === index && "border-2 border-purple-500 bg-purple-100"
                 )}
                 onClick={() => setSelectedPrompt(index)}
+                disabled={ index !== 0}
               >
                 <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
                   {index === 0 && <FileCode2 className="h-4 w-4 text-purple-600" />}

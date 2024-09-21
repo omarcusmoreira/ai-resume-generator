@@ -11,7 +11,7 @@ class OpenAiService {
     }
   }
 
-  async generateCompletion(prompt: string, model: string = 'text-davinci-002', maxTokens: number = 100) {
+  async generateCompletion(prompt: string, model: string = 'gpt-3.5-turbo', maxTokens: number = 1500) {
     try {
       const response = await axios.post(
         `${this.baseUrl}/completions`,
@@ -35,7 +35,7 @@ class OpenAiService {
     }
   }
 
-  async generateChatCompletion(messages: Array<{ role: string, content: string }>, model: string = 'gpt-3.5-turbo') {
+  async generateChatCompletion(messages: Array<{ role: string, content: string }>, model: string = 'gpt-4o-mini') {
     try {
       const response = await axios.post(
         `${this.baseUrl}/chat/completions`,

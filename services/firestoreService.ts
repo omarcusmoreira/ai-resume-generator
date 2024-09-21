@@ -118,19 +118,22 @@ export const getProfiles = async (): Promise<ProfileType[]> => {
 };
 
 // Add new profile
-export const addProfile = async (profile: ProfileType): Promise<string> => {
+export const addProfile = async (profileId: string, profile: ProfileType): Promise<void> => {
   const userId = getUserId();
   const profilesCollection = collection(db, 'users', userId, 'profiles');
-  const docRef = await addDoc(profilesCollection, profile);
-  await updateDoc(docRef, { id: docRef.id });
-  return docRef.id;
+  const docRef = doc(profilesCollection, profileId);
+  const updatedProfile = { ...profile, id: profileId };
+  await setDoc(docRef, updatedProfile);
+
+  console.log('Profile added to Firestore *from firestoreService.ts*', profileId);
 };
 
 // Update an existing profile
 export const updateProfile = async (profileId: string, profile: Partial<ProfileType>): Promise<void> => {
   const userId = getUserId();
   const profileRef = doc(db, 'users', userId, 'profiles', profileId);
-  await updateDoc(profileRef, profile);
+  const updatedProfile = { ...profile, id: profileId };
+  await updateDoc(profileRef, updatedProfile);
 };
 
 // Delete a profile
@@ -143,61 +146,64 @@ export const deleteProfile = async (profileId: string): Promise<void> => {
 /* ------------------ Resumes ------------------ */
 
 // Get all resumes for a specific profile
-export const getResumes = async (profileId: string): Promise<ResumeType[]> => {
+export const getResumes = async (): Promise<ResumeType[]> => {
   const userId = getUserId();
-  const resumesCollection = collection(db, 'users', userId, 'profiles', profileId, 'resumes');
+  const resumesCollection = collection(db, 'users', userId, 'resumes');
   const resumesSnap = await getDocs(resumesCollection);
   return resumesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as ResumeType));
 };
 
 // Add a new resume
-export const addResume = async (profileId: string, resume: ResumeType): Promise<void> => {
+export const addResume = async (resumeId: string, resume: ResumeType): Promise<void> => {
   const userId = getUserId();
-  const resumesCollection = collection(db, 'users', userId, 'profiles', profileId, 'resumes');
-  await addDoc(resumesCollection, { ...resume, updatedAt: Timestamp.now() });
+  const resumesCollection = collection(db, 'users', userId, 'resumes');
+  const docRef = doc(resumesCollection, resumeId);
+  const updatedResume = { ...resume, id: resumeId };
+  await setDoc(docRef, updatedResume);
 };
 
 // Update a resume
-export const updateResume = async (profileId: string, resumeId: string, resume: Partial<ResumeType>): Promise<void> => {
+export const updateResume = async (resumeId: string, resume: Partial<ResumeType>): Promise<void> => {
   const userId = getUserId();
-  const resumeRef = doc(db, 'users', userId, 'profiles', profileId, 'resumes', resumeId);
+  const resumeRef = doc(db, 'users', userId, 'resumes', resumeId);
   await updateDoc(resumeRef, { ...resume, updatedAt: Timestamp.now() });
 };
 
 // Delete a resume
-export const deleteResume = async (profileId: string, resumeId: string): Promise<void> => {
+export const deleteResume = async (resumeId: string): Promise<void> => {
   const userId = getUserId();
-  const resumeRef = doc(db, 'users', userId, 'profiles', profileId, 'resumes', resumeId);
+  const resumeRef = doc(db, 'users', userId, 'resumes', resumeId);
   await deleteDoc(resumeRef);
 };
 
 /* ------------------ Opportunities ------------------ */
 
 // Get all opportunities for a specific profile
-export const getOpportunities = async (profileId: string): Promise<OpportunityType[]> => {
+export const getOpportunities = async (): Promise<OpportunityType[]> => {
   const userId = getUserId();
-  const opportunitiesCollection = collection(db, 'users', userId, 'profiles', profileId, 'opportunities');
+  const opportunitiesCollection = collection(db, 'users', userId, 'opportunities');
   const opportunitiesSnap = await getDocs(opportunitiesCollection);
   return opportunitiesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as OpportunityType));
 };
 
 // Add a new opportunity
-export const addOpportunity = async (profileId: string, opportunity: OpportunityType): Promise<void> => {
+export const addOpportunity = async (opportunity: OpportunityType): Promise<void> => {
   const userId = getUserId();
-  const opportunitiesCollection = collection(db, 'users', userId, 'profiles', profileId, 'opportunities');
-  await addDoc(opportunitiesCollection, { ...opportunity, updatedAt: Timestamp.now() });
+  const opportunitiesCollection = collection(db, 'users', userId, 'opportunities');
+  const docRef = doc(opportunitiesCollection, opportunity.id);
+  await setDoc(docRef, opportunity);
 };
 
 // Update an opportunity
-export const updateOpportunity = async (profileId: string, opportunityId: string, opportunity: Partial<OpportunityType>): Promise<void> => {
+export const updateOpportunity = async (opportunityId: string, opportunity: Partial<OpportunityType>): Promise<void> => {
   const userId = getUserId();
-  const opportunityRef = doc(db, 'users', userId, 'profiles', profileId, 'opportunities', opportunityId);
+  const opportunityRef = doc(db, 'users', userId, 'opportunities', opportunityId);
   await updateDoc(opportunityRef, { ...opportunity, updatedAt: Timestamp.now() });
 };
 
 // Delete an opportunity
-export const deleteOpportunity = async (profileId: string, opportunityId: string): Promise<void> => {
+export const deleteOpportunity = async (opportunityId: string): Promise<void> => {
   const userId = getUserId();
-  const opportunityRef = doc(db, 'users', userId, 'profiles', profileId, 'opportunities', opportunityId);
+  const opportunityRef = doc(db, 'users', userId, 'opportunities', opportunityId);
   await deleteDoc(opportunityRef);
 };

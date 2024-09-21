@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useFirestore} from '@/hooks/useFirestore'
 import { Sparkles } from 'lucide-react'
 import { DialogDescription } from '@radix-ui/react-dialog'
+import { v4 } from 'uuid'
  
 const initialState: ProfileType = {
   id: '',
@@ -131,8 +132,8 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
 
   const handleFinish = () => {
     if (user) {
-      const profileWithId = { ...profile }
-      addProfile(profileWithId)
+      const profileId = v4();
+      addProfile(profileId, profile)
       onClose();
     }
   }

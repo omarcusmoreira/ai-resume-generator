@@ -13,11 +13,6 @@ import {
 import { auth } from '@/firebaseConfig'
 
 import { useFirestore } from '@/hooks/useFirestore'
-import {
-  AdminInfoType,
-  PersonalInfoType,
-  UserDataType,
-} from '@/types'
 
 import {
   Card,
@@ -36,8 +31,11 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs'
-import { Mail, Lock, User, HeartHandshake } from 'lucide-react'
+import { Mail, Lock, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Image from 'next/image'
+import logoHorizontal from '../../public/assets/images/logo_horizontal.png'
+import { AdminInfoType, PersonalInfoType, UserDataType } from '@/types'
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -213,11 +211,8 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <HeartHandshake className="h-10 w-10 text-primary" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-center">
-            MeContrata.Ai
+          <CardTitle className="text-2xl font-bold flex justify-center">
+            <Image src={logoHorizontal} alt="MeContrata.Ai" width={300} className='my-8'/>
           </CardTitle>
           <CardDescription className="text-center">
             Faça login ou crie uma conta para começar

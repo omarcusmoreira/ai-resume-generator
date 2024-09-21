@@ -19,7 +19,8 @@ export type ProfileSectionType = {
 // Define a resume object
 export type ResumeType = {
   id: string;
-  content: string; // Markdown content
+  profileName: string;
+  markdownContent: string; // Markdown content
 };
 
 // Define contact details for opportunities
@@ -55,8 +56,6 @@ export type ProfileType = {
   id: string;
   profileName: string;
   sections: ProfileSectionType;
-  resumes?: ResumeType[];
-  opportunities?: OpportunityType[];
 };
 
 // Define personal information of the user
@@ -70,12 +69,19 @@ export type PersonalInfoType = {
   city: string;
   profilePicture: string;
 };
-
 // Define admin-specific information
 export type AdminInfoType = {
   createdAt: Timestamp;
   updatedAt: Timestamp; // Use Firebase Timestamp for date fields
-  plan: string;
+  plan: 'free' | 'basic' | 'premium';
+  interactionsQuota?: number;
+  interactionsUsed?: number;
+  profilesQuota?: number;
+  profilesUsed?: number;
+  resumesQuota?: number;
+  resumesUsed?: number;
+  opportunitiesQuota?: number;
+  opportunitiesUsed?: number;
 };
 
 // Define the main user state
@@ -89,4 +95,6 @@ export type UserDataType = {
 export type AppState = {
   userType: UserType;
   profiles: ProfileType[];
+  resumes: ResumeType[]; 
+  opportunities: OpportunityType[];   
 };
