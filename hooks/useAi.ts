@@ -44,6 +44,82 @@ export async function generateATSResume(jobDescription: string, profile: Profile
   return { completion };
 }
 
+export async function generateATSResumeJSON(jobDescription: string, profile: ProfileType) {
+  const systemPrompt = `Você é um recrutador sênior encarregado de gerar partes de um currículo em formato JSON para a seguinte oportunidade de emprego: "${jobDescription}". 
+  Use as informações fornecidas para criar um currículo atraente, SEMPRE RESPONDENDO EM PORTUGUÊS.`;
+
+  const userPrompt = `
+  IMPORTANTE: RETORNE APENAS OBJETOS JSON. NÃO RETORNE NENHUM OUTRO TEXTO. SEMPRE RESPONDA EM PORTUGUÊS.
+  Use a seguinte descrição do emprego: "${jobDescription}" e use as informações do perfil para gerar cada seção do currículo separadamente em formato JSON. Aqui está a estrutura:
+
+  ### Use ${profile.sections.summary} para gerar o resumo: 
+  {
+    "summary": "Um resumo de 6-7 sentenças personalizado para o emprego usando palavras-chave relevantes."
+  }
+
+  ### Use ${profile.sections.professionalExperience} para organizar por data egerar a experiência profissional: 
+  {
+    "professionalExperience": [
+      {
+        "company": "Primeira empresa",
+        "position": "Cargo",
+        "dates": "Período",
+        "responsibilities": [
+          "Crie uma lista com pelo menos 5 frases relevantes e atividades e responsabilidades."
+        ]
+      },
+      {
+        "company": "Segunda empresa",
+        "position": "Cargo",
+        "dates": "Período",
+        "responsibilities": [
+          "Crie uma lista com pelo menos 5 frases relevantes e atividades e responsabilidades."
+        ]
+      }
+    ]
+  }
+
+  ### Use ${profile.sections.academicBackground} para gerar a formação acadêmica: 
+  {
+    "academicBackground": [
+      {
+        "degree": "Título",
+        "institution": "Instituição",
+        "graduationYear": "Ano de Graduação"
+      }
+    ]
+  }
+
+  ### Use ${profile.sections.idioms} para gerar os idiomas: 
+  {
+    "languages": [
+      {
+        "language": "Idioma",
+        "fluency": "Nível de fluência"
+      }
+    ]
+  }
+    se o usuário não especificou idiomas, retorne português e fluência "Nativo".
+
+  ### Use ${profile.sections.extraCurricular === "" ? "Não há atividades extracurriculares" : profile.sections.extraCurricular} para gerar as atividades extracurriculares: 
+  {
+    "extraCurricular": 
+  }
+
+  IMPORTANTE: 
+  - NÃO RETORNE NADA ALÉM DOS OBJETOS JSON.
+  - Preencha cada campo com base na descrição do emprego e nos dados do perfil fornecidos.`;
+
+  const completion = await openAiService.generateChatCompletion([
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userPrompt }
+  ]);
+
+  return { completion };
+}
+
+
+
 export async function generateTraditionalResume(jobDescription: string, profile: ProfileType) {
   const systemPrompt = `You are a senior recruiter tasked with generating a tailored resume in strict markdown format for the following job opportunity: "${jobDescription}".
   Your job is to create a resume that follows the exact structure and uses the provided information, focusing only on relevance to the job description.`;
@@ -158,4 +234,26 @@ export async function generateKeywords(profileName: string) {
 
   return { completion };
 } 
+//eslint-disable-next-line
+export async function improveCompletion(jobDescription: string, profile: ProfileType, previousCompletion: any) {
+  const systemPrompt = `Você é um recrutador encarregado de corrigir um currículo gerado para a vaga "${jobDescription}".`;
 
+  const userPrompt = `
+  O currículo gerado anteriormente contém erros ou está incompleto.
+  Por favor, corrija o seguinte JSON gerado: ${JSON.stringify(previousCompletion)}
+  Certifique-se de que o formato esteja correto e siga a estrutura:
+  {
+    "summary": "Um resumo de 6-7 sentenças.",
+    "professionalExperience": [...],
+    "academicBackground": "${profile.sections.academicBackground}",
+    "languages": "${profile.sections.idioms}",
+    "extraCurricular": "${profile.sections.extraCurricular}"
+  }`;
+
+  const completion = await openAiService.generateChatCompletion([
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userPrompt }
+  ]);
+
+  return { completion };
+};

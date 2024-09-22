@@ -1,5 +1,5 @@
 export type ResumeType = {
     id: string;
     profileName: string;
-    markdownContent: string; 
+    contentJSON: string; 
   };

@@ -20,17 +20,19 @@ function ResumeContent() {
   const resumeId = useSearchParams().get('resumeId') as string
   const [resume, setResume] = useState<ResumeType | null>(null)
   const [personalInfo, setPersonalInfo] = useState<PersonalInfoType | null>(null)
-  const [resumeContent, setResumeContent] = useState<string>(resume?.markdownContent || '')
+  const [resumeContent, setResumeContent] = useState<string>(resume?.contentJSON || '')
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   
+  console.log(resumeId);
+
   useEffect(() => {
     const fetchData = async () => {
       const userData = await getUserData()
       const resume = await getResume(resumeId)
       setPersonalInfo(userData?.personalInfo || null)
       setResume(resume)
-      setResumeContent(resume?.markdownContent || '')
+      setResumeContent(resume?.contentJSON || '')
     }
     fetchData() 
   }, [resumeId])
@@ -46,7 +48,7 @@ function ResumeContent() {
     if (!resume) {
       throw new Error('Selected resume not found')
     } else {
-      await updateResume(resumeId, { markdownContent: resumeContent })
+      await updateResume(resumeId, {  contentJSON: resumeContent })
     }
   }, [resumeContent, resumeId, resume])
 

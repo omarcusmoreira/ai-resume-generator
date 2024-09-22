@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { FileCode2, Images, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
 import { Card } from '@/components/ui/card'
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
-import { generateATSResume, generateTraditionalResume, generateCoverLetter } from '@/hooks/useAi'
+import { generateATSResumeJSON } from '@/hooks/useAi'
 import { useRouter } from 'next/navigation'
 import { v4 } from 'uuid'
 import { getUserData } from '@/services/userServices'
@@ -17,18 +17,13 @@ import { UserDataType } from '@/types/users'
 import { ProfileType } from '@/types/profiles'
 import { ResumeType } from '@/types/resumes'
 import { addResume } from '@/services/resumeServices'
-import { Progress } from '@/components/ui/progress'
+import { validateCompletion } from '../utils/validateJSONCompletion'
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog"
+import { Loader2 } from "lucide-react"
+import { trimToJSON } from '../utils/trimToJSON'
 
-export default function GenerateResumePagePage() {
-  return (
-    
-    <Suspense fallback={<Progress className="w-full" />}>
-      <GenerateResumePage />
-    </Suspense>
-  )
-}
 
-function GenerateResumePage() {
+export default function GenerateResumePage() {
 
   const [userData, setUserData] = useState<UserDataType>()
   const [profiles, setProfiles] = useState<ProfileType[]>()
@@ -38,7 +33,11 @@ function GenerateResumePage() {
   const [selectedProfile, setSelectedProfile] = useState<string>()
   const [isGenerating, setIsGenerating] = useState(false)
   const router = useRouter()
-
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [generationStatus, setGenerationStatus] = useState('')
+  const [isGenerationComplete, setIsGenerationComplete] = useState(false)
+  const [generationError, setGenerationError] = useState(false)
+  const [resumeId, setResumeId] = useState<string>()
   useEffect(() => {
     const fetchData = async () => {
       const fetchedUser = await getUserData();
@@ -70,55 +69,70 @@ function GenerateResumePage() {
 
   const handleGenerateResume = async () => {
     if (!selectedProfile || !inputText) {
-      console.error('Please select a profile and enter a job description')
-      return
+      console.error('Please select a profile and enter a job description');
+      return;
     }
-
+    setIsDialogOpen(true)
     setIsGenerating(true)
+    setGenerationStatus('Iniciando geração do currículo...')
+    
+    const newResumeId = v4(); // Generate the ID here
+    setResumeId(newResumeId);
 
     try {
-      const profile = profiles?.find(p => p.id === selectedProfile)
+      const profile = profiles?.find(p => p.id === selectedProfile);
       if (!profile) {
-        throw new Error('Selected profile not found')
+        throw new Error('Selected profile not found');
       }
-
-      if (selectedPrompt === 0) {
-
-        const resumeId = v4();
+  
+      let attempts = 0;
+      const maxAttempts = 7; 
+  
+      do {
         try {
-          const { completion } = await generateATSResume(inputText, profile)
-          const resume = {
-            id: resumeId,
-            markdownContent: completion,
-          } as ResumeType
-          try {
-            await addResume(resumeId, resume);
-            router.push(`/resume-render?resumeId=${resumeId}`);
-          } catch (error) {
-            console.error('Error generating resume:', error)
-          } finally {
-            setIsGenerating(false)
+          setGenerationStatus(`Tentativa ${attempts + 1} de ${maxAttempts}...`)
+          const {completion} = await generateATSResumeJSON(inputText, profile);
+          setGenerationStatus('Validando currículo gerado...');
+          const trimmedCompletion = trimToJSON(completion);
+          console.log(resumeId);
+
+          if (validateCompletion(trimmedCompletion)) {
+            const resume = {
+              id: newResumeId, // Use the generated ID
+              contentJSON: trimmedCompletion,
+            } as ResumeType;
+            setGenerationStatus('Currículo gerado com sucesso!');
+            await addResume(newResumeId, resume); // Use the generated ID
+            setIsGenerationComplete(true)
+            return;
+          } else {
+            setGenerationStatus('Currículo inválido, tentando gerar novamente...');
           }
         } catch (error) {
-          console.error('Error generating resume:', error)
-        } finally {
-          setIsGenerating(false)
+          console.error('Error generating resume:', error);
+          setGenerationStatus('Erro ao gerar currículo, tentando novamente...');
         }
-      } else if (selectedPrompt === 1) {
-        const { completion } = await generateTraditionalResume(inputText, profile)
-        console.log('Generated Resume:', completion)
-      } else if (selectedPrompt === 2) {
-        const { completion } = await generateCoverLetter(inputText, profile)
-        console.log('Generated Cover Letter:', completion)
-      }
-
+        attempts++;
+      } while (attempts < maxAttempts);
+  
+      setGenerationError(true)
+      setGenerationStatus('Ops, não foi possível gerar seu currículo. Tente novamente mais tarde.');
     } catch (error) {
-      console.error('Error generating resume:', error)
+      console.error('Erro ao gerar currículo:', error);
+      setGenerationError(true)
+      setGenerationStatus('Erro ao gerar currículo. Por favor, tente novamente.');
     } finally {
       setIsGenerating(false)
-
     }
   }
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false)
+    setIsGenerationComplete(false)
+    setGenerationError(false)
+    setGenerationStatus('')
+  }
+
   return (
     <div className="flex-1 flex flex-col">
       <div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
@@ -138,6 +152,7 @@ function GenerateResumePage() {
                 )}
                 onClick={() => setSelectedPrompt(index)}
                 disabled={ index !== 0}
+                autoFocus={index === 0}
               >
                 <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
                   {index === 0 && <FileCode2 className="h-4 w-4 text-purple-600" />}
@@ -214,6 +229,30 @@ function GenerateResumePage() {
         isOpen={isProfileWizardOpen} 
         onClose={handleProfileWizardClose}
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md bg-white">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            {isGenerating && (
+              <Loader2 className="h-16 w-16 text-primary animate-spin" />
+            )}
+            {isGenerationComplete && (
+              <Sparkles className="h-16 w-16 text-primary" />
+            )}
+            <p className="text-center">{generationStatus}</p>
+          </div>
+          <DialogFooter>
+            {generationError && (
+              <Button onClick={handleCloseDialog}>Fechar</Button>
+            )}
+            {isGenerationComplete && (
+              <Button onClick={() => router.push(`/resume-render?resumeId=${resumeId}`)}>
+                Ver Currículo
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
     )
   }
