@@ -67,7 +67,7 @@ type ProfileWizardComponentProps = {
 export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizardComponentProps) {
   const [step, setStep] = useState(1)
   const [profile, setProfile] = useState<ProfileType>(initialState)
-
+  const [suggesting, setSuggesting] = useState<boolean>(false)
   const totalSteps = 6
 
   const { user } = useAuth();
@@ -108,9 +108,24 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
       ...prev,
       sections: {
         ...prev.sections,
-        [section]: { value },
+        [section]: value,
       },
     }))
+  }
+
+  const handleSuggestedKeywords = async (value: string) => {
+    setSuggesting(true)
+    const { completion } = await generateKeywords(value)
+    if (completion) {
+      setProfile(prev => ({
+        ...prev,
+        sections: {
+          ...prev.sections,
+          keywords: completion,
+        },
+      }))
+    }
+    setSuggesting(false)
   }
 
   const handleProfileNameChange = (value: string) => {
@@ -143,9 +158,9 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
                 onChange={(e) => handleInputChange('keywords', e.target.value)}
                 required
               />
-              <Button variant="ai" onClick={() => generateKeywords(profile.profileName)}>
+              <Button disabled={suggesting} variant="ai" onClick={() => handleSuggestedKeywords(profile.profileName)}>
                 Sugerir
-                <Sparkles className="w-4 h-4 ml-2" />
+                <Sparkles className={`w-4 h-4 ml-2 ${suggesting ? 'animate-spin' : ''}`} />
               </Button>
             </div>
           </div>

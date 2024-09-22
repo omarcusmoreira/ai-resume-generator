@@ -12,9 +12,11 @@ import logo from '../public/assets/images/logo_quadrado.ico';
 import UserMenu from '@/components/UserMenu/page';
 import { useEffect, useState } from 'react';
 import { UserDataType } from '@/types/users';
-import { getUser } from '@/services/userServices';
-import { getLatestPlanHistory } from '@/services/planHistoryService';
+import { getUserData } from '@/services/userServices';
+import { getCurrentPlanHistory } from '@/services/planHistoryService';
 import { PlanHistory } from '@/types/planHistory';
+import { useAuth } from '@/context/AuthContext'; // Import useAuth
+import { Progress } from '@/components/ui/progress';
 
 export default function RootLayout({
   children,
@@ -35,18 +37,50 @@ export default function RootLayout({
 function LayoutWithAuth({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [userData, setUserData] = useState<UserDataType | null>(null);
-  const [planHistory, setPlanHistory] = useState<PlanHistory| null>(null);
+  const [planHistory, setPlanHistory] = useState<PlanHistory | null>(null);
+  const { user, loading } = useAuth();
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const user = await getUser();
-      const fetchedLatestPlanHistory = await getLatestPlanHistory();
+      if (user) {
+        try {
+          const [fetchedUser, fetchedLatestPlanHistory] = await Promise.all([
+            getUserData(),
+            getCurrentPlanHistory()
+          ]);
 
-      setUserData(user);
-      setPlanHistory(fetchedLatestPlanHistory);
+          setUserData(fetchedUser);
+          setPlanHistory(fetchedLatestPlanHistory);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        } finally {
+          setIsDataLoaded(true);
+        }
+      } else if (!loading) {
+        setIsDataLoaded(true);
+      }
     };
+
     fetchData();
-  }, []);
+  }, [user, loading]);
+
+  const [progress, setProgress] = useState(17)
+ 
+  useEffect(() => {
+    const timer = setTimeout(() => setProgress(82), 100)
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (loading || !isDataLoaded) {
+
+    return (
+    <div className='flex flex-col items-center justify-center h-screen'>
+      <span className='text-sm text-gray-500 mb-4'>LOADING LAYOUT...</span>
+      <Progress  value={progress} className='w-1/3 h-1' />
+    </div>
+  );
+}
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -60,7 +94,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
         {children}
         
         {/* Floating bottom navbar for mobile */}
-        {pathname !== '/auth-page' && pathname !== '/landing-page' && (
+        {pathname !== '/auth-page' && pathname !== '/landing-page' && userData && planHistory && (
           <nav className="z-50 md:hidden fixed bottom-4 left-4 right-4 bg-pink-50 border-2 border-purple-200 rounded-full shadow-lg p-2 flex justify-around items-center">
             <Link href="/generate-resume" passHref>
               <Button variant="ghost" size="icon" className="w-8 h-8">
@@ -79,7 +113,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
               <LayoutDashboard className="h-5 w-5 text-gray-500" />
             </Button>
             <div className="w-10 h-10 flex items-center justify-center">
-              <UserMenu profilePicture={userData?.personalInfo.profilePicture || ''} userName={userData?.personalInfo.name || ''} plan={planHistory?.plan || ''} />
+              <UserMenu/>
             </div>
           </nav>
         )}

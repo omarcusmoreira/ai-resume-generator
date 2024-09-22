@@ -5,49 +5,40 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Save, Upload } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { getUser, updateUser } from '@/services/userServices';
+import { getUserData, updateUser } from '@/services/userServices';
 import { PersonalInfoType, UserDataType } from '@/types/users';
 
 export default function UserInfo() {
   const [isSaving, setIsSaving] = useState(false);
-  const [userData, setUserData] = useState<UserDataType | null>(null);
+  const [userData, setUserData] = useState<UserDataType>();
 
   useEffect(() => {
     const fetchData = async () => {
-      const userData = await getUser();
-      setPersonalInfo(userData?.personalInfo || null);
-      setUserData(userData);
+      const userData = await getUserData();
+      if (userData) {
+        setUserData(userData);
+      }
     };
     fetchData();
   }, []);
-
-  const [personalInfo, setPersonalInfo] = useState<PersonalInfoType | null>(null);
-
-  const updatedUser: UserDataType = {
-    ...userData,
-    personalInfo: personalInfo || { name: '', email: '' },
-    userId: userData?.userId || ''
-  };
-
-  // if (loading) {
-  //   return <div>Loading...</div>;
-  // }
 
   const handlePictureUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        updateUser({
-          ...userData,
-          userId: userData?.userId || '', // Provide a default empty string
+        if (userData) {
+          setUserData({
+            ...userData,
+          userId: userData.userId, 
           personalInfo: {
-            ...personalInfo,
-            name: personalInfo?.name || '',
-            email: personalInfo?.email || '',
+            ...userData.personalInfo,
+            name: userData.personalInfo.name,
+            email: userData.personalInfo.email,
             profilePicture: reader.result as string
-          }
-        });
+            }
+          });
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -55,32 +46,43 @@ export default function UserInfo() {
 
   const handleSavePersonalInfo = async () => {
     setIsSaving(true);
-    console.log("Saving personal info:", personalInfo);
-    await updateUser(updatedUser); 
+    console.log("Saving personal info:", userData);
+    if (userData) {
+      await updateUser(userData); 
+    }
     setIsSaving(false);
   };
 
   const handleChange = (key: keyof PersonalInfoType, value: string) => {
-    setPersonalInfo({
-      ...personalInfo,
-      [key]: value || '',
-    } as PersonalInfoType);
+    if (userData) {
+      setUserData({
+        ...userData,
+      personalInfo: {
+        ...userData.personalInfo,
+        [key]: value,
+      },
+      });
+    }
   };
+
+  if (!userData) {
+    return <div>Loading User Data...</div>;
+  } 
 
   return (
     <div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
       <Card className="w-full max-w-3xl p-4 md:p-6">
         <CardHeader>
-          <CardTitle className="text-2xl text-heading">Personal Information</CardTitle>
+          <CardTitle className="text-2xl text-heading">Informações Pessoais</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2 flex items-center justify-center mb-4">
               <div className="relative">
                 <Avatar className="w-32 h-32">
-                  <AvatarImage src={personalInfo?.profilePicture || ''} alt="Profile picture" />
+                  <AvatarImage src={userData?.personalInfo?.profilePicture || ''} alt="Profile picture" />
                   <AvatarFallback>
-                    {personalInfo?.profilePicture ? '' : 'Upload'}
+                    {userData?.personalInfo?.profilePicture ? '' : 'Upload'}
                   </AvatarFallback>
                 </Avatar>
                 <label htmlFor="picture-upload" className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer">
@@ -99,7 +101,7 @@ export default function UserInfo() {
               key="name"
               label="Name"
               id="name"
-              value={personalInfo?.name || ''}
+              value={userData?.personalInfo?.name || ''}
               placeholder="Enter your name"
               onChange={(e) => handleChange('name', e.target.value)}
             />
@@ -107,7 +109,7 @@ export default function UserInfo() {
               key="email"
               label="Email"
               id="email"
-              value={personalInfo?.email || ''}
+              value={userData?.personalInfo?.email || ''}
               placeholder="Enter your email"
               onChange={(e) => handleChange('email', e.target.value)}
               disabled
@@ -116,7 +118,7 @@ export default function UserInfo() {
               key="cpf"
               label="CPF"
               id="cpf"
-              value={personalInfo?.cpf || ''}
+              value={userData?.personalInfo?.cpf || ''}
               placeholder="Enter your CPF"
               type="text"
               onChange={(e) => handleChange('cpf', e.target.value)}
@@ -126,7 +128,7 @@ export default function UserInfo() {
               key="phone"
               label="Phone Number"
               id="phoneNumber"
-              value={personalInfo?.phone || ''}
+              value={userData?.personalInfo?.phone || ''}
               placeholder="Enter your phone number"
               onChange={(e) => handleChange('phone', e.target.value)}
             />
@@ -134,7 +136,7 @@ export default function UserInfo() {
               key="birthDate"
               label="Birth Date"
               id="birthDate"
-              value={personalInfo?.birthDate || ''}
+              value={userData?.personalInfo?.birthDate || ''}
               placeholder="Enter your birth date"
               type="date"
               onChange={(e) => handleChange('birthDate', e.target.value)}
@@ -143,7 +145,7 @@ export default function UserInfo() {
               key="linkedinURL"
               label="LinkedIn"
               id="linkedin"
-              value={personalInfo?.linkedinURL || ''}
+              value={userData?.personalInfo?.linkedinURL || ''}
               placeholder="Enter your LinkedIn URL"
               type="text"
               onChange={(e) => handleChange('linkedinURL', e.target.value)}
@@ -152,7 +154,7 @@ export default function UserInfo() {
               key="city"
               label="City"
               id="city"
-              value={personalInfo?.city || '' }
+              value={userData?.personalInfo?.city || '' }
               placeholder="Enter your city"
               type="text"
               onChange={(e) => handleChange('city', e.target.value)}    
@@ -162,7 +164,7 @@ export default function UserInfo() {
         <CardFooter className="flex justify-end">
           <Button onClick={handleSavePersonalInfo} className="text-button text-white" disabled={isSaving}>
             <Save className="mr-2 h-4 w-4" />
-            {isSaving ? "Saving..." : "Save Personal Info"}
+            {isSaving ? "Salvando..." : "Salvar"}
           </Button>
         </CardFooter>
       </Card>

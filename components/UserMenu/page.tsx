@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,15 +9,36 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
-import { CreditCard, LogOut, Settings, Sparkles, HeartHandshake, Crown, Bug } from 'lucide-react'
+import { CreditCard, LogOut, Settings, Sparkles, Crown, Bug } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { signOut } from 'firebase/auth'
 import { auth } from '@/firebaseConfig'
 import Link from 'next/link'
 import AvatarPlaceholder from '@/public/avatar_placeholder.png'
+import Image from 'next/image'
+import Logo from '@/public/assets/images/logo_horizontal.png';
+import { UserDataType } from '@/types/users'
+import { PlanHistory } from '@/types'
+import { getUserData } from '@/services/userServices'
+import { getCurrentPlanHistory } from '@/services/planHistoryService'
 
-export default function UserMenu({profilePicture, userName, plan}: {profilePicture: string, userName: string, plan: string}) {
+export default function UserMenu() {
     const router = useRouter();
+    const [userData, setUserData] = useState<UserDataType>();
+    const [planHistory, setPlanHistory] = useState<PlanHistory>();
+
+    useEffect(() => {
+      const fetchUserData = async () => {
+        const fetchedPlanHistory = await getCurrentPlanHistory();  
+        const fetchedUserData = await getUserData();
+        if (fetchedUserData && fetchedPlanHistory) {
+          setUserData(fetchedUserData);
+          setPlanHistory(fetchedPlanHistory);
+        }
+      }
+      fetchUserData();
+    }, []);
+
 
     const handleLogout = async () => {
         try {
@@ -33,26 +54,17 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
         <Avatar className="h-6 w-6 cursor-pointer hover:opacity-80 transition-opacity rounded-full">
-          {profilePicture ?  (
+          {userData?.personalInfo.profilePicture ?  (
             <AvatarImage
-              src={profilePicture}
+              src={userData.personalInfo.profilePicture}
               alt="User Profile"
-              className={`h-6 w-6 rounded-full ${
-                plan === 'free' ? 'border-2 border-gray-800' :
-                plan === 'premium' ? 'border-2 border-pink-700' :
-                plan === 'pro' ? 'border-2 border-purple-700' :
-                  'border-2 border-black'
-              }`}
+              className={`h-6 w-6 rounded-full`}
           />
           ) : (
             <AvatarImage
             src={AvatarPlaceholder.src}
             alt="User Profile"
-            className={`h-6 w-6 rounded-full mb-2 ${
-                plan === 'pro' ? 'border-2 border-purple-500' :
-                plan === 'premium' ? 'border-2 border-pink-500' :
-                'border-2 border-purple-500'
-              }`}
+            className={`h-6 w-6 rounded-full mb-2` }
             />
           )}
 			</Avatar>
@@ -62,7 +74,7 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
         <DropdownMenuLabel>
           <div className="flex items-center justify-between">
             <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-              {plan}
+              {planHistory?.plan || '...'}
             </span>
             <Link href='/user-info'>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -72,7 +84,7 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
             </Link>
           </div>
           <p className="text-sm text-foreground mt-1">
-            {userName}
+            {userData?.personalInfo.name}
           </p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -105,8 +117,7 @@ export default function UserMenu({profilePicture, userName, plan}: {profilePictu
         <DropdownMenuSeparator />
         <div className="p-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground">MeContrata.Ai</p>
-            <HeartHandshake className="h-4 w-4 text-muted-foreground" />
+            <Image src={Logo} alt="MeContrata.Ai" width={100} height={100} className="h-4"/>
           </div>
         </div>
       </DropdownMenuContent>

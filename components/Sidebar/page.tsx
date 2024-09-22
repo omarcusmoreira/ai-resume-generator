@@ -7,27 +7,11 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 import Image from "next/image";
 import logo from '../../public/assets/images/logo_quadrado.ico'
-import { getUser } from "@/services/userServices";
-import { useEffect, useState } from "react";
-import { UserDataType } from "@/types/users";
-import { getLatestPlanHistory } from "@/services/planHistoryService";
-import { PlanHistory } from "@/types/planHistory";
 
 const Sidebar = () => {
     const pathname = usePathname();
     const router = useRouter();
-    const [user, setUser] = useState<UserDataType | null>(null);
-    const [latestPlanHistory, setLatestPlanHistory] = useState<PlanHistory | null>(null);
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            const fetchedUser = await getUser();
-            const fetchedLatestPlanHistory = await getLatestPlanHistory();
-            setUser(fetchedUser);
-            setLatestPlanHistory(fetchedLatestPlanHistory);
-        };
-        fetchUser();
-    }, []);
 
 
     const handleLogout = async () => {
@@ -67,7 +51,8 @@ const Sidebar = () => {
                     <p className="text-gray-300">.....</p>
                 </Button>
             </div>
-            <UserMenu profilePicture={user?.personalInfo.profilePicture || ''} userName={user?.personalInfo.name || ''} plan={latestPlanHistory?.plan || ''} />
+            <UserMenu />
+
         </div>
     )
 }

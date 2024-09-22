@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { FileCode2, Images, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
 import { Card } from '@/components/ui/card'
@@ -11,36 +11,50 @@ import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
 import { generateATSResume, generateTraditionalResume, generateCoverLetter } from '@/hooks/useAi'
 import { useRouter } from 'next/navigation'
 import { v4 } from 'uuid'
-import { getUser } from '@/services/userServices'
+import { getUserData } from '@/services/userServices'
 import { getProfiles } from '@/services/profileServices'
 import { UserDataType } from '@/types/users'
 import { ProfileType } from '@/types/profiles'
 import { ResumeType } from '@/types/resumes'
 import { addResume } from '@/services/resumeServices'
+import { Progress } from '@/components/ui/progress'
 
-export default function GenerateResumePage() {
-  const [userData, setUserData] = useState<UserDataType | null>(null)
-  const [profiles, setProfiles] = useState<ProfileType[] | null>(null)
+export default function GenerateResumePagePage() {
+  return (
+    
+    <Suspense fallback={<Progress className="w-full" />}>
+      <GenerateResumePage />
+    </Suspense>
+  )
+}
+
+function GenerateResumePage() {
+
+  const [userData, setUserData] = useState<UserDataType>()
+  const [profiles, setProfiles] = useState<ProfileType[]>()
   const [inputText, setInputText] = useState('')
-  const [selectedPrompt, setSelectedPrompt] = useState<number | null>(null)
+  const [selectedPrompt, setSelectedPrompt] = useState<number>()
   const [isProfileWizardOpen, setIsProfileWizardOpen] = useState(false)
-  const [selectedProfile, setSelectedProfile] = useState<string | null>(null)
+  const [selectedProfile, setSelectedProfile] = useState<string>()
   const [isGenerating, setIsGenerating] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     const fetchData = async () => {
-      const fetchedUser = await getUser();
+      const fetchedUser = await getUserData();
       const fetchedProfiles = await getProfiles();
-
-      setUserData(fetchedUser);
-      setProfiles(fetchedProfiles);
+      if (fetchedUser) {
+        setUserData(fetchedUser);
+      }
+      if (fetchedProfiles) {
+        setProfiles(fetchedProfiles);
+      }  
     };
     fetchData();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputText(e.target.value.slice(0, 1000)) // Limit to 1000 characters
+    setInputText(e.target.value.slice(0, 1000)) 
   }
 
   const handleProfileWizardClose = () => {
@@ -105,7 +119,6 @@ export default function GenerateResumePage() {
 
     }
   }
-
   return (
     <div className="flex-1 flex flex-col">
       <div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
@@ -202,5 +215,5 @@ export default function GenerateResumePage() {
         onClose={handleProfileWizardClose}
       />
     </div>
-  )
-}
+    )
+  }

@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress"
 import remarkGfm from 'remark-gfm'
 import { ResumeType } from '@/types/resumes'
 import { PersonalInfoType } from '@/types/users'
-import { getUser } from '@/services/userServices'
+import { getUserData } from '@/services/userServices'
 import { getResume, updateResume } from '@/services/resumeServices'
 
 function ResumeContent() {
@@ -26,7 +26,7 @@ function ResumeContent() {
   
   useEffect(() => {
     const fetchData = async () => {
-      const userData = await getUser()
+      const userData = await getUserData()
       const resume = await getResume(resumeId)
       setPersonalInfo(userData?.personalInfo || null)
       setResume(resume)

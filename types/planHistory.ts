@@ -1,17 +1,17 @@
-enum PlanType {
+enum PlanTypeEnum {
   FREE = 'free',
   BASIC = 'basic',
   PREMIUM = 'premium'
 }
  
-enum PlanChangeType { 
+enum PlanChangeTypeEnum { 
   NEW = 'new',  
   UPGRADE = 'upgrade',
   DOWNGRADE = 'downgrade',
   RENEWAL = 'renewal'
 }
 
-export { PlanChangeType, PlanType };
+export { PlanChangeTypeEnum, PlanTypeEnum };
 
 import { Timestamp } from "firebase/firestore";
 
@@ -22,20 +22,20 @@ export type QuotasType = {
     opportunities: number;
   };
   
-  const PlanQuotas: { [key in PlanType]: QuotasType } = {
-    [PlanType.FREE]: {
+  const PlanQuotas: { [key in PlanTypeEnum]: QuotasType } = {
+    [PlanTypeEnum.FREE]: {
       interactions: 10,
       profiles: 1,
       resumes: 1,
       opportunities: 0,
     },
-    [PlanType.BASIC]: {
+    [PlanTypeEnum.BASIC]: {
       interactions: 50,
       profiles: 3,
       resumes: 5,
       opportunities: 20,
     },
-    [PlanType.PREMIUM]: {
+    [PlanTypeEnum.PREMIUM]: {
       interactions: 100,
       profiles: 5,
       resumes: 10,
@@ -44,13 +44,15 @@ export type QuotasType = {
   };
 
   export type PlanHistoryData = {
-    plan: PlanType;
-    changeType: PlanChangeType;
+    id: string;
+    plan: PlanTypeEnum;
+    changeType: PlanChangeTypeEnum;
     amountPaid: number;
   };
 
 export class PlanHistory implements PlanHistoryData {
-  plan: PlanType;
+  id: string;
+  plan: PlanTypeEnum;
   quotas: {
     interactions: number,
     profiles: number,
@@ -58,14 +60,19 @@ export class PlanHistory implements PlanHistoryData {
     opportunities: number
   };
   planChangeDate: Timestamp;
-  changeType: PlanChangeType;
+  expirationDate: Timestamp;
+  changeType: PlanChangeTypeEnum;
   amountPaid: number;
   
   constructor(data: PlanHistoryData) {
+    this.id = data.id;
     this.plan = data.plan;
     this.changeType = data.changeType;
-    this.planChangeDate = Timestamp.now();  
-    this.quotas = PlanQuotas[this.plan];
     this.amountPaid = data.amountPaid;
+    this.planChangeDate = Timestamp.now(); 
+
+    const expiration = new Date();
+    expiration.setDate(expiration.getDate() + 30);
+    this.expirationDate = Timestamp.fromDate(expiration);    this.quotas = PlanQuotas[this.plan];
   }
 }

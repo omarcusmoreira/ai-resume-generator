@@ -36,8 +36,9 @@ import { PersonalInfoType, UserDataType } from '@/types/users'
 import { addUser } from '@/services/userServices'
 import { addPlanHistory } from '@/services/planHistoryService'
 import { GoogleIcon } from '@/components/ui/google-icon'
-import { PlanChangeType, PlanHistory, PlanType } from '@/types/planHistory'
+import { PlanChangeTypeEnum, PlanHistory, PlanTypeEnum } from '@/types/planHistory'
 import { v4 } from 'uuid'
+
 export default function AuthPage() {
   // State Variables for Login
   const [loginEmail, setLoginEmail] = useState('')
@@ -55,10 +56,9 @@ export default function AuthPage() {
 
   const router = useRouter()
 
-  // Handle Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoginError('') // Reset error state
+    setLoginError('')
 
     if (!loginEmail || !loginPassword) {
       setLoginError('Por favor, preencha todos os campos.')
@@ -120,20 +120,14 @@ export default function AuthPage() {
       // Save AppState to Firestore and localStorage
       await addUser(initialUserData)
       const planHistoryId = v4()
-      const planHistoryInstance = new PlanHistory({
-        plan: PlanType.FREE,
-        changeType: PlanChangeType.NEW,
+      const planHistory = new PlanHistory({
+        id: planHistoryId,
+        plan: PlanTypeEnum.FREE,
+        changeType: PlanChangeTypeEnum.NEW,
         amountPaid: 0,
       })
 
-      const planHistoryObject: PlanHistory   = {
-        plan: planHistoryInstance.plan,
-        changeType: planHistoryInstance.changeType,
-        planChangeDate: planHistoryInstance.planChangeDate,
-        quotas: planHistoryInstance.quotas,
-        amountPaid: planHistoryInstance.amountPaid
-      }
-      await addPlanHistory(planHistoryId, planHistoryObject)
+      await addPlanHistory(planHistoryId, planHistory)
 
       router.push('/')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -149,9 +143,12 @@ export default function AuthPage() {
     try {
       const result = await signInWithPopup(auth, provider)
       const user = result.user
+      if (!user.displayName || !user.email) {
+        throw new Error('Nome ou e-mail não disponíveis')
+      }
       const personalInfo: PersonalInfoType = {
-          name: user.displayName || '',
-          email: user.email || '',
+          name: user.displayName ,
+          email: user.email,
       }
       const userState: UserDataType = {
         userId: user.uid,

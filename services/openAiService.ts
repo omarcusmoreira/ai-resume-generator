@@ -35,7 +35,7 @@ class OpenAiService {
     }
   }
 
-  async generateChatCompletion(messages: Array<{ role: string, content: string }>, model: string = 'gpt-4o-mini') {
+  async generateChatCompletion(messages: Array<{ role: string, content: string }>, model: string = 'gpt-3.5-turbo') {
     try {
       const response = await axios.post(
         `${this.baseUrl}/chat/completions`,

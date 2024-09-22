@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,54 +11,12 @@ import { Plus, Pencil, Check, X, Link as LinkIcon, Trash2 } from 'lucide-react'
 import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
 import { useRouter } from 'next/navigation'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { Skeleton } from "@/components/ui/skeleton"
 import { PersonalInfoType } from '@/types/users'
 import { ProfileSectionType, ProfileType } from '@/types/profiles'
-import { getUser } from '@/services/userServices'
+import { getUserData } from '@/services/userServices'
 import { deleteProfile, getProfiles, updateProfile } from '@/services/profileServices'
 
-function SkeletonLoader() {
-  return (
-    <div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
-      <Card className="w-full max-w-3xl p-4 md:p-6">
-        <div className="space-y-6">
-          <Skeleton className="h-8 w-1/3" />
-          <div className="flex space-x-2">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-10 w-24" />
-            ))}
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <Skeleton className="h-24 w-24 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-4 w-64" />
-                <Skeleton className="h-4 w-32" />
-              </div>
-            </div>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="space-y-2">
-                <Skeleton className="h-5 w-1/4" />
-                <Skeleton className="h-20 w-full" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </Card>
-    </div>
-  )
-}
-
-export default function ProfileManagerPage() {
-  return (
-    <Suspense fallback={<SkeletonLoader />}>
-      <ProfileManagement />
-    </Suspense>
-  )
-}
-
-function ProfileManagement() {
+export default function ProfileManagement() {
   const router = useRouter()
   const [personalInfo, setPersonalInfo] = useState<PersonalInfoType | null>(null)
   const [profiles, setProfiles] = useState<ProfileType[]>([])
@@ -78,7 +36,7 @@ function ProfileManagement() {
 
   useEffect(() => {
     const fetchData = async () => { 
-      const fetchedUser = await getUser()
+      const fetchedUser = await getUserData()
       const fetchedProfiles = await getProfiles()
       setPersonalInfo(fetchedUser?.personalInfo || null)
       setProfiles(fetchedProfiles)
@@ -140,8 +98,8 @@ function ProfileManagement() {
     }
   }
 
-  if (!personalInfo || profiles.length === 0) {
-    return <div>Loading...</div>
+  if (!personalInfo) {
+    return <div>Loading profiles...</div>
   }
 
   return (
@@ -149,6 +107,11 @@ function ProfileManagement() {
       <Card className="w-full max-w-3xl p-4 md:p-6">
     <div className="container mx-auto p-4 space-y-6">
       <h1 className="text-3xl font-bold mb-6">Página de Perfis</h1>
+      { profiles.length === 0 ? (
+        <div className="flex justify-center items-center">
+          <p className="text-lg text-muted-foreground">Nenhum perfil encontrado. Clique no botão abaixo para adicionar um novo perfil.</p>
+        </div>
+      ) : (
       <Tabs value={activeProfile} onValueChange={setActiveProfile} className="w-full">
         <div className="flex justify-between items-center mb-4">
           <TabsList>
@@ -271,6 +234,7 @@ function ProfileManagement() {
           </TabsContent>
         ))}
       </Tabs>
+      )}
     </div>
     </Card>
     <ProfileWizardComponent 
