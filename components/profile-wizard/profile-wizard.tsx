@@ -5,23 +5,24 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ProfileType } from '@/types'
 import { useAuth } from '@/context/AuthContext'
-import { useFirestore} from '@/hooks/useFirestore'
 import { Sparkles } from 'lucide-react'
 import { DialogDescription } from '@radix-ui/react-dialog'
 import { v4 } from 'uuid'
+import { ProfileType } from '@/types/profiles'
+import { addProfile } from '@/services/profileServices'
+import { generateKeywords } from '@/hooks/useAi'
  
 const initialState: ProfileType = {
   id: '',
   profileName: '',
   sections: {
-    academicBackground: { content: '', aiEnhanced: '' },
-    keywords: { content: '', aiEnhanced: '' },
-    summary: { content: '', aiEnhanced: '' },
-    professionalExperience: { content: '', aiEnhanced: '' },
-    idioms: { content: '', aiEnhanced: '' },
-    extraCurricular: { content: '', aiEnhanced: '' },
+    academicBackground: '',
+    keywords: '',
+    summary: '',
+    professionalExperience: '',
+    idioms: '',
+    extraCurricular: '',
   },
 }
 
@@ -71,8 +72,6 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
 
   const { user } = useAuth();
 
-  const { addProfile } = useFirestore();
-
   const handleNext = () => {
     if (isStepValid() && step < totalSteps) {
       setStep(step + 1)
@@ -82,17 +81,17 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
   const isStepValid = () => {
     switch (step) {
       case 1:
-        return profile.profileName.trim() !== '' && profile.sections.keywords.content.trim() !== ''
+        return profile.profileName.trim() !== '' && profile.sections.keywords.trim() !== ''
       case 2:
-        return profile.sections.summary.content.trim() !== ''
+        return profile.sections.summary.trim() !== ''
       case 3:
-        return profile.sections.professionalExperience.content.trim() !== ''
+        return profile.sections.professionalExperience.trim() !== ''
       case 4:
-        return profile.sections.academicBackground.content.trim() !== ''
+        return profile.sections.academicBackground.trim() !== ''
       case 5:
-        return profile.sections.idioms.content.trim() !== ''
+        return profile.sections.idioms.trim() !== ''
       case 6:
-        return profile.sections.extraCurricular.content.trim() !== ''
+        return true
       default:
         return true
     }
@@ -109,25 +108,13 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
       ...prev,
       sections: {
         ...prev.sections,
-        [section]: { ...prev.sections[section], content: value },
+        [section]: { value },
       },
     }))
   }
 
   const handleProfileNameChange = (value: string) => {
     setProfile(prev => ({ ...prev, profileName: value }))
-  }
-
-  const handleAIEnhance = (section: keyof ProfileType['sections']) => {
-    // Simulating AI enhancement (replace with actual AI call)
-    const enhancedContent = `AI enhanced: ${profile.sections[section].content}`
-    setProfile(prev => ({
-      ...prev,
-      sections: {
-        ...prev.sections,
-        [section]: { ...prev.sections[section], aiEnhanced: enhancedContent },
-      },
-    }))
   }
 
   const handleFinish = () => {
@@ -152,11 +139,11 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
             <div className="flex space-x-2">
               <Input
                 placeholder="Palavras-chave"
-                value={profile.sections.keywords.content}
+                value={profile.sections.keywords}
                 onChange={(e) => handleInputChange('keywords', e.target.value)}
                 required
               />
-              <Button variant="ai" onClick={() => handleAIEnhance('keywords')}>
+              <Button variant="ai" onClick={() => generateKeywords(profile.profileName)}>
                 Sugerir
                 <Sparkles className="w-4 h-4 ml-2" />
               </Button>
@@ -167,7 +154,7 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
         return (
           <Textarea
             placeholder={stepsData[2].placeholder}
-            value={profile.sections.summary.content}
+            value={profile.sections.summary}
             onChange={(e) => handleInputChange('summary', e.target.value)}
             required
           />
@@ -176,7 +163,7 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
         return (
           <Textarea
             placeholder={stepsData[3].placeholder}
-            value={profile.sections.professionalExperience.content}
+            value={profile.sections.professionalExperience}
             onChange={(e) => handleInputChange('professionalExperience', e.target.value)}
             required
           />
@@ -185,7 +172,7 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
         return (
           <Textarea
             placeholder={stepsData[4].placeholder}
-            value={profile.sections.academicBackground.content}
+            value={profile.sections.academicBackground}
             onChange={(e) => handleInputChange('academicBackground', e.target.value)}
             required
           />
@@ -194,7 +181,7 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
         return (
           <Textarea
             placeholder={stepsData[5].placeholder}
-            value={profile.sections.idioms.content}
+            value={profile.sections.idioms}
             onChange={(e) => handleInputChange('idioms', e.target.value)}
             required
           />
@@ -203,7 +190,7 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
         return (
           <Textarea
             placeholder={stepsData[6].placeholder}
-            value={profile.sections.extraCurricular.content}
+            value={profile.sections.extraCurricular}
             onChange={(e) => handleInputChange('extraCurricular', e.target.value)}
             required
           />
@@ -213,12 +200,12 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Review Your Profile</h3>
             <p>Profile Name: {profile.profileName}</p>
-            <p>Keywords: {profile.sections.keywords.content}</p>
-            <p>Summary: {profile.sections.summary.content}</p>
-            <p>Professional Experience: {profile.sections.professionalExperience.content}</p>
-            <p>Academic Background: {profile.sections.academicBackground.content}</p>
-            <p>Idioms: {profile.sections.idioms.content}</p>
-            <p>Extracurricular/Certifications: {profile.sections.extraCurricular.content}</p>
+            <p>Keywords: {profile.sections.keywords}</p>
+            <p>Summary: {profile.sections.summary}</p>
+            <p>Professional Experience: {profile.sections.professionalExperience}</p>
+            <p>Academic Background: {profile.sections.academicBackground}</p>
+            <p>Idioms: {profile.sections.idioms}</p>
+            <p>Extracurricular/Certifications: {profile.sections.extraCurricular}</p>
           </div>
         )
       default:

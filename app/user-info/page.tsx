@@ -4,41 +4,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Save, Upload } from "lucide-react";
-import { useFirestore } from '@/hooks/useFirestore';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { PersonalInfoType } from '@/types';
+import { getUser, updateUser } from '@/services/userServices';
+import { PersonalInfoType, UserDataType } from '@/types/users';
 
 export default function UserInfo() {
-  const { appState, loading, updateUser } = useFirestore();
   const [isSaving, setIsSaving] = useState(false);
+  const [userData, setUserData] = useState<UserDataType | null>(null);
 
   useEffect(() => {
-    if (appState) {
-      setPersonalInfo(appState.userType.personalInfo);
-    }
-  }, [appState]);
+    const fetchData = async () => {
+      const userData = await getUser();
+      setPersonalInfo(userData?.personalInfo || null);
+      setUserData(userData);
+    };
+    fetchData();
+  }, []);
 
-  const [personalInfo, setPersonalInfo] = useState<PersonalInfoType>({
-    name: '',
-    email: '',
-    cpf: '',
-    phone: '',
-    birthDate: '',
-    linkedinURL: '',
-    profilePicture: '',
-    city: ''
-  });
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfoType | null>(null);
 
-  const updatedUser = {
-    ...appState?.userType,
-    personalInfo: personalInfo
-  }
-  
+  const updatedUser: UserDataType = {
+    ...userData,
+    personalInfo: personalInfo || { name: '', email: '' },
+    userId: userData?.userId || ''
+  };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-  console.log(appState);
+  // if (loading) {
+  //   return <div>Loading...</div>;
+  // }
 
   const handlePictureUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -46,9 +39,12 @@ export default function UserInfo() {
       const reader = new FileReader();
       reader.onloadend = () => {
         updateUser({
-          ...appState?.userType,
+          ...userData,
+          userId: userData?.userId || '', // Provide a default empty string
           personalInfo: {
-            ...appState?.userType.personalInfo,
+            ...personalInfo,
+            name: personalInfo?.name || '',
+            email: personalInfo?.email || '',
             profilePicture: reader.result as string
           }
         });
@@ -65,11 +61,10 @@ export default function UserInfo() {
   };
 
   const handleChange = (key: keyof PersonalInfoType, value: string) => {
-    console.log("Changing personal info:", key, value);
     setPersonalInfo({
       ...personalInfo,
-      [key]: value,
-    });
+      [key]: value || '',
+    } as PersonalInfoType);
   };
 
   return (
@@ -83,9 +78,9 @@ export default function UserInfo() {
             <div className="md:col-span-2 flex items-center justify-center mb-4">
               <div className="relative">
                 <Avatar className="w-32 h-32">
-                  <AvatarImage src={personalInfo.profilePicture} alt="Profile picture" />
+                  <AvatarImage src={personalInfo?.profilePicture || ''} alt="Profile picture" />
                   <AvatarFallback>
-                    {personalInfo.profilePicture ? '' : 'Upload'}
+                    {personalInfo?.profilePicture ? '' : 'Upload'}
                   </AvatarFallback>
                 </Avatar>
                 <label htmlFor="picture-upload" className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer">
@@ -104,7 +99,7 @@ export default function UserInfo() {
               key="name"
               label="Name"
               id="name"
-              value={personalInfo.name}
+              value={personalInfo?.name || ''}
               placeholder="Enter your name"
               onChange={(e) => handleChange('name', e.target.value)}
             />
@@ -112,7 +107,7 @@ export default function UserInfo() {
               key="email"
               label="Email"
               id="email"
-              value={personalInfo.email}
+              value={personalInfo?.email || ''}
               placeholder="Enter your email"
               onChange={(e) => handleChange('email', e.target.value)}
               disabled
@@ -121,7 +116,7 @@ export default function UserInfo() {
               key="cpf"
               label="CPF"
               id="cpf"
-              value={personalInfo.cpf}
+              value={personalInfo?.cpf || ''}
               placeholder="Enter your CPF"
               type="text"
               onChange={(e) => handleChange('cpf', e.target.value)}
@@ -131,7 +126,7 @@ export default function UserInfo() {
               key="phone"
               label="Phone Number"
               id="phoneNumber"
-              value={personalInfo.phone}
+              value={personalInfo?.phone || ''}
               placeholder="Enter your phone number"
               onChange={(e) => handleChange('phone', e.target.value)}
             />
@@ -139,7 +134,7 @@ export default function UserInfo() {
               key="birthDate"
               label="Birth Date"
               id="birthDate"
-              value={personalInfo.birthDate}
+              value={personalInfo?.birthDate || ''}
               placeholder="Enter your birth date"
               type="date"
               onChange={(e) => handleChange('birthDate', e.target.value)}
@@ -148,7 +143,7 @@ export default function UserInfo() {
               key="linkedinURL"
               label="LinkedIn"
               id="linkedin"
-              value={personalInfo.linkedinURL}
+              value={personalInfo?.linkedinURL || ''}
               placeholder="Enter your LinkedIn URL"
               type="text"
               onChange={(e) => handleChange('linkedinURL', e.target.value)}
@@ -157,7 +152,7 @@ export default function UserInfo() {
               key="city"
               label="City"
               id="city"
-              value={personalInfo.city}
+              value={personalInfo?.city || '' }
               placeholder="Enter your city"
               type="text"
               onChange={(e) => handleChange('city', e.target.value)}    

@@ -8,29 +8,33 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import ReactMarkdown from 'react-markdown'
 import { Edit2, Share2, Download, Trash2 } from 'lucide-react'
 import Image from 'next/image'
-import { PersonalInfoType } from '@/types'
-import { useFirestore } from '@/hooks/useFirestore'
 import { useSearchParams } from 'next/navigation'
 import { Progress } from "@/components/ui/progress"
 import remarkGfm from 'remark-gfm'
+import { ResumeType } from '@/types/resumes'
+import { PersonalInfoType } from '@/types/users'
+import { getUser } from '@/services/userServices'
+import { getResume, updateResume } from '@/services/resumeServices'
 
 function ResumeContent() {
-  const { appState, updateResume } = useFirestore();
   const resumeId = useSearchParams().get('resumeId') as string
-  const resume = appState?.resumes.find(r => r.id === resumeId)
-
-  useEffect(() => {
-    setPersonalInfo(appState?.userType.personalInfo)
-  }, [appState])
-
-  useEffect(() => {
-    setResumeContent(resume?.markdownContent || '')
-  }, [resume])
-
-  const [personalInfo, setPersonalInfo] = useState<PersonalInfoType>(appState?.userType.personalInfo || null)
+  const [resume, setResume] = useState<ResumeType | null>(null)
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfoType | null>(null)
   const [resumeContent, setResumeContent] = useState<string>(resume?.markdownContent || '')
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      const userData = await getUser()
+      const resume = await getResume(resumeId)
+      setPersonalInfo(userData?.personalInfo || null)
+      setResume(resume)
+      setResumeContent(resume?.markdownContent || '')
+    }
+    fetchData() 
+  }, [resumeId])
+
 
   const handleEdit = () => {
     setIsEditing(true)
@@ -39,16 +43,12 @@ function ResumeContent() {
   const handleSave = useCallback(async () => {
     setIsEditing(false)
     setResumeContent(resumeContent) 
-    const resume = appState?.resumes[0]
     if (!resume) {
       throw new Error('Selected resume not found')
     } else {
       await updateResume(resumeId, { markdownContent: resumeContent })
     }
-    // Here you would typically save the changes to your backend
-    console.log('Saving changes...')
-    //eslint-disable-next-line
-  }, [resumeContent, resumeId, appState])
+  }, [resumeContent, resumeId, resume])
 
   const handleShare = () => {
     // Implement share functionality

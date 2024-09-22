@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Timestamp } from 'firebase/firestore'
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -11,8 +10,6 @@ import {
   signInWithPopup,
 } from 'firebase/auth'
 import { auth } from '@/firebaseConfig'
-
-import { useFirestore } from '@/hooks/useFirestore'
 
 import {
   Card,
@@ -35,23 +32,12 @@ import { Mail, Lock, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import logoHorizontal from '../../public/assets/images/logo_horizontal.png'
-import { AdminInfoType, PersonalInfoType, UserDataType } from '@/types'
-
-const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={props.width}
-    height={props.height}
-    viewBox="0 0 48 48"
-    {...props}
-  >
-    <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
-    <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
-    <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
-    <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
-  </svg>
-)
-
+import { PersonalInfoType, UserDataType } from '@/types/users'
+import { addUser } from '@/services/userServices'
+import { addPlanHistory } from '@/services/planHistoryService'
+import { GoogleIcon } from '@/components/ui/google-icon'
+import { PlanChangeType, PlanHistory, PlanType } from '@/types/planHistory'
+import { v4 } from 'uuid'
 export default function AuthPage() {
   // State Variables for Login
   const [loginEmail, setLoginEmail] = useState('')
@@ -68,8 +54,6 @@ export default function AuthPage() {
   const [rememberMe, setRememberMe] = useState(false)
 
   const router = useRouter()
-
-  const { saveUser } = useFirestore()
 
   // Handle Login
   const handleLogin = async (e: React.FormEvent) => {
@@ -121,35 +105,35 @@ export default function AuthPage() {
 
       console.log('Sign-up successful')
 
-      // Initialize AdminInfo without 'plan'
-      const adminInfo: AdminInfoType = {
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-        plan: 'free',
-      }
-
       // Initialize PersonalInfo without 'cpf'
-      const personalInfo: PersonalInfoType = {
+      const initialPersonalInfo: PersonalInfoType = {
         name: signupName,
-        birthDate: '',
-        linkedinURL: '',
         email: signupEmail,
-        phone: '',
-        city: '',
-        profilePicture: '',
-        cpf: '',
-      }
+        }
 
       // Initialize UserState
-      const userState: UserDataType = {
+      const initialUserData: UserDataType = {
         userId: user.uid,
-        adminInfo: adminInfo,
-        personalInfo: personalInfo,
+        personalInfo: initialPersonalInfo,
       }
 
-      console.log('newAppState', user)
       // Save AppState to Firestore and localStorage
-      await saveUser(userState)
+      await addUser(initialUserData)
+      const planHistoryId = v4()
+      const planHistoryInstance = new PlanHistory({
+        plan: PlanType.FREE,
+        changeType: PlanChangeType.NEW,
+        amountPaid: 0,
+      })
+
+      const planHistoryObject: PlanHistory   = {
+        plan: planHistoryInstance.plan,
+        changeType: planHistoryInstance.changeType,
+        planChangeDate: planHistoryInstance.planChangeDate,
+        quotas: planHistoryInstance.quotas,
+        amountPaid: planHistoryInstance.amountPaid
+      }
+      await addPlanHistory(planHistoryId, planHistoryObject)
 
       router.push('/')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -165,45 +149,19 @@ export default function AuthPage() {
     try {
       const result = await signInWithPopup(auth, provider)
       const user = result.user
-
-      console.log('Google sign-in successful')
-
-
-        // Initialize AdminInfo
-        const adminInfo: AdminInfoType = {
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now(),
-          plan: 'free',
-        }
-
-        // Initialize PersonalInfo
-        const personalInfo: PersonalInfoType = {
+      const personalInfo: PersonalInfoType = {
           name: user.displayName || '',
-          birthDate: '',
-          linkedinURL: '',
           email: user.email || '',
-          phone: '',
-          city: '',
-          profilePicture: user.photoURL || '',
-          cpf: '',
-        }
-
-        // Initialize UserState
-        const userState: UserDataType = {
-          userId: user.uid,
-          adminInfo: adminInfo,
-          personalInfo: personalInfo,
-        }
-
-        // Save to Firestore
-        await saveUser(userState)
-
-
+      }
+      const userState: UserDataType = {
+        userId: user.uid,
+        personalInfo: personalInfo,
+      }
+      await addUser(userState)
       router.push('/')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Google sign-in error', error)
-      // Optionally, set an error state to display to the user
     }
   }
 

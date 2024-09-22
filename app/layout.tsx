@@ -10,7 +10,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../public/assets/images/logo_quadrado.ico';
 import UserMenu from '@/components/UserMenu/page';
-import { useFirestore } from '@/hooks/useFirestore';
+import { useEffect, useState } from 'react';
+import { UserDataType } from '@/types/users';
+import { getUser } from '@/services/userServices';
+import { getLatestPlanHistory } from '@/services/planHistoryService';
+import { PlanHistory } from '@/types/planHistory';
 
 export default function RootLayout({
   children,
@@ -28,10 +32,21 @@ export default function RootLayout({
   );
 }
 
-
 function LayoutWithAuth({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { appState } = useFirestore();
+  const [userData, setUserData] = useState<UserDataType | null>(null);
+  const [planHistory, setPlanHistory] = useState<PlanHistory| null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const user = await getUser();
+      const fetchedLatestPlanHistory = await getLatestPlanHistory();
+
+      setUserData(user);
+      setPlanHistory(fetchedLatestPlanHistory);
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -64,7 +79,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
               <LayoutDashboard className="h-5 w-5 text-gray-500" />
             </Button>
             <div className="w-10 h-10 flex items-center justify-center">
-              <UserMenu profilePicture={appState?.userType.personalInfo.profilePicture} userName={appState?.userType.personalInfo.name} plan={appState?.userType.adminInfo.plan} />
+              <UserMenu profilePicture={userData?.personalInfo.profilePicture || ''} userName={userData?.personalInfo.name || ''} plan={planHistory?.plan || ''} />
             </div>
           </nav>
         )}

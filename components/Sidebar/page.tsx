@@ -1,18 +1,34 @@
 import { FileText, LayoutDashboard, PlusSquare, Settings, Users } from "lucide-react";
 import { Button } from "../ui/button";
 import { usePathname, useRouter } from "next/navigation";
-import { useFirestore } from "@/hooks/useFirestore";
 import Link from "next/link";
 import UserMenu from "../UserMenu/page";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 import Image from "next/image";
 import logo from '../../public/assets/images/logo_quadrado.ico'
+import { getUser } from "@/services/userServices";
+import { useEffect, useState } from "react";
+import { UserDataType } from "@/types/users";
+import { getLatestPlanHistory } from "@/services/planHistoryService";
+import { PlanHistory } from "@/types/planHistory";
 
 const Sidebar = () => {
     const pathname = usePathname();
-    const { loading, error, appState } = useFirestore();
     const router = useRouter();
+    const [user, setUser] = useState<UserDataType | null>(null);
+    const [latestPlanHistory, setLatestPlanHistory] = useState<PlanHistory | null>(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const fetchedUser = await getUser();
+            const fetchedLatestPlanHistory = await getLatestPlanHistory();
+            setUser(fetchedUser);
+            setLatestPlanHistory(fetchedLatestPlanHistory);
+        };
+        fetchUser();
+    }, []);
+
 
     const handleLogout = async () => {
         try {
@@ -23,14 +39,6 @@ const Sidebar = () => {
             console.error('Error signing out:', error);
         }
     };
-
-    if (loading) {
-        return <div className="w-64 bg-white shadow-md">Loading...</div>;
-    }
-
-    if (error) {
-        return <div className="w-64 bg-white shadow-md">Error: {error}</div>;
-    }
 
     return (
         <div className="h-full flex flex-col items-center justify-between py-4" >
@@ -59,7 +67,7 @@ const Sidebar = () => {
                     <p className="text-gray-300">.....</p>
                 </Button>
             </div>
-            <UserMenu profilePicture={appState?.userType.personalInfo.profilePicture} userName={appState?.userType.personalInfo.name} plan={appState?.userType.adminInfo.plan} />
+            <UserMenu profilePicture={user?.personalInfo.profilePicture || ''} userName={user?.personalInfo.name || ''} plan={latestPlanHistory?.plan || ''} />
         </div>
     )
 }

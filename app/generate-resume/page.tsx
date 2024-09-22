@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { FileCode2, Images, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
-import { useFirestore } from '@/hooks/useFirestore'
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
@@ -11,11 +10,17 @@ import { cn } from "@/lib/utils"
 import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
 import { generateATSResume, generateTraditionalResume, generateCoverLetter } from '@/hooks/useAi'
 import { useRouter } from 'next/navigation'
-import { ResumeType } from '@/types'
 import { v4 } from 'uuid'
+import { getUser } from '@/services/userServices'
+import { getProfiles } from '@/services/profileServices'
+import { UserDataType } from '@/types/users'
+import { ProfileType } from '@/types/profiles'
+import { ResumeType } from '@/types/resumes'
+import { addResume } from '@/services/resumeServices'
 
 export default function GenerateResumePage() {
-  const { appState, loading, error, addResume, refreshProfiles } = useFirestore()
+  const [userData, setUserData] = useState<UserDataType | null>(null)
+  const [profiles, setProfiles] = useState<ProfileType[] | null>(null)
   const [inputText, setInputText] = useState('')
   const [selectedPrompt, setSelectedPrompt] = useState<number | null>(null)
   const [isProfileWizardOpen, setIsProfileWizardOpen] = useState(false)
@@ -23,13 +28,16 @@ export default function GenerateResumePage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const router = useRouter()
 
-  if (loading) {
-    return <div className="p-8">Loading...</div>
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      const fetchedUser = await getUser();
+      const fetchedProfiles = await getProfiles();
 
-  if (error) {
-    return <div className="p-8 text-red-500">Error: {error}</div>
-  }
+      setUserData(fetchedUser);
+      setProfiles(fetchedProfiles);
+    };
+    fetchData();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputText(e.target.value.slice(0, 1000)) // Limit to 1000 characters
@@ -37,7 +45,6 @@ export default function GenerateResumePage() {
 
   const handleProfileWizardClose = () => {
     setIsProfileWizardOpen(false)
-    refreshProfiles()
   }
 
   const prompts = [
@@ -56,7 +63,7 @@ export default function GenerateResumePage() {
     setIsGenerating(true)
 
     try {
-      const profile = appState?.profiles?.find(p => p.id === selectedProfile)
+      const profile = profiles?.find(p => p.id === selectedProfile)
       if (!profile) {
         throw new Error('Selected profile not found')
       }
@@ -65,14 +72,13 @@ export default function GenerateResumePage() {
 
         const resumeId = v4();
         try {
-          const { completion } = await generateATSResume(inputText, profile, appState?.userType.personalInfo)
+          const { completion } = await generateATSResume(inputText, profile)
           const resume = {
             id: resumeId,
             markdownContent: completion,
           } as ResumeType
           try {
-            await addResume(resumeId, resume, profile.profileName);
-            console.log('added resume to firestore from generate-resume.tsx')
+            await addResume(resumeId, resume);
             router.push(`/resume-render?resumeId=${resumeId}`);
           } catch (error) {
             console.error('Error generating resume:', error)
@@ -85,10 +91,10 @@ export default function GenerateResumePage() {
           setIsGenerating(false)
         }
       } else if (selectedPrompt === 1) {
-        const { completion } = await generateTraditionalResume(inputText, profile, appState?.userType.personalInfo)
+        const { completion } = await generateTraditionalResume(inputText, profile)
         console.log('Generated Resume:', completion)
       } else if (selectedPrompt === 2) {
-        const { completion } = await generateCoverLetter(inputText, profile, appState?.userType.personalInfo)
+        const { completion } = await generateCoverLetter(inputText, profile)
         console.log('Generated Cover Letter:', completion)
       }
 
@@ -100,13 +106,11 @@ export default function GenerateResumePage() {
     }
   }
 
-  console.log('appState?.profiles', appState?.profiles)
-
   return (
     <div className="flex-1 flex flex-col">
       <div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
         <Card className="w-full max-w-3xl p-4 md:p-6">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Olá, <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 inline-block text-transparent bg-clip-text">{appState?.userType.personalInfo.name || 'Usuário'}</span></h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Olá, <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 inline-block text-transparent bg-clip-text">{userData?.personalInfo.name || 'Usuário'}</span></h1>
           <h2 className="text-xl md:text-2xl font-semibold mb-4">Vamos criar seu currículo?</h2>
           <p className="text-gray-500 mb-6 md:mb-8">Escolha um dos prompts abaixo, selecione um perfil desejado e cole a descrição do cargo para criar seu currículo.</p>
 
@@ -148,7 +152,7 @@ export default function GenerateResumePage() {
                   <SelectValue placeholder="Escolha um perfil" />
                 </SelectTrigger>
                 <SelectContent> 
-                  {appState?.profiles?.map((profile, index) => (
+                  {profiles?.map((profile, index) => (
                     profile.id ? (
                       <SelectItem key={index} value={profile.id}>
                         {profile.profileName || `Profile ${index + 1}`}

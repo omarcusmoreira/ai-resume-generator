@@ -6,16 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Plus, Pencil, Check, X, Link as LinkIcon, Trash2 } from 'lucide-react'
-import { PersonalInfoType, ProfileSectionType, ProfileType } from '@/types'
-import { useFirestore } from '@/hooks/useFirestore'
 import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
 import { useRouter } from 'next/navigation'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Skeleton } from "@/components/ui/skeleton"
+import { PersonalInfoType } from '@/types/users'
+import { ProfileSectionType, ProfileType } from '@/types/profiles'
+import { getUser } from '@/services/userServices'
+import { deleteProfile, getProfiles, updateProfile } from '@/services/profileServices'
 
 function SkeletonLoader() {
   return (
@@ -60,7 +60,6 @@ export default function ProfileManagerPage() {
 
 function ProfileManagement() {
   const router = useRouter()
-  const { appState, updateProfile, deleteProfile } = useFirestore()
   const [personalInfo, setPersonalInfo] = useState<PersonalInfoType | null>(null)
   const [profiles, setProfiles] = useState<ProfileType[]>([])
   const [activeProfile, setActiveProfile] = useState<string>('')
@@ -78,22 +77,25 @@ function ProfileManagement() {
   }
 
   useEffect(() => {
-    if (appState) {
-      setPersonalInfo(appState.userType.personalInfo)
-      setProfiles(appState.profiles)
-      if (appState.profiles.length > 0) {
-        setActiveProfile(appState.profiles[0].id)
+    const fetchData = async () => { 
+      const fetchedUser = await getUser()
+      const fetchedProfiles = await getProfiles()
+      setPersonalInfo(fetchedUser?.personalInfo || null)
+      setProfiles(fetchedProfiles)
+      if (fetchedProfiles.length > 0) {
+        setActiveProfile(fetchedProfiles[0].id)
       }
     }
-  }, [appState])
+    fetchData() 
+  }, []);
 
   const handleSectionChange = (profileId: string, sectionKey: keyof ProfileSectionType, content: string) => {
     setLocalProfileChanges(prev => {
       if (!prev) {
         const profile = profiles.find(p => p.id === profileId)!;
-        return { ...profile, sections: { ...profile.sections, [sectionKey]: { ...profile.sections[sectionKey], content } } };
+        return { ...profile, sections: { ...profile.sections, [sectionKey]: content } };
       }
-      return { ...prev, sections: { ...prev.sections, [sectionKey]: { ...prev.sections[sectionKey], content } } };
+      return { ...prev, sections: { ...prev.sections, [sectionKey]: content }};
     });
   };
 
@@ -116,47 +118,6 @@ function ProfileManagement() {
   const cancelProfileChanges = () => {
     setLocalProfileChanges(null)
     setEditingSection(null)
-  }
-
-  const addKeyword = async (profileId: string, keyword: string) => {
-    const updatedProfile = profiles.map(profile => 
-      profile.id === profileId
-        ? { 
-            ...profile, 
-            sections: { 
-              ...profile.sections, 
-              keywords: { 
-                ...profile.sections.keywords, 
-                content: profile.sections.keywords.content + (profile.sections.keywords.content ? ", " : "") + keyword
-              } 
-            } 
-          }
-        : profile
-    )
-    setProfiles(updatedProfile)
-    await updateProfile(updatedProfile.find(profile => profile.id === profileId)!)
-  }
-
-  const removeKeyword = async (profileId: string, keywordToRemove: string) => {
-    const updatedProfile = profiles.map(profile => 
-      profile.id === profileId
-        ? { 
-            ...profile, 
-            sections: { 
-              ...profile.sections, 
-              keywords: { 
-                ...profile.sections.keywords, 
-                content: profile.sections.keywords.content
-                  .split(', ')
-                  .filter(keyword => keyword !== keywordToRemove)
-                  .join(', ')
-              } 
-            } 
-          }
-        : profile
-    )
-    setProfiles(updatedProfile)
-    await updateProfile(updatedProfile.find(profile => profile.id === profileId)!)
   }
 
   const handleAddProfile = () => {
@@ -267,64 +228,23 @@ function ProfileManagement() {
                       </div>
                       {editingSection === key ? (
                         <Textarea
-                          value={localProfileChanges?.sections[key as keyof ProfileSectionType]?.content || section.content}
+                          value={localProfileChanges?.sections[key as keyof ProfileSectionType] || section}
                           onChange={(e) => handleSectionChange(profile.id, key as keyof ProfileSectionType, e.target.value)}
                           onBlur={saveProfileChanges}
                           rows={5}
                           className="w-full"
                         />
                       ) : (
-                        <p className="whitespace-pre-line">{section.content}</p>
+                        <p className="whitespace-pre-line">{section}</p>
                       )}
-                      {section.aiEnhanced && (
+                      {section && (
                         <div className="mt-2 p-2 bg-blue-50 rounded">
-                          <p className="text-sm text-blue-800">AI Enhanced: {section.aiEnhanced}</p>
+                          <p className="text-sm text-blue-800">AI Enhanced: {section}</p>
                         </div>
                       )}
                     </div>
                   );
                 })}
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">Keywords</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {profile.sections.keywords.content.split(', ').filter(Boolean).map((keyword) => (
-                      <Badge key={keyword} variant="secondary" className="text-sm">
-                        {keyword}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="ml-2 h-auto p-0"
-                          onClick={() => removeKeyword(profile.id, keyword)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </Badge>
-                    ))}
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Plus className="h-4 w-4 mr-2" /> Add Keyword
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px] bg-white">
-                        <DialogHeader>
-                          <DialogTitle>Add Keyword</DialogTitle>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <Input
-                            placeholder="Enter keyword"
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter') {
-                                addKeyword(profile.id, (e.target as HTMLInputElement).value)
-                                ;(e.target as HTMLInputElement).value = ''
-                              }
-                            }}
-                          />
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </div>
               </CardContent>
               <div className="absolute bottom-4 right-4">
                 <AlertDialog>
