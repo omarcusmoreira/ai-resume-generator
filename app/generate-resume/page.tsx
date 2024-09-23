@@ -24,6 +24,7 @@ import { trimToJSON } from '../utils/trimToJSON'
 import { AlertCircle } from "lucide-react"
 import { generateCoverLetter } from '@/aiPrompts/generateCoverLetter'
 import CoverLetterDialog from '@/components/CoverLetterDialog/page'
+import { generateLinkedinBio } from '@/aiPrompts/generateLinkedinBio'
 
 export default function GenerateResumePage() {
 
@@ -173,6 +174,24 @@ export default function GenerateResumePage() {
     }
   } 
 
+  const handleGenerateLinkedinBio = async () => {
+    if (!selectedProfile) {
+      console.error('Please select a profile');
+      return;
+    }
+    setIsGenerating(true)
+    const profile = profiles?.find(p => p.id === selectedProfile);
+    if (!profile) {
+      throw new Error('Selected profile not found');
+    }
+    setIsGenerating(true)
+    const { completion } = await generateLinkedinBio(profile)
+    console.log(completion);
+    setIsGenerating(false)
+    setCoverLetterCompletion(completion)
+    setIsCoverLetterDialogOpen(true)
+  } 
+
   const handleCloseDialog = () => {
     setIsDialogOpen(false)
     setIsGenerationComplete(false)
@@ -219,7 +238,7 @@ export default function GenerateResumePage() {
             <Button 
               variant="ai" 
               className="rounded-full bg-primary text-primary-foreground"
-              onClick={selectedPrompt === 2 ? handleGenerateCoverLetter :  handleGenerateResume}
+              onClick={selectedPrompt === 2 ? handleGenerateCoverLetter : selectedPrompt === 3 ? handleGenerateLinkedinBio : handleGenerateResume}
               disabled={isGenerating || !selectedProfile || selectedPrompt === 1 && !inputText}
             >
               {isGenerating ? (
@@ -227,7 +246,7 @@ export default function GenerateResumePage() {
               ) : (
                 <Sparkles className="h-4 w-4 md:mr-2" />
               )}
-              <span className="hidden md:block">{selectedPrompt === 2 ? 'Gerar Carta de Apresentação' : 'Gerar Currículo'}</span>
+              <span className="hidden md:block">{selectedPrompt === 2 ? 'Gerar Carta de Apresentação' : selectedPrompt === 3 ? 'Gerar Biografia' : 'Gerar Currículo'}</span>
             </Button>
           </div>
 
@@ -241,7 +260,6 @@ export default function GenerateResumePage() {
                   selectedPrompt === index && "border-2 border-purple-500 bg-purple-100"
                 )}
                 onClick={() => setSelectedPrompt(index)}
-                disabled={index === 3}
                 autoFocus={index === 0}
               >
                 <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center shrink-0">

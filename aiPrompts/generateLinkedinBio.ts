@@ -1,16 +1,17 @@
 import OpenAiService from "@/services/openAiService";
 import { ProfileType } from "@/types/profiles";
-import { UserDataType } from "@/types/users";
 
 const openAiService = new OpenAiService();
 
-export async function generateCoverLetter(jobDescription: string, profile: ProfileType, user: UserDataType) {
-    const systemPrompt = `Você é um recrutador sênior encarregado de gerar uma carta de apresentações para o usuário baseados nas informações pessoais e no perfil fornecidos. 
-    Use as informações fornecidas para criar uma carta de apresentações atrativa, SEMPRE RESPONDENDO EM PORTUGUÊS.`;
+export async function generateLinkedinBio(profile: ProfileType) {
+    const systemPrompt = `Você é um recrutador sênior encarregado de gerar uma biografia para o LinkedIn do usuário baseados no perfil fornecido. 
+    Use as informações fornecidas para criar uma biografia atrativa, SEMPRE RESPONDENDO EM PORTUGUÊS.`;
   
     const userPrompt = `
     IMPORTANTE: NÃO RETORNE NENHUM OUTRO TEXTO ALEM DA CARTA DE APRESENTAÇÕES. SEMPRE RESPONDA EM PORTUGUÊS.
-    Use a seguinte descrição do emprego PRETENDIDO: "${jobDescription}" e use as informações do perfil para gerar a minha carta de apresentações:
+    Use as informações do meu perfil para gerar uma biografia criativa e cativante para meu LinkedIn. Use uma linguagem informal e criativa em no MAXIMO 2000 caracteres.
+    E retorne com espaçamento e quebras de linha que fique bem legível no meu perfil do LinkedIn.
+    Aqui estão algumas informações:
   
     Use ${profile.sections.summary} para gerar a introdução.
 
@@ -20,12 +21,10 @@ export async function generateCoverLetter(jobDescription: string, profile: Profi
   
     Use ${profile.sections.idioms} para conhecer os idiomas 
 
-      se eu deixar em branco, retorne português e fluência "Nativo".
+      se o usuário não especificou idiomas, retorne português e fluência "Nativo".
   
     Use ${profile.sections.extraCurricular === "" ? "Não há atividades extracurriculares" : profile.sections.extraCurricular} para gerar as atividades extracurriculares: 
-  
-    Use ${user.personalInfo.name} para o meu nome.
-
+      
     IMPORTANTE: 
     - NÃO RETORNE NADA ALÉM DA CARTA.`;
   
