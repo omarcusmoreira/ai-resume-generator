@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { FileCheck, FileCode2, Images, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
+import { FileCheck, FileCode2, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
-import { generateATSResumeJSON } from '@/hooks/useAi'
+import { generateResume } from '@/aiPrompts/generateResume'
+import { generateResumeWithJobDescription } from '@/aiPrompts/generateResumeWithJobDescription'
 import { useRouter } from 'next/navigation'
 import { v4 } from 'uuid'
 import { getUserData } from '@/services/userServices'
@@ -71,14 +72,14 @@ export default function GenerateResumePage() {
   }
 
   const prompts = [
-    'Gerar um currículo para vagas selecionadas por algorítmos de recrutamento.',
-    'Gerar um currículo tradicional para envio direto para recrutadores.',
+    'Gerar um currículo ATS otimizado para algoritmos de recrutamento.',
+    'Gerar um currículo baseado em uma vaga específica.',
     'Escrever uma carta de apresentação para enviar para recrutadores.',
     'Criar Biografia profissional para LinkedIn.'
   ]
 
   const handleGenerateResume = async () => {
-    if (!selectedProfile || !inputText) {
+    if (!selectedProfile || (selectedPrompt === 1 && !inputText)) {
       console.error('Please select a profile and enter a job description');
       return;
     }
@@ -94,14 +95,27 @@ export default function GenerateResumePage() {
       if (!profile) {
         throw new Error('Selected profile not found');
       }
-  
+
       let attempts = 0;
       const maxAttempts = 7; 
-  
+
       do {
         try {
           setGenerationStatus(`Tentativa ${attempts + 1} de ${maxAttempts}...`)
-          const {completion} = await generateATSResumeJSON(inputText, profile);
+          
+          let completion;
+          if (selectedPrompt === 0) {
+            // Call generateATSResumeJSON if the first prompt is selected
+            const result = await generateResume(profile);
+            completion = result.completion;
+          } else if (selectedPrompt === 1) {
+            // Call generateResumeWithJobDescription if the second prompt is selected
+            const result = await generateResumeWithJobDescription(inputText, profile);
+            completion = result.completion;
+          } else {
+            throw new Error('Invalid prompt selected');
+          }
+
           console.log(completion)
           setGenerationStatus('Validando currículo gerado...');
           const trimmedCompletion = trimToJSON(completion);
@@ -152,6 +166,49 @@ export default function GenerateResumePage() {
           <h2 className="text-xl md:text-2xl font-semibold mb-4">Vamos criar seu currículo?</h2>
           <p className="text-gray-500 mb-6 md:mb-8">Escolha um dos prompts abaixo, selecione um perfil desejado e cole a descrição do cargo para criar seu currículo.</p>
 
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <div className="flex items-center">
+              <Select 
+                key={profilesKey}
+                onValueChange={(value) => setSelectedProfile(value)}
+              >
+                <SelectTrigger key={profilesKey}>
+                  <SelectValue placeholder="Escolha um perfil" />
+                </SelectTrigger>
+                <SelectContent> 
+                  {profiles?.map((profile, index) => (
+                    profile.id ? (
+                      <SelectItem key={profile.id} value={profile.id}>
+                        {profile.profileName || `Profile ${index + 1}`}
+                      </SelectItem>
+                    ) : null
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button 
+                variant="outline" 
+                className="ml-4"
+                onClick={() => setIsProfileWizardOpen(true)}
+              >
+                <PlusSquare className="md:mr-2 h-4 w-4" /> 
+                <span className="hidden md:block">Perfil</span>
+              </Button>
+            </div>
+            <Button 
+              variant="ai" 
+              className="rounded-full bg-primary text-primary-foreground"
+              onClick={handleGenerateResume}
+              disabled={isGenerating || !selectedProfile || selectedPrompt === 1 && !inputText}
+            >
+              {isGenerating ? (
+                <span className="animate-spin">✨</span>
+              ) : (
+                <Sparkles className="h-4 w-4 md:mr-2" />
+              )}
+              <span className="hidden md:block">Gerar Currículo</span>
+            </Button>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 md:mb-8">
             {prompts.map((prompt, index) => (
               <Button
@@ -162,7 +219,7 @@ export default function GenerateResumePage() {
                   selectedPrompt === index && "border-2 border-purple-500 bg-purple-100"
                 )}
                 onClick={() => setSelectedPrompt(index)}
-                disabled={ index !== 0}
+                disabled={index !== 0 && index !== 1}
                 autoFocus={index === 0}
               >
                 <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
@@ -176,66 +233,23 @@ export default function GenerateResumePage() {
             ))}
           </div>
 
-          <Button 
-            variant="outline" 
-            className="mb-6 md:mb-8 w-full md:w-auto"
-            onClick={() => setIsProfileWizardOpen(true)}
-          >
-            <PlusSquare className="mr-2 h-4 w-4" /> Perfil
-          </Button>
-
-          <div className="relative">
-            <div className="absolute top-2 right-2 z-10">
-              <Select 
-                key={profilesKey}
-                onValueChange={(value) => setSelectedProfile(value)}
-              >
-                <SelectTrigger key={profilesKey} className="w-auto h-8 px-2 rounded-full bg-primary text-primary-foreground">
-                  <SelectValue placeholder="Escolha um perfil" />
-                </SelectTrigger>
-                <SelectContent> 
-                  {profiles?.map((profile, index) => (
-                    profile.id ? (
-                      <SelectItem key={profile.id} value={profile.id}>
-                        {profile.profileName || `Profile ${index + 1}`}
-                      </SelectItem>
-                    ) : null
-                  ))}
-                </SelectContent>
-              </Select>
+          {selectedPrompt === 1 && (
+            <div className="relative">
+              {inputText === '' && <div className="absolute top-2 left-2 text-sm text-gray-400 pointer-events-none">
+                Cole a descrição da vaga aqui
+              </div>}
+              <Textarea 
+                className="min-h-[100px] pr-24 resize-none pt-10 pl-2 pb-10"
+                value={inputText}
+                onChange={handleInputChange}
+                style={{ height: 'auto', minHeight: '100px' }}
+                rows={Math.max(3, inputText.split('\n').length)}
+              />
+              <div className="absolute bottom-2 left-2 text-xs text-gray-400">
+                {inputText.length}/1000
+              </div>
             </div>
-            {inputText === '' && <div className="absolute top-2 left-2 text-sm text-gray-400 pointer-events-none">
-              Cole a descrição da vaga aqui
-            </div>}
-            <Textarea 
-              className="min-h-[100px] pr-24 resize-none pt-10 pl-2 pb-10"
-              value={inputText}
-              onChange={handleInputChange}
-              style={{ height: 'auto', minHeight: '100px' }}
-              rows={Math.max(3, inputText.split('\n').length)}
-            />
-            <div className="absolute bottom-2 right-2 flex items-center space-x-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Images className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="ai" 
-                size="icon" 
-                className="h-8 w-8 rounded-full bg-primary text-primary-foreground"
-                onClick={handleGenerateResume}
-                disabled={isGenerating || !selectedProfile || !inputText}
-              >
-                {isGenerating ? (
-                  <span className="animate-spin">✨</span>
-                ) : (
-                  <Sparkles className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            <div className="absolute bottom-2 left-2 text-xs text-gray-400">
-              {inputText.length}/1000
-            </div>
-          </div>
+          )}
         </Card>
       </div>
 
@@ -274,5 +288,5 @@ export default function GenerateResumePage() {
         </DialogContent>
       </Dialog>
     </div>
-    )
-  }
+  )
+}

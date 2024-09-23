@@ -3,47 +3,6 @@ import { ProfileType } from "@/types/profiles";
 
 const openAiService = new OpenAiService();
 
-export async function generateATSResume(jobDescription: string, profile: ProfileType) {
-  const systemPrompt = `You are a senior recruiter tasked 
-  with generating a tailored resume in markdown format for the 
-  following job opportunity: "${jobDescription}". 
-  Use the provided information to create a compelling ATS resume.`;
-
-  const userPrompt = `
-  IMPORTANT: DO NOT RETURN ANYTHING ELSE THAN THE RESUME FIELDS IN MARKDOWN FORMAT. NOT EVEN PERSONAL INFORMATION.
-  Read the following job description: "${jobDescription}"
-  and use the following profile information to generate the resume based on the following template:
-
-  ## Resumo de Qualificações  
-  Use 
-  ${profile.sections.keywords} to improve the summary and summarize it into 6 to 7 sentences: ${profile.sections.summary}
-
-  ## Experiência Profissional
-  Use ${profile.sections.keywords} to improve the professional experience 
-  of ${profile.sections.professionalExperience}
-  generating exactly 9 to 13 bullet points of relevant activities and responsibilities for EACH COMPANY. MAKE UP THE RESPONSIBILITIES IF NECESSARY.
-
-  ## Formação Acadêmica
-  ${profile.sections.academicBackground}
-
-  ## Idiomas
-  ${profile.sections.idioms}
-
-  ## Atividades Extracurriculares
-  ${profile.sections.extraCurricular}
-
-  IMPORTANT NOTES: 
-  - Format the resume in markdown, focusing on relevance to the job description. Keep it concise and impactful.
-  - DO NOT RETURN ANYTHING ELSE THAN THE MARKDOWN RESUME and always use the same language of the job description.`;
-
-  const completion = await openAiService.generateChatCompletion([
-    { role: 'system', content: systemPrompt },
-    { role: 'user', content: userPrompt }
-  ]);
-
-  return { completion };
-}
-
 export async function generateATSResumeJSON(jobDescription: string, profile: ProfileType) {
   const systemPrompt = `Você é um recrutador sênior encarregado de gerar partes de um currículo em formato JSON para a seguinte oportunidade de emprego: "${jobDescription}". 
   Use as informações fornecidas para criar um currículo atraente, SEMPRE RESPONDENDO EM PORTUGUÊS.`;
