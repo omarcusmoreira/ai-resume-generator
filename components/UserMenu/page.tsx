@@ -43,8 +43,8 @@ export default function UserMenu() {
     const handleLogout = async () => {
         try {
             await signOut(auth);
+            sessionStorage.clear();
             router.push('/');
-            console.log('User signed out');
         } catch (error) {
             console.error('Error signing out:', error);
         }

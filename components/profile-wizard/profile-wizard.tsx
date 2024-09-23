@@ -26,36 +26,42 @@ const initialState: ProfileType = {
   },
 }
 
-const stepsData: { [key: number]: { title: string; subtitle: string; placeholder: string } } = {
+const stepsData: { [key: number]: { title: string; subtitle: string; placeholder: string, hint: string } } = {
   1: {
     title: 'Nome do perfil', 
     subtitle: 'De um nome para o seu perfil.',
-    placeholder: 'Desenvolvedor Front-end'
+    placeholder: 'Desenvolvedor Front-end',
+    hint: 'Este é o cargo desejado para a sua busca.'
   },
   2: {
     title: 'Resumo de qualificações',
     subtitle: 'Quais são seus pontos fortes e tecnologias que domina?',
-    placeholder: 'Desenvolvedor de software com 5 anos de experiência em front-end, especializado em React e JavaScript. Habilidade comprovada na criação de interfaces de usuário responsivas ...'
+    placeholder: 'Desenvolvedor de software com 5 anos de experiência em front-end, especializado em React e JavaScript. Habilidade comprovada na criação de interfaces de usuário responsivas ...',
+    hint: 'Dica: Descreva suas principais qualificações e experiências.'
   },
   3: {
     title: 'Experiência Profissional',
     subtitle: 'Descreva suas experiências profissionais nas empresas em que trabalhou.',
-    placeholder: 'Empresa XPTO, abril 2020 a atual, desenvolvedor pleno - Atuei com a criação de projetos utilizando React e Node.js, focado na construção de aplicações web escaláveis. Desenvolvi e mantive integrações com APIs REST...',
+    placeholder: 'Desenvolvedor Senior na Empresa XPTO de abril 2020 a atual, desenvolvedor pleno na empresa Technology Solutions...',
+    hint: 'Dica: Liste as empresas e cargos que ocupou, com a data de início e término.'
   },
   4: {
     title: 'Formação Acadêmica', 
     subtitle: 'Descreva sua formação acadêmica e cursos complementares.',
     placeholder: 'Bacharelado em Ciência da Computação pela Universidade Federal de São Paulo (2014-2018). Formação focada em desenvolvimento ...',
+    hint: 'Dica: Liste as instituições de ensino e cursos que realizou, com a data de conclusão.'
   },
   5: {
     title: 'Idiomas', 
     subtitle: 'Quais idiomas você domina?',
     placeholder: 'Inglês fluente (C1) com experiência em ambientes corporativos internacionais e Espanhol intermediário ...',
+    hint: 'Dica: Liste os idiomas que domina, com o nível de fluência.'
   },
   6: {
     title: 'Atividades Complementares/Certificações', 
     subtitle: 'Possui alguma certificação ou atividade complementar?',
     placeholder: 'Certificação PMP (Project Management Professional) pelo PMI, cursos de especialização em gerenciamento ágil de projetos (Scrum e Kanban) ...',
+    hint: 'Dica: Liste as certificações e atividades complementares que possui.'
   }
 }
 
@@ -150,6 +156,7 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
               value={profile.profileName}
               onChange={(e) => handleProfileNameChange(e.target.value)}
               required
+              autoFocus
             />
             <div className="flex space-x-2">
               <Input
@@ -167,61 +174,68 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
         )
       case 2:
         return (
+          <>
           <Textarea
             placeholder={stepsData[2].placeholder}
             value={profile.sections.summary}
             onChange={(e) => handleInputChange('summary', e.target.value)}
             required
+            autoFocus
           />
+          <span className="text-[10px] mt-1 text-gray-500">{stepsData[2].hint}</span>
+          </>
         )
       case 3:
         return (
+          <>
           <Textarea
             placeholder={stepsData[3].placeholder}
             value={profile.sections.professionalExperience}
             onChange={(e) => handleInputChange('professionalExperience', e.target.value)}
             required
-          />
+            autoFocus
+            />
+          <span className="text-[10px] mt-1 text-gray-500">{stepsData[3].hint}</span>
+          </>
         )
       case 4:
         return (
+          <>
           <Textarea
             placeholder={stepsData[4].placeholder}
             value={profile.sections.academicBackground}
             onChange={(e) => handleInputChange('academicBackground', e.target.value)}
             required
+            autoFocus
           />
+            <span className="text-[10px] mt-1 text-gray-500">{stepsData[4].hint}</span>
+          </>
         )
       case 5:
         return (
+          <>
           <Textarea
             placeholder={stepsData[5].placeholder}
             value={profile.sections.idioms}
             onChange={(e) => handleInputChange('idioms', e.target.value)}
             required
+            autoFocus
           />
+          <span className="text-[10px] mt-1 text-gray-500">{stepsData[5].hint}</span>
+          </>
         )
       case 6:
         return (
+          <>
           <Textarea
             placeholder={stepsData[6].placeholder}
             value={profile.sections.extraCurricular}
             onChange={(e) => handleInputChange('extraCurricular', e.target.value)}
             required
+            autoFocus
           />
-        )
-      case 7:
-        return (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Review Your Profile</h3>
-            <p>Profile Name: {profile.profileName}</p>
-            <p>Keywords: {profile.sections.keywords}</p>
-            <p>Summary: {profile.sections.summary}</p>
-            <p>Professional Experience: {profile.sections.professionalExperience}</p>
-            <p>Academic Background: {profile.sections.academicBackground}</p>
-            <p>Idioms: {profile.sections.idioms}</p>
-            <p>Extracurricular/Certifications: {profile.sections.extraCurricular}</p>
-          </div>
+          <span className="text-[10px] mt-1 text-gray-500">{stepsData[6].hint}</span>
+          </>
         )
       default:
         return null
@@ -233,7 +247,7 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
         <DialogContent className="sm:max-w-[425px] bg-white">
           <DialogHeader>
             <DialogTitle>{stepsData[step].title}</DialogTitle>
-            <DialogDescription>{stepsData[step].subtitle}</DialogDescription>
+            <DialogDescription className="pt-2">{stepsData[step].subtitle}</DialogDescription>
           </DialogHeader>
           <div className="py-4">
             {renderStepContent()}

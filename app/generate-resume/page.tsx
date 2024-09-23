@@ -102,6 +102,7 @@ export default function GenerateResumePage() {
         try {
           setGenerationStatus(`Tentativa ${attempts + 1} de ${maxAttempts}...`)
           const {completion} = await generateATSResumeJSON(inputText, profile);
+          console.log(completion)
           setGenerationStatus('Validando currículo gerado...');
           const trimmedCompletion = trimToJSON(completion);
           console.log(resumeId);

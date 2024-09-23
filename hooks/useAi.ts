@@ -65,7 +65,7 @@ export async function generateATSResumeJSON(jobDescription: string, profile: Pro
         "position": 
         "dates": 
         "responsibilities": [
-          "Crie uma lista com pelo menos 5 frases relevantes e atividades e responsabilidades."
+          "Crie uma lista com pelo menos 7 frases relevantes e atividades e responsabilidades."
         ]
       },
       {
@@ -73,7 +73,7 @@ export async function generateATSResumeJSON(jobDescription: string, profile: Pro
         "position": 
         "dates": 
         "responsibilities": [
-          "Crie uma lista com pelo menos 5 frases relevantes e atividades e responsabilidades."
+          "Crie uma lista com pelo menos 7 frases relevantes e atividades e responsabilidades."
         ]
       }
     ]

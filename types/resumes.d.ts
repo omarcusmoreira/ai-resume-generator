@@ -1,5 +1,6 @@
 export type ResumeType = {
     id: string;
+    isAccepted: boolean;
     profileName: string;
     contentJSON: string; 
   };

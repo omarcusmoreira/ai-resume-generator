@@ -1,15 +1,15 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Save, Edit2, Share2, Download, Trash2, MoreVertical } from 'lucide-react'
+import { Save, Edit2, Share2, Download, Trash2, MoreVertical, RotateCcw, Check } from 'lucide-react'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-
+import { useRouter } from 'next/navigation'
 // Client-side only import for html2pdf
 const html2pdf = dynamic(() => import('html2pdf.js'), { ssr: false })
 void html2pdf
@@ -22,11 +22,13 @@ import { getResume, updateResume } from '@/services/resumeServices'
 
 export default function ResumePreviewPage() {
   const resumeId = useSearchParams().get('resumeId') as string
+  const [isAccepted, setIsAccepted] = useState<boolean>(false)
   const [userData, setUserData] = useState<UserDataType>()
   const [resume, setResume] = useState<ResumeType>()
   const [resumeBody, setResumeBody] = useState<ResumeBodyType>()
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const resumeRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   const fetchUserData = async () => {
     const userData = await getUserData()
@@ -92,6 +94,14 @@ export default function ResumePreviewPage() {
     console.log('Excluindo currículo...')
   }
 
+  const handleRegenerate = () => {
+    router.push('/')
+  }
+
+  const handleAccept = () => {
+    setIsAccepted(true)
+  }
+
 //   const updateResumeData = (path: string[], value: string) => {
 //     setResumeData(prevData => {
 //       const newData = JSON.parse(JSON.stringify(prevData))
@@ -133,42 +143,99 @@ export default function ResumePreviewPage() {
     return <span className="text-sm">{fieldValue}</span>
   }
 
-  return (
-    <div className="container mx-auto p-4">
-      <Card className="w-full max-w-4xl mx-auto relative pb-8" ref={resumeRef}>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="flex justify-end">
-              <Button variant="ghost" size="sm" className="flex items-center">
-                <MoreVertical className="h-4 w-4" />
-                <span className="sr-only">Ações</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleSave}>
+  const ActionButtons = () => (
+    <div className="flex w-full flex-wrap justify-between">
+        <div className="flex w-100 flex-wrap gap-2">
+            <Button onClick={handleSave} size="sm" disabled className="bg-purple-500 hover:bg-purple-600 text-white">
                 <Save className="h-4 w-4 mr-2" />
-                <span>Salvar</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleEdit} disabled>
+                <span className="hidden sm:inline">Salvar</span>
+            </Button>
+            <Button onClick={handleEdit} size="sm" disabled className="bg-purple-500 hover:bg-purple-600 text-white">
                 <Edit2 className="h-4 w-4 mr-2" />
-                <span>Editar</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleShare}>
+                <span className="hidden sm:inline">Editar</span>
+            </Button>
+            <Button onClick={handleShare} size="sm" disabled className="bg-purple-500 hover:bg-purple-600 text-white">
                 <Share2 className="h-4 w-4 mr-2" />
-                <span>Compartilhar</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDownloadPDF}>
+                <span className="hidden sm:inline">Compartilhar</span>
+            </Button>
+            <Button onClick={handleDownloadPDF} size="sm" className="bg-purple-500 hover:bg-purple-600 text-white">
                 <Download className="h-4 w-4 mr-2" />
-                <span>Baixar PDF</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDelete}>
-                <Trash2 className="h-4 w-4 mr-2 text-red-500" />
-                <span className="text-red-500">Excluir</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </CardHeader>
-        <CardContent>
+                <span className="hidden sm:inline">Baixar PDF</span>
+            </Button>
+        </div>
+        <Button onClick={handleDelete}  variant="destructive" size="sm">
+            <Trash2 className="h-4 w-4" />
+        </Button>
+    </div>
+  )
+
+  return (
+    <div className="w-full max-w-4xl mx-auto relative pb-8 mt-4">
+      <div className={`p-4 mb-4 rounded-lg ${isAccepted ? 'bg-purple-400' : 'bg-yellow-100'}`}>
+        <div className="flex justify-between items-center mb-2">
+          <h2 className={`font-medium text-lg ${isAccepted ? 'text-white' : 'text-yellow-800'}`}>
+            {isAccepted ?? 'Revise seu currículo abaixo.'}
+          </h2>
+          {isAccepted && (
+            <div className="sm:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-purple-500">
+                    <MoreVertical className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleSave} disabled>
+                    <Save className="h-4 w-4 mr-2" />
+                    <span>Salvar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleEdit} disabled>
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    <span>Editar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleShare} disabled>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    <span>Compartilhar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDownloadPDF}>
+                    <Download className="h-4 w-4 mr-2" />
+                    <span>Baixar PDF</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDelete}>
+                    <Trash2 className="h-4 w-4 mr-2 text-red-500"/>
+                    <span className="text-red-500">Excluir</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+        </div>
+        {!isAccepted && (
+          <p className="text-[12px] mb-4 text-yellow-700">
+            Ao refazer o currículo, sua cota não será afetada.
+          </p>
+        )}
+        <div className="flex flex-wrap gap-2">
+          {!isAccepted ? (
+            <>
+              <Button onClick={handleRegenerate} variant="outline" size="sm" className="bg-white hover:bg-yellow-50">
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Refazer
+              </Button>
+              <Button onClick={handleAccept} size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-white">
+                <Check className="h-4 w-4 mr-2" />
+                Aceitar
+              </Button>
+            </>
+          ) : (
+            <div className="hidden sm:flex sm:flex-wrap sm:gap-2">
+              <ActionButtons />
+            </div>
+          )}
+        </div>
+      </div>
+      <Card className="w-full max-w-4xl mx-auto relative pb-8" ref={resumeRef}>
+        <CardContent className="pt-4">
           <div className="flex items-center mb-6">
             <Image
               src={userData?.personalInfo.profilePicture || ''}
