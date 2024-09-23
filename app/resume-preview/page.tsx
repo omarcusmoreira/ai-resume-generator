@@ -18,7 +18,8 @@ import { getUserData } from '@/services/userServices'
 import { useSearchParams } from 'next/navigation'
 import { UserDataType } from '@/types/users'
 import { ResumeBodyType, ResumeType } from '@/types/resumes'
-import { getResume, updateResume } from '@/services/resumeServices'
+import { deleteResume, getResume, updateResume } from '@/services/resumeServices'
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 
 export default function ResumePreviewPage() {
   const resumeId = useSearchParams().get('resumeId') as string
@@ -26,6 +27,7 @@ export default function ResumePreviewPage() {
   const [userData, setUserData] = useState<UserDataType>()
   const [resume, setResume] = useState<ResumeType>()
   const [resumeBody, setResumeBody] = useState<ResumeBodyType>()
+  const [localResumeBody, setLocalResumeBody] = useState<ResumeBodyType>()
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const resumeRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -44,18 +46,29 @@ export default function ResumePreviewPage() {
     fetchUserData()
   }, [])
 
+  useEffect(() => {
+    setLocalResumeBody(resumeBody)
+  }, [resumeBody])
+
   const handleEdit = () => {
     setIsEditing(true)
   }
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     setIsEditing(false)
-    const resumeData = { ...resume, contentJSON: JSON.stringify(resumeBody) }
+    const resumeData = { ...resume, contentJSON: JSON.stringify(localResumeBody) }
     if (resumeData.contentJSON) {
-      updateResume(resumeId, resumeData)
+      console.log('Updating resume with data:', resumeData)
+      try {
+        const response = await updateResume(resumeId, resumeData)
+        console.log('Update response:', response)
+        setResumeBody(localResumeBody) // Update the main state after successful save
+      } catch (error) {
+        console.error('Error updating resume:', error)
+      }
     }
-    console.log('Salvando alterações...', resumeBody)
-  }, [resumeBody, resumeId, resume])
+    console.log('Salvando alterações...', localResumeBody)
+  }, [localResumeBody, resumeId, resume])
 
   const handleShare = () => {
     // Implement share functionality
@@ -89,9 +102,9 @@ export default function ResumePreviewPage() {
     }
   }
 
-  const handleDelete = () => {
-    // Implement delete functionality
-    console.log('Excluindo currículo...')
+  const handleDelete = async() => {
+    await deleteResume(resumeId)
+    router.push('/')
   }
 
   const handleRegenerate = () => {
@@ -102,40 +115,45 @@ export default function ResumePreviewPage() {
     setIsAccepted(true)
   }
 
-//   const updateResumeData = (path: string[], value: string) => {
-//     setResumeData(prevData => {
-//       const newData = JSON.parse(JSON.stringify(prevData))
-//       let current = newData
-//       for (let i = 0; i < path.length - 1; i++) {
-//         current = current[path[i]]
-//       }
-//       current[path[path.length - 1]] = value
-//       return newData
-//     })
-//   }
+  const updateResumeData = (path: string[], value: string) => {
+    setLocalResumeBody(prevData => {
+      const newData = JSON.parse(JSON.stringify(prevData))
+      let current = newData
+      for (let i = 0; i < path.length - 1; i++) {
+        current = current[path[i]]
+      }
+      current[path[path.length - 1]] = value
+      return newData
+    })
+  }
 
   const EditableField = ({ value, onChange, multiline = false }: { value: string, onChange?: (value: string) => void, multiline?: boolean }) => {
     const [fieldValue, setFieldValue] = useState(value)
 
-    const handleChange = (newValue: string) => {
-      setFieldValue(newValue)
+    const handleBlur = () => {
       if (onChange) {
-        onChange(newValue)
+        onChange(fieldValue)
       }
     }
+
+    useEffect(() => {
+      setFieldValue(value)
+    }, [value])
 
     if (isEditing) {
       return multiline ? (
         <Textarea
           value={fieldValue}
-          onChange={(e) => handleChange(e.target.value)}
+          onChange={(e) => setFieldValue(e.target.value)}
+          onBlur={handleBlur}
           className="w-full p-2 border rounded text-sm"
         />
       ) : (
         <Input
           type="text"
           value={fieldValue}
-          onChange={(e) => handleChange(e.target.value)}
+          onChange={(e) => setFieldValue(e.target.value)}
+          onBlur={handleBlur}
           className="w-full p-2 border rounded text-sm"
         />
       )
@@ -144,28 +162,48 @@ export default function ResumePreviewPage() {
   }
 
   const ActionButtons = () => (
-    <div className="flex w-full justify-between">
-        <div className="flex w-full flex-wrap gap-2">
-            <Button onClick={handleSave} size="sm" disabled className="bg-purple-500 hover:bg-purple-600 text-white">
-                <Save className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Salvar</span>
-            </Button>
-            <Button onClick={handleEdit} size="sm" disabled className="bg-purple-500 hover:bg-purple-600 text-white">
-                <Edit2 className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Editar</span>
-            </Button>
-            <Button onClick={handleShare} size="sm" disabled className="bg-purple-500 hover:bg-purple-600 text-white">
-                <Share2 className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Compartilhar</span>
-            </Button>
-            <Button onClick={handleDownloadPDF} size="sm" className="bg-purple-500 hover:bg-purple-600 text-white">
-                <Download className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Baixar PDF</span>
-            </Button>
-        </div>
-        <Button onClick={handleDelete}  variant="destructive" size="sm">
-            <Trash2 className="h-4 w-4" />
+    <div className="flex w-full justify-between gap-2">
+      <div className="flex gap-2">
+        {isEditing ? (
+          <Button onClick={handleSave} size="sm" className="bg-green-500 hover:bg-green-600 text-white">
+            <Save className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Salvar</span>
+          </Button>):(
+        <Button onClick={handleEdit} size="sm" className="bg-purple-500 hover:bg-purple-600 text-white">
+          <Edit2 className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Editar</span>
         </Button>
+        )}
+        <Button onClick={handleShare} size="sm" disabled className="bg-purple-500 hover:bg-purple-600 text-white">
+          <Share2 className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Compartilhar</span>
+        </Button>
+        <Button onClick={handleDownloadPDF} size="sm" className="bg-purple-500 hover:bg-purple-600 text-white">
+          <Download className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Baixar PDF</span>
+        </Button>
+      </div>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="destructive" size="sm">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent className="bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar o currículo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não poderá ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600 text-white">
+              Apagar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 
@@ -185,15 +223,15 @@ export default function ResumePreviewPage() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleSave} disabled>
+                  <DropdownMenuItem onClick={handleSave} >
                     <Save className="h-4 w-4 mr-2" />
                     <span>Salvar</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleEdit} disabled>
+                  <DropdownMenuItem onClick={handleEdit}>
                     <Edit2 className="h-4 w-4 mr-2" />
                     <span>Editar</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleShare} disabled>
+                  <DropdownMenuItem onClick={handleShare}>
                     <Share2 className="h-4 w-4 mr-2" />
                     <span>Compartilhar</span>
                   </DropdownMenuItem>
@@ -256,27 +294,27 @@ export default function ResumePreviewPage() {
           <div className="prose max-w-none text-sm">
             <h2 className="text-lg font-semibold mb-2">Resumo</h2>
             <EditableField
-              value={resumeBody?.summary || ''}
-            //   onChange={(value) => updateResumeData(['summary'], value)}
+              value={localResumeBody?.summary || ''}
+              onChange={(value) => updateResumeData(['summary'], value)}
               multiline
             />
 
             <h2 className="text-lg font-semibold mb-2 mt-4">Experiência Profissional</h2>
-            {resumeBody?.professionalExperience.map((exp, index) => (
+            {localResumeBody?.professionalExperience.map((exp, index) => (
               <div key={index} className="mb-4">
                 <h3 className="text-base font-medium">
                   <EditableField
                     value={exp.position || ''}
-                    // onChange={(value) => updateResumeData(['professionalExperience', index, 'position'], value)}
+                    onChange={(value) => updateResumeData(['professionalExperience', index.toString(), 'position'], value)}
                   /> na <EditableField
                     value={exp.company || ''}
-                    // onChange={(value) => updateResumeData(['professionalExperience', index, 'company'], value)}
+                    onChange={(value) => updateResumeData(['professionalExperience', index.toString(), 'company'], value)}
                   />
                 </h3>
                 <p className="text-xs text-gray-600">
                   <EditableField
                     value={exp.dates || ''}
-                    // onChange={(value) => updateResumeData(['professionalExperience', index, 'dates'], value)}
+                    onChange={(value) => updateResumeData(['professionalExperience', index.toString(), 'dates'], value)}
                   />
                 </p>
                 <ul className="list-disc pl-5 mt-2">
@@ -284,7 +322,7 @@ export default function ResumePreviewPage() {
                     <li key={respIndex}>
                       <EditableField
                         value={resp}
-                        // onChange={(value) => updateResumeData(['professionalExperience', index, 'responsibilities', respIndex], value)}
+                        onChange={(value) => updateResumeData(['professionalExperience', index.toString(), 'responsibilities', respIndex.toString()], value)}
                       />
                     </li>
                   ))}
@@ -293,21 +331,21 @@ export default function ResumePreviewPage() {
             ))}
 
             <h2 className="text-lg font-semibold mb-2 mt-4">Formação Acadêmica</h2>
-            {resumeBody?.academicBackground.map((edu, index) => (
+            {localResumeBody?.academicBackground.map((edu, index) => (
               <div key={index} className="mb-4">
                 <h3 className="text-base font-medium">
                   <EditableField
                     value={edu.degree}
-                    // onChange={(value) => updateResumeData(['academicBackground', index, 'degree'], value)}
+                    onChange={(value) => updateResumeData(['academicBackground', index.toString(), 'degree'], value)}
                   />
                 </h3>
                 <p>
                   <EditableField
                     value={edu.institution}
-                    // onChange={(value) => updateResumeData(['academicBackground', index, 'institution'], value)}
+                    onChange={(value) => updateResumeData(['academicBackground', index.toString(), 'institution'], value)}
                   />, <EditableField
                     value={edu.graduationYear}
-                    // onChange={(value) => updateResumeData(['academicBackground', index, 'graduationYear'], value)}
+                    onChange={(value) => updateResumeData(['academicBackground', index.toString(), 'graduationYear'], value)}
                   />
                 </p>
               </div>
@@ -315,20 +353,20 @@ export default function ResumePreviewPage() {
 
             <h2 className="text-lg font-semibold mb-2 mt-4">Idiomas</h2>
             <ul className="list-disc pl-5">
-              {resumeBody?.languages.map((lang, index) => (
+              {localResumeBody?.languages.map((lang, index) => (
                 <li key={index}>
                   <EditableField
                     value={lang.language}
-                    // onChange={(value) => updateResumeData(['languages', index, 'language'], value)}
+                    onChange={(value) => updateResumeData(['languages', index.toString(), 'language'], value)}
                   /> - <EditableField
                     value={lang.fluency}
-                    // onChange={(value) => updateResumeData(['languages', index, 'fluency'], value)}
+                    onChange={(value) => updateResumeData(['languages', index.toString(), 'fluency'], value)}
                   />
                 </li>
               ))}
             </ul>
 
-            {Object.keys(resumeBody?.extraCurricular || {}).length > 0 && (
+            {Object.keys(localResumeBody?.extraCurricular || {}).length > 0 && (
               <>
                 <h2 className="text-lg font-semibold mb-2 mt-4">Atividades Extracurriculares</h2>
                 {/* Render extra-curricular activities here if any */}
