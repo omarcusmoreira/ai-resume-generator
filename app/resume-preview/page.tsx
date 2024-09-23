@@ -174,13 +174,13 @@ export default function ResumePreviewPage() {
           <span className="hidden sm:inline">Editar</span>
         </Button>
         )}
-        <Button onClick={handleShare} size="sm" disabled className="bg-purple-500 hover:bg-purple-600 text-white">
-          <Share2 className="h-4 w-4 mr-2" />
-          <span className="hidden sm:inline">Compartilhar</span>
-        </Button>
         <Button onClick={handleDownloadPDF} size="sm" className="bg-purple-500 hover:bg-purple-600 text-white">
           <Download className="h-4 w-4 mr-2" />
           <span className="hidden sm:inline">Baixar PDF</span>
+        </Button>
+        <Button onClick={handleShare} size="sm" disabled className="bg-purple-500 hover:bg-purple-600 text-white">
+          <Share2 className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Compartilhar</span>
         </Button>
       </div>
       <AlertDialog>
@@ -231,13 +231,13 @@ export default function ResumePreviewPage() {
                     <Edit2 className="h-4 w-4 mr-2" />
                     <span>Editar</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleShare}>
-                    <Share2 className="h-4 w-4 mr-2" />
-                    <span>Compartilhar</span>
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleDownloadPDF}>
                     <Download className="h-4 w-4 mr-2" />
                     <span>Baixar PDF</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleShare}>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    <span>Compartilhar</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleDelete}>
                     <Trash2 className="h-4 w-4 mr-2 text-red-500"/>
