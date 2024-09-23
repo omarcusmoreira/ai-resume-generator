@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Copy, Pencil, Save } from 'lucide-react'
 
@@ -22,7 +22,7 @@ export default function CoverLetterDialog({ completion, isOpen, onClose }: Cover
 
   const handleCopy = () => {
     navigator.clipboard.writeText(coverLetter)
-      .then(() => alert('Cover letter copied to clipboard!'))
+      .then(() => alert('Carta de apresentação copiada para a área de transferência!'))
       .catch((err) => console.error('Failed to copy: ', err))
   }
 
@@ -38,7 +38,15 @@ export default function CoverLetterDialog({ completion, isOpen, onClose }: Cover
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[625px] bg-white">
         <DialogHeader>
-          <DialogTitle>Cover Letter</DialogTitle>
+          <DialogTitle>Carta de Apresentação</DialogTitle>
+          <DialogDescription>
+            <p>
+              Abaixo está a carta de apresentação gerada para você.
+            </p>
+            <p>
+              Você pode editar o texto gerado ou copiar para a área de transferência para usar em seu currículo.
+            </p>
+          </DialogDescription>
         </DialogHeader>
         <div className="mt-4">
           {isEditing ? (
