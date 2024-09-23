@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { FileCode2, Images, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
+import { FileCheck, FileCode2, Images, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
@@ -19,7 +19,6 @@ import { ResumeType } from '@/types/resumes'
 import { addResume } from '@/services/resumeServices'
 import { validateCompletion } from '../utils/validateJSONCompletion'
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog"
-import { Loader2 } from "lucide-react"
 import { trimToJSON } from '../utils/trimToJSON'
 
 
@@ -38,26 +37,37 @@ export default function GenerateResumePage() {
   const [isGenerationComplete, setIsGenerationComplete] = useState(false)
   const [generationError, setGenerationError] = useState(false)
   const [resumeId, setResumeId] = useState<string>()
+  const [profilesKey, setProfilesKey] = useState(0)
+
   useEffect(() => {
-    const fetchData = async () => {
-      const fetchedUser = await getUserData();
-      const fetchedProfiles = await getProfiles();
-      if (fetchedUser) {
-        setUserData(fetchedUser);
-      }
-      if (fetchedProfiles) {
-        setProfiles(fetchedProfiles);
-      }  
-    };
     fetchData();
   }, []);
+
+  const fetchData = async () => {
+    const fetchedUser = await getUserData();
+    const fetchedProfiles = await getProfiles();
+    if (fetchedUser) {
+      setUserData(fetchedUser);
+    }
+    if (fetchedProfiles) {
+      setProfiles(fetchedProfiles);
+      setProfilesKey(prevKey => prevKey + 1); // Increment the key to force re-render
+    }  
+  };
+  useEffect(() => {
+    if (profiles && profiles.length > 0) {
+      setProfilesKey(prevKey => prevKey + 1); // Force re-render of Select component
+    }
+  }, [profiles]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputText(e.target.value.slice(0, 1000)) 
   }
 
   const handleProfileWizardClose = () => {
-    setIsProfileWizardOpen(false)
+    fetchData();
+    setProfilesKey(prevKey => prevKey + 1); // Increment the key to force re-render 
+    setIsProfileWizardOpen(false);
   }
 
   const prompts = [
@@ -175,14 +185,17 @@ export default function GenerateResumePage() {
 
           <div className="relative">
             <div className="absolute top-2 right-2 z-10">
-              <Select onValueChange={(value) => setSelectedProfile(value)}>
-                <SelectTrigger className="w-auto h-8 px-2 rounded-full bg-primary text-primary-foreground">
+              <Select 
+                key={profilesKey}
+                onValueChange={(value) => setSelectedProfile(value)}
+              >
+                <SelectTrigger key={profilesKey} className="w-auto h-8 px-2 rounded-full bg-primary text-primary-foreground">
                   <SelectValue placeholder="Escolha um perfil" />
                 </SelectTrigger>
                 <SelectContent> 
                   {profiles?.map((profile, index) => (
                     profile.id ? (
-                      <SelectItem key={index} value={profile.id}>
+                      <SelectItem key={profile.id} value={profile.id}>
                         {profile.profileName || `Profile ${index + 1}`}
                       </SelectItem>
                     ) : null
@@ -234,10 +247,10 @@ export default function GenerateResumePage() {
         <DialogContent className="sm:max-w-md bg-white">
           <div className="flex flex-col items-center justify-center space-y-4">
             {isGenerating && (
-              <Loader2 className="h-16 w-16 text-primary animate-spin" />
+              <Sparkles className="h-16 w-16 text-gray-500 animate-spin" />
             )}
             {isGenerationComplete && (
-              <Sparkles className="h-16 w-16 text-primary" />
+              <FileCheck className="h-16 w-16 text-primary" />
             )}
             <p className="text-center">{generationStatus}</p>
           </div>
@@ -246,7 +259,7 @@ export default function GenerateResumePage() {
               <Button onClick={handleCloseDialog}>Fechar</Button>
             )}
             {isGenerationComplete && (
-              <Button onClick={() => router.push(`/resume-render?resumeId=${resumeId}`)}>
+              <Button onClick={() => router.push(`/resume-preview?resumeId=${resumeId}`)}>
                 Ver Currículo
               </Button>
             )}

@@ -61,17 +61,17 @@ export async function generateATSResumeJSON(jobDescription: string, profile: Pro
   {
     "professionalExperience": [
       {
-        "company": "Primeira empresa",
-        "position": "Cargo",
-        "dates": "Período",
+        "company": 
+        "position": 
+        "dates": 
         "responsibilities": [
           "Crie uma lista com pelo menos 5 frases relevantes e atividades e responsabilidades."
         ]
       },
       {
-        "company": "Segunda empresa",
-        "position": "Cargo",
-        "dates": "Período",
+        "company": 
+        "position": 
+        "dates": 
         "responsibilities": [
           "Crie uma lista com pelo menos 5 frases relevantes e atividades e responsabilidades."
         ]
@@ -221,11 +221,11 @@ const completion = await openAiService.generateChatCompletion([
 }
 
 export async function generateKeywords(profileName: string) {
-  const systemPrompt = `You are a senior recruiter tasked with generating a list of keywords for a given carrer.`;
+  const systemPrompt = `Voce é um recrutador sênior encarregado de gerar uma lista de palavras-chave para uma carreira específica.`;
 
-  const userPrompt = `Generate a list of 10 keywords relevant to the following career: ${profileName}. 
-  IMPORTANT: DO NOT RETURN ANYTHING ELSE THAN THE KEYWORDS.
-  IMPORTANT: USE THE SAME LANGUAGE OF THE SUMMARY.`;
+  const userPrompt = `Gere uma lista de 10 palavras-chave relevantes para a seguinte carreira: ${profileName}. 
+  IMPORTANTE: NÃO RETORNE NADA ALÉM DAS PALAVRAS-CHAVE.
+  IMPORTANTE: SO RESPONDA EM PORTUGUÊS.`;
 
   const completion = await openAiService.generateChatCompletion([
     { role: 'system', content: systemPrompt },

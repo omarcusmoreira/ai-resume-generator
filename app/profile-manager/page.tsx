@@ -33,18 +33,18 @@ export default function ProfileManagement() {
     idioms: "Idiomas",
     extraCurricular: "Atividades Complementares/Certificações"
   }
-
-  useEffect(() => {
-    const fetchData = async () => { 
-      const fetchedUser = await getUserData()
-      const fetchedProfiles = await getProfiles()
-      setPersonalInfo(fetchedUser?.personalInfo || null)
-      setProfiles(fetchedProfiles)
-      if (fetchedProfiles.length > 0) {
-        setActiveProfile(fetchedProfiles[0].id)
-      }
+  const fetchData = async () => { 
+    const fetchedUser = await getUserData()
+    const fetchedProfiles = await getProfiles()
+    setPersonalInfo(fetchedUser?.personalInfo || null)
+    setProfiles(fetchedProfiles)
+    if (fetchedProfiles.length > 0) {
+      setActiveProfile(fetchedProfiles[0].id)
     }
-    fetchData() 
+  }
+  
+  useEffect(() => {
+    fetchData()
   }, []);
 
   const handleSectionChange = (profileId: string, sectionKey: keyof ProfileSectionType, content: string) => {
@@ -239,7 +239,10 @@ export default function ProfileManagement() {
     </Card>
     <ProfileWizardComponent 
       isOpen={isWizardOpen} 
-      onClose={() => setIsWizardOpen(false)}
+      onClose={() => {
+        fetchData()
+        setIsWizardOpen(false)
+      }}
     />
     </div>
   )

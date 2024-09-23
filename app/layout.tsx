@@ -76,7 +76,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
 
     return (
     <div className='flex flex-col items-center justify-center h-screen'>
-      <span className='text-sm text-gray-500 mb-4'>LOADING LAYOUT...</span>
+      <span className='text-sm text-gray-500 mb-4'>carregando...</span>
       <Progress  value={progress} className='w-1/3 h-1' />
     </div>
   );
