@@ -20,7 +20,7 @@ import { addResume } from '@/services/resumeServices'
 import { validateCompletion } from '../utils/validateJSONCompletion'
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog"
 import { trimToJSON } from '../utils/trimToJSON'
-
+import { AlertCircle } from "lucide-react"
 
 export default function GenerateResumePage() {
 
@@ -252,7 +252,13 @@ export default function GenerateResumePage() {
             {isGenerationComplete && (
               <FileCheck className="h-16 w-16 text-primary" />
             )}
-            <p className="text-center">{generationStatus}</p>
+            {generationError && (
+              <AlertCircle className="h-16 w-16 text-red-500" />
+            )}
+            <p className="text-center font-semibold">{generationStatus}</p>
+            {isGenerating && (
+              <p className="text-sm text-gray-500">Isso pode levar alguns minutos...</p>
+            )}
           </div>
           <DialogFooter>
             {generationError && (
