@@ -144,8 +144,8 @@ export default function ResumePreviewPage() {
   }
 
   const ActionButtons = () => (
-    <div className="flex w-full flex-wrap justify-between">
-        <div className="flex w-100 flex-wrap gap-2">
+    <div className="flex w-full justify-between">
+        <div className="flex w-full flex-wrap gap-2">
             <Button onClick={handleSave} size="sm" disabled className="bg-purple-500 hover:bg-purple-600 text-white">
                 <Save className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Salvar</span>
@@ -174,7 +174,7 @@ export default function ResumePreviewPage() {
       <div className={`p-4 mb-4 rounded-lg ${isAccepted ? 'bg-purple-400' : 'bg-yellow-100'}`}>
         <div className="flex justify-between items-center mb-2">
           <h2 className={`font-medium text-lg ${isAccepted ? 'text-white' : 'text-yellow-800'}`}>
-            {isAccepted ?? 'Revise seu currículo abaixo.'}
+            {isAccepted ? 'Currículo aceito' : 'Revise seu currículo abaixo.'}
           </h2>
           {isAccepted && (
             <div className="sm:hidden">
