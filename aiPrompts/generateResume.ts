@@ -16,7 +16,7 @@ export async function generateResume(profile: ProfileType) {
       "summary": "Um resumo de 6-7 sentenças personalizado para o emprego usando palavras-chave relevantes."
     }
   
-    ### Use ${profile.sections.professionalExperience} para organizar por data egerar a experiência profissional: 
+    ### Use ${profile.sections.professionalExperience} para organizar por data e gerar a experiência profissional: 
     {
       "professionalExperience": [
         {

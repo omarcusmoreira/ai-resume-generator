@@ -22,6 +22,8 @@ import { validateCompletion } from '../utils/validateJSONCompletion'
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog"
 import { trimToJSON } from '../utils/trimToJSON'
 import { AlertCircle } from "lucide-react"
+import { generateCoverLetter } from '@/aiPrompts/generateCoverLetter'
+import CoverLetterDialog from '@/components/CoverLetterDialog/page'
 
 export default function GenerateResumePage() {
 
@@ -39,7 +41,8 @@ export default function GenerateResumePage() {
   const [generationError, setGenerationError] = useState(false)
   const [resumeId, setResumeId] = useState<string>()
   const [profilesKey, setProfilesKey] = useState(0)
-
+  const [isCoverLetterDialogOpen, setIsCoverLetterDialogOpen] = useState(false)
+  const [coverLetterCompletion, setCoverLetterCompletion] = useState('')
   useEffect(() => {
     fetchData();
   }, []);
@@ -151,6 +154,25 @@ export default function GenerateResumePage() {
     }
   }
 
+  const handleGenerateCoverLetter = async () => {
+    if (!selectedProfile || !inputText) {
+      console.error('Please select a profile and enter a job description');
+      return;
+    }
+    if (userData && selectedProfile) {
+      const profile = profiles?.find(p => p.id === selectedProfile);
+      if (!profile) {
+        throw new Error('Selected profile not found');
+      }
+      setIsGenerating(true)
+      const { completion } = await generateCoverLetter(inputText, profile, userData)
+      console.log(completion);
+      setIsGenerating(false)
+      setCoverLetterCompletion(completion)
+      setIsCoverLetterDialogOpen(true)
+    }
+  } 
+
   const handleCloseDialog = () => {
     setIsDialogOpen(false)
     setIsGenerationComplete(false)
@@ -197,7 +219,7 @@ export default function GenerateResumePage() {
             <Button 
               variant="ai" 
               className="rounded-full bg-primary text-primary-foreground"
-              onClick={handleGenerateResume}
+              onClick={selectedPrompt === 2 ? handleGenerateCoverLetter :  handleGenerateResume}
               disabled={isGenerating || !selectedProfile || selectedPrompt === 1 && !inputText}
             >
               {isGenerating ? (
@@ -205,7 +227,7 @@ export default function GenerateResumePage() {
               ) : (
                 <Sparkles className="h-4 w-4 md:mr-2" />
               )}
-              <span className="hidden md:block">Gerar Currículo</span>
+              <span className="hidden md:block">{selectedPrompt === 2 ? 'Gerar Carta de Apresentação' : 'Gerar Currículo'}</span>
             </Button>
           </div>
 
@@ -219,7 +241,7 @@ export default function GenerateResumePage() {
                   selectedPrompt === index && "border-2 border-purple-500 bg-purple-100"
                 )}
                 onClick={() => setSelectedPrompt(index)}
-                disabled={index !== 0 && index !== 1}
+                disabled={index === 3}
                 autoFocus={index === 0}
               >
                 <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
@@ -233,7 +255,7 @@ export default function GenerateResumePage() {
             ))}
           </div>
 
-          {selectedPrompt === 1 && (
+          {(selectedPrompt === 1 || selectedPrompt === 2) && (
             <div className="relative">
               {inputText === '' && <div className="absolute top-2 left-2 text-sm text-gray-400 pointer-events-none">
                 Cole a descrição da vaga aqui
@@ -287,6 +309,11 @@ export default function GenerateResumePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <CoverLetterDialog 
+        completion={coverLetterCompletion}
+        isOpen={isCoverLetterDialogOpen} 
+        onClose={() => setIsCoverLetterDialogOpen(false)}
+      />
     </div>
   )
 }
