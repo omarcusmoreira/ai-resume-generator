@@ -223,7 +223,7 @@ export default function GenerateResumePage() {
               disabled={isGenerating || !selectedProfile || selectedPrompt === 1 && !inputText}
             >
               {isGenerating ? (
-                <span className="animate-spin">✨</span>
+                <span className="animate-spin md:mr-2">✨</span>
               ) : (
                 <Sparkles className="h-4 w-4 md:mr-2" />
               )}

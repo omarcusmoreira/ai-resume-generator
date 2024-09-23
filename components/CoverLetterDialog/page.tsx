@@ -41,10 +41,7 @@ export default function CoverLetterDialog({ completion, isOpen, onClose }: Cover
           <DialogTitle>Carta de Apresentação</DialogTitle>
           <DialogDescription>
             <p>
-              Abaixo está a carta de apresentação gerada para você.
-            </p>
-            <p>
-              Você pode editar o texto gerado ou copiar para a área de transferência para usar em seu currículo.
+              Você pode editar o texto gerado ou copiar para a área de transferência para enviar para a oportunidade pretendida.
             </p>
           </DialogDescription>
         </DialogHeader>
