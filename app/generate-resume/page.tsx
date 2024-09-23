@@ -29,7 +29,7 @@ import { generateLinkedinBio } from '@/aiPrompts/generateLinkedinBio'
 export default function GenerateResumePage() {
 
   const [userData, setUserData] = useState<UserDataType>()
-  const [profiles, setProfiles] = useState<ProfileType[]>()
+  const [profiles, setProfiles] = useState<ProfileType[]>([])
   const [inputText, setInputText] = useState('')
   const [selectedPrompt, setSelectedPrompt] = useState<number>()
   const [isProfileWizardOpen, setIsProfileWizardOpen] = useState(false)
@@ -41,12 +41,14 @@ export default function GenerateResumePage() {
   const [isGenerationComplete, setIsGenerationComplete] = useState(false)
   const [generationError, setGenerationError] = useState(false)
   const [resumeId, setResumeId] = useState<string>()
-  const [profilesKey, setProfilesKey] = useState(0)
   const [isCoverLetterDialogOpen, setIsCoverLetterDialogOpen] = useState(false)
   const [coverLetterCompletion, setCoverLetterCompletion] = useState('')
+  const [refreshKey, setRefreshKey] = useState(0)
+
   useEffect(() => {
     fetchData();
-  }, []);
+    console.log(refreshKey)
+  }, [refreshKey]);
 
   const fetchData = async () => {
     const fetchedUser = await getUserData();
@@ -56,22 +58,15 @@ export default function GenerateResumePage() {
     }
     if (fetchedProfiles) {
       setProfiles(fetchedProfiles);
-      setProfilesKey(prevKey => prevKey + 1); // Increment the key to force re-render
     }  
   };
-  useEffect(() => {
-    if (profiles && profiles.length > 0) {
-      setProfilesKey(prevKey => prevKey + 1); // Force re-render of Select component
-    }
-  }, [profiles]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputText(e.target.value.slice(0, 1000)) 
   }
 
   const handleProfileWizardClose = () => {
-    fetchData();
-    setProfilesKey(prevKey => prevKey + 1); // Increment the key to force re-render 
+    setTimeout(() => setRefreshKey(prevKey => prevKey + 1), 500); 
     setIsProfileWizardOpen(false);
   }
 
@@ -210,10 +205,10 @@ export default function GenerateResumePage() {
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <div className="flex items-center">
               <Select 
-                key={profilesKey}
+                key={refreshKey}
                 onValueChange={(value) => setSelectedProfile(value)}
               >
-                <SelectTrigger key={profilesKey}>
+                <SelectTrigger>
                   <SelectValue placeholder="Escolha um perfil" />
                 </SelectTrigger>
                 <SelectContent> 
@@ -230,6 +225,7 @@ export default function GenerateResumePage() {
                 variant="outline" 
                 className="ml-4"
                 onClick={() => setIsProfileWizardOpen(true)}
+                disabled={profiles?.length >= 5}
               >
                 <PlusSquare className="md:mr-2 h-4 w-4" /> 
                 <span className="hidden md:block">Perfil</span>
@@ -328,6 +324,7 @@ export default function GenerateResumePage() {
         </DialogContent>
       </Dialog>
       <CoverLetterDialog 
+        dialogTitle={selectedPrompt === 2 ? 'Carta de Apresentação' : 'Biografia para LinkedIn'}
         completion={coverLetterCompletion}
         isOpen={isCoverLetterDialogOpen} 
         onClose={() => setIsCoverLetterDialogOpen(false)}

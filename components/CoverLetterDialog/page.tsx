@@ -10,9 +10,10 @@ interface CoverLetterDialogProps {
   completion: string
   isOpen: boolean
   onClose: () => void
+  dialogTitle: string
 }
 
-export default function CoverLetterDialog({ completion, isOpen, onClose }: CoverLetterDialogProps) {
+export default function CoverLetterDialog({ completion, isOpen, onClose, dialogTitle }: CoverLetterDialogProps) {
   const [coverLetter, setCoverLetter] = useState(completion)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -38,7 +39,7 @@ export default function CoverLetterDialog({ completion, isOpen, onClose }: Cover
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[625px] bg-white">
         <DialogHeader>
-          <DialogTitle>Carta de Apresentação</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>
             <p>
               Você pode editar o texto gerado ou copiar para a área de transferência para enviar para a oportunidade pretendida.

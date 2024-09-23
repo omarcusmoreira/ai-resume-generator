@@ -37,7 +37,6 @@ export async function generateATSResumeJSON(jobDescription: string, profile: Pro
       }
     ]
   }
-
   ### Use ${profile.sections.academicBackground} para gerar a formação acadêmica: 
   {
     "academicBackground": [

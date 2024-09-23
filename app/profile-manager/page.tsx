@@ -42,10 +42,10 @@ export default function ProfileManagement() {
       setActiveProfile(fetchedProfiles[0].id)
     }
   }
-  
+  const [refreshKey, setRefreshKey] = useState(0)
   useEffect(() => {
     fetchData()
-  }, []);
+  }, [refreshKey]);
 
   const handleSectionChange = (profileId: string, sectionKey: keyof ProfileSectionType, content: string) => {
     setLocalProfileChanges(prev => {
@@ -84,6 +84,11 @@ export default function ProfileManagement() {
     }
   }
 
+  const handleCloseWizard = () => {
+    setIsWizardOpen(false)
+    setTimeout(() => setRefreshKey(prevKey => prevKey + 1), 500)
+  }
+
   const handlePersonalInfoClick = () => {
     router.push('/user-info')
   }
@@ -96,6 +101,7 @@ export default function ProfileManagement() {
         setActiveProfile(newActiveProfile);
       }
     }
+    setRefreshKey(prevKey => prevKey + 1)
   }
 
   if (!personalInfo) {
@@ -112,7 +118,7 @@ export default function ProfileManagement() {
           <p className="text-lg text-muted-foreground">Nenhum perfil encontrado. Clique no botão abaixo para adicionar um novo perfil.</p>
         </div>
       ) : (
-      <Tabs value={activeProfile} onValueChange={setActiveProfile} className="w-full">
+      <Tabs value={activeProfile} onValueChange={setActiveProfile} className="w-full" key={refreshKey}>
         <div className="flex justify-between items-center mb-4">
           <TabsList>
             {profiles.map((profile) => (
@@ -129,11 +135,8 @@ export default function ProfileManagement() {
         {profiles.map((profile) => (
           <TabsContent key={profile.id} value={profile.id} className="space-y-6">
             <Card className="relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 py-1 px-6 transform rotate-45 translate-x-[30%] translate-y-[30%] text-sm font-semibold">
-                RASCUNHO
-              </div>
               <CardHeader>
-                <CardTitle>
+                <CardTitle className='flex justify-between'>
                   <Input
                     value={profile.profileName}
                     onChange={(e) => {
@@ -148,6 +151,27 @@ export default function ProfileManagement() {
                     className="text-2xl font-bold bg-transparent border-none hover:bg-gray-100 focus:bg-white"
                     aria-label="Profile name"
                   />
+                  <div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="icon">
+                      <Trash2 className="h-4 w-4 text-white" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className='bg-white'>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Deseja mesmo deletar o perfil?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Atenção, Esta ação não pode ser desfeita. 
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDeleteProfile(profile.id)} className='bg-red-600 hover:bg-red-700 text-white'>Continuar</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -200,36 +224,10 @@ export default function ProfileManagement() {
                       ) : (
                         <p className="whitespace-pre-line">{section}</p>
                       )}
-                      {section && (
-                        <div className="mt-2 p-2 bg-blue-50 rounded">
-                          <p className="text-sm text-blue-800">AI Enhanced: {section}</p>
-                        </div>
-                      )}
                     </div>
                   );
                 })}
               </CardContent>
-              <div className="absolute bottom-4 right-4">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="icon">
-                      <Trash2 className="h-4 w-4 text-white" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className='bg-white'>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Atenção, ao deletar um perfil todos os currículos atrelados a ele serão perdidos. Deseja continuar?
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDeleteProfile(profile.id)} className='bg-red-600 hover:bg-red-700 text-white'>Continuar</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
             </Card>
           </TabsContent>
         ))}
@@ -239,10 +237,7 @@ export default function ProfileManagement() {
     </Card>
     <ProfileWizardComponent 
       isOpen={isWizardOpen} 
-      onClose={() => {
-        fetchData()
-        setIsWizardOpen(false)
-      }}
+      onClose={handleCloseWizard}
     />
     </div>
   )
