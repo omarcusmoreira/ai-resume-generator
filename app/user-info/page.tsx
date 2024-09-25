@@ -115,16 +115,6 @@ export default function UserInfo() {
               disabled
             />
             <Field
-              key="cpf"
-              label="CPF"
-              id="cpf"
-              value={userData?.personalInfo?.cpf || ''}
-              placeholder="Enter your CPF"
-              type="text"
-              onChange={(e) => handleChange('cpf', e.target.value)}
-              disabled
-            />
-            <Field
               key="phone"
               label="Phone Number"
               id="phoneNumber"

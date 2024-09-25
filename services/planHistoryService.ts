@@ -1,9 +1,9 @@
 import { db } from "@/firebaseConfig";
 import { 
-    collection, deleteDoc, doc, getDocs, limit, orderBy, query, setDoc, updateDoc 
+    collection, deleteDoc, doc, getDocs, setDoc, updateDoc, query, orderBy, limit 
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { PlanHistory } from "@/types/planHistory";
+import { PlanHistory, PlanTypeEnum } from "@/types/planHistory";
 
 const getUserId = () => {
     const auth = getAuth();
@@ -33,7 +33,7 @@ export const addPlanHistory = async (planHistoryId: string, planHistory: PlanHis
     const planHistoryCollection = collection(db, 'users', userId, 'planHistory');
     const docRef = doc(planHistoryCollection, planHistoryId);
     
-    const plainPlanHistory: PlanHistory   = {
+    const newPlanHistory: PlanHistory   = {
       id: planHistoryId,
       plan: planHistory.plan,
       quotas: planHistory.quotas,
@@ -43,13 +43,12 @@ export const addPlanHistory = async (planHistoryId: string, planHistory: PlanHis
       expirationDate: planHistory.expirationDate,
     };
 
-    await setDoc(docRef, plainPlanHistory);
+    await setDoc(docRef, newPlanHistory);
     
     // Update session storage
     const cachedPlanHistory = getSessionData() || [];
-    setSessionData([...cachedPlanHistory, plainPlanHistory]);
+    setSessionData([...cachedPlanHistory, newPlanHistory]);
 };
-
 // Get all plan history
 export const getPlanHistory = async (): Promise<PlanHistory[]> => {
     const cachedPlanHistory = getSessionData();
@@ -67,27 +66,24 @@ export const getPlanHistory = async (): Promise<PlanHistory[]> => {
     return planHistory;
 };
 
-// Get latest plan history
-export const getCurrentPlanHistory = async (): Promise<PlanHistory | null> => {
-    try {
-        const userId = getUserId();
-        const planHistoryCollection = collection(db, 'users', userId, 'planHistory');
-        
-        const planHistoryQuery = query(planHistoryCollection, orderBy('planChangeDate', 'desc'), limit(1));
-        const planHistorySnap = await getDocs(planHistoryQuery);
-        
-        if (planHistorySnap.empty) {
-            return null;
-        }
-        
-        const latestPlanDoc = planHistorySnap.docs[0];
-        return latestPlanDoc.data() as PlanHistory;
-        
-    } catch (error) {
-        console.error("Error retrieving latest plan history:", error);
-        return null;
+export const getCurrentPlan = async (): Promise<PlanTypeEnum> => {
+    const userId = getUserId();
+    const planHistoryQuery = query(
+        collection(db, 'users', userId, 'planHistory'),
+        orderBy('planChangeDate', 'desc'),
+        limit(1)
+    );
+
+    const querySnapshot = await getDocs(planHistoryQuery);
+    console.log(querySnapshot)
+    if (querySnapshot.empty) {
+        return PlanTypeEnum.FREE;
     }
-};
+
+    const planData = querySnapshot.docs[0].data();
+    console.log(planData.plan)
+    return planData.plan as PlanTypeEnum;
+}
 
 // Update plan history
 export const updatePlanHistory = async (planHistoryId: string, planHistory: Partial<PlanHistory>): Promise<void> => {

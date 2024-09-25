@@ -26,20 +26,20 @@ export type QuotasType = {
     [PlanTypeEnum.FREE]: {
       interactions: 10,
       profiles: 1,
-      resumes: 1,
+      resumes: 3,
       opportunities: 0,
     },
     [PlanTypeEnum.BASIC]: {
       interactions: 50,
-      profiles: 3,
-      resumes: 5,
+      profiles: 5,
+      resumes: 10,
       opportunities: 20,
     },
     [PlanTypeEnum.PREMIUM]: {
       interactions: 100,
-      profiles: 5,
-      resumes: 10,
-      opportunities: 50,
+      profiles: 10,
+      resumes: 30,
+      opportunities: 100,
     },
   };
 
@@ -53,12 +53,7 @@ export type QuotasType = {
 export class PlanHistory implements PlanHistoryData {
   id: string;
   plan: PlanTypeEnum;
-  quotas: {
-    interactions: number,
-    profiles: number,
-    resumes: number,
-    opportunities: number
-  };
+  quotas: QuotasType;
   planChangeDate: Timestamp;
   expirationDate: Timestamp;
   changeType: PlanChangeTypeEnum;
@@ -73,6 +68,7 @@ export class PlanHistory implements PlanHistoryData {
 
     const expiration = new Date();
     expiration.setDate(expiration.getDate() + 30);
-    this.expirationDate = Timestamp.fromDate(expiration);    this.quotas = PlanQuotas[this.plan];
+    this.expirationDate = Timestamp.fromDate(expiration);
+    this.quotas = PlanQuotas[this.plan];
   }
 }

@@ -2,15 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { FileCheck, FileCode2, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
+import { FileCode2, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
 import { generateResume } from '@/aiPrompts/generateResume'
 import { generateResumeWithJobDescription } from '@/aiPrompts/generateResumeWithJobDescription'
-import { useRouter } from 'next/navigation'
 import { v4 } from 'uuid'
 import { getUserData } from '@/services/userServices'
 import { getProfiles } from '@/services/profileServices'
@@ -19,56 +17,38 @@ import { ProfileType } from '@/types/profiles'
 import { ResumeType } from '@/types/resumes'
 import { addResume } from '@/services/resumeServices'
 import { validateCompletion } from '../utils/validateJSONCompletion'
-import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog"
 import { trimToJSON } from '../utils/trimToJSON'
-import { AlertCircle } from "lucide-react"
 import { generateCoverLetter } from '@/aiPrompts/generateCoverLetter'
-import CoverLetterDialog from '@/components/CoverLetterDialog/page'
 import { generateLinkedinBio } from '@/aiPrompts/generateLinkedinBio'
+import { ResumeGenerationDialog } from '@/components/ResumeGenerationDialog'
+import BioCoverLetterDialog from '@/components/BioCoverLetterDialog/'
+import ProfileCreationDialogComponent from '@/components/ProfileCreationDialog'
+import { decrementQuota, getQuotas } from '@/services/quotaServices'
+import { QuotasType } from '@/types/planHistory'
+import { UpgradeDialog } from '@/components/UpgradeAlertDialog'
 
 export default function GenerateResumePage() {
 
   const [userData, setUserData] = useState<UserDataType>()
   const [profiles, setProfiles] = useState<ProfileType[]>([])
   const [inputText, setInputText] = useState('')
-  const [selectedPrompt, setSelectedPrompt] = useState<number>()
+  const [selectedPrompt, setSelectedPrompt] = useState<number>(0)
   const [isProfileWizardOpen, setIsProfileWizardOpen] = useState(false)
   const [selectedProfile, setSelectedProfile] = useState<string>()
   const [isGenerating, setIsGenerating] = useState(false)
-  const router = useRouter()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [generationStatus, setGenerationStatus] = useState('')
-  const [isGenerationComplete, setIsGenerationComplete] = useState(false)
-  const [generationError, setGenerationError] = useState(false)
   const [resumeId, setResumeId] = useState<string>()
   const [isCoverLetterDialogOpen, setIsCoverLetterDialogOpen] = useState(false)
   const [coverLetterCompletion, setCoverLetterCompletion] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
-
-  useEffect(() => {
-    fetchData();
-    console.log(refreshKey)
-  }, [refreshKey]);
-
-  const fetchData = async () => {
-    const fetchedUser = await getUserData();
-    const fetchedProfiles = await getProfiles();
-    if (fetchedUser) {
-      setUserData(fetchedUser);
-    }
-    if (fetchedProfiles) {
-      setProfiles(fetchedProfiles);
-    }  
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputText(e.target.value.slice(0, 1000)) 
-  }
-
-  const handleProfileWizardClose = () => {
-    setTimeout(() => setRefreshKey(prevKey => prevKey + 1), 500); 
-    setIsProfileWizardOpen(false);
-  }
+  const [generationAttempt, setGenerationAttempt] = useState<number>(0)
+  const [hasGenerationFailed, setHasGenerationFaild] = useState(false)
+  const [isGenerationSuccessful, setIsGenerationSuccessful] = useState(false)
+  const [quotas, setQuotas] = useState<QuotasType>()
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false)
+  const [noInteractions, setNoInteractions] = useState(false)
+  const [noResumes, setNoResumes] = useState(false)
+  const [upgradeDialogTitle, setUpgradeDialogTitle] = useState<'Perfis' | 'Currículos' | 'Interações'>('Interações')
 
   const prompts = [
     'Gerar um currículo ATS otimizado para algoritmos de recrutamento.',
@@ -77,16 +57,61 @@ export default function GenerateResumePage() {
     'Criar Biografia profissional para LinkedIn.'
   ]
 
+  useEffect(() => {
+    fetchData();
+  }, [refreshKey]);
+
+  useEffect(()=>{
+    if(quotas){
+      if (quotas.interactions === 0)
+        setNoInteractions(true)
+      if(quotas.resumes === 0)
+        setNoResumes(true)
+    }
+  }, [quotas])
+
+  const fetchData = async () => {
+    const fetchedUser = await getUserData();
+    const fetchedProfiles = await getProfiles();
+    const fetchedQuotas = await getQuotas();
+
+    if (fetchedUser && fetchedProfiles) {
+      setUserData(fetchedUser);
+      setProfiles(fetchedProfiles);
+      setQuotas(fetchedQuotas);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputText(e.target.value.slice(0, 1000)) 
+  }
+
+  const handleProfileCreationDialogClose = () => {
+    setTimeout(() => setRefreshKey(prevKey => prevKey + 1), 500); 
+    setIsProfileWizardOpen(false);
+  }
+
+  const handleResumeGenerationDialogClose = () => {
+    setIsDialogOpen(false)
+    setIsGenerationSuccessful(false)
+    setHasGenerationFaild(false)
+    setGenerationAttempt(0)
+  }
+
   const handleGenerateResume = async () => {
-    if (!selectedProfile || (selectedPrompt === 1 && !inputText)) {
+    if (noResumes) {
+      setUpgradeDialogTitle('Currículos')
+      setIsUpgradeDialogOpen(true)
+      return;
+    }
+    if (!selectedProfile) {
       console.error('Please select a profile and enter a job description');
       return;
     }
     setIsDialogOpen(true)
     setIsGenerating(true)
-    setGenerationStatus('Iniciando geração do currículo...')
     
-    const newResumeId = v4(); // Generate the ID here
+    const newResumeId = v4();
     setResumeId(newResumeId);
 
     try {
@@ -95,20 +120,16 @@ export default function GenerateResumePage() {
         throw new Error('Selected profile not found');
       }
 
-      let attempts = 0;
+      let currentAttempt = 0;
       const maxAttempts = 7; 
 
       do {
-        try {
-          setGenerationStatus(`Tentativa ${attempts + 1} de ${maxAttempts}...`)
-          
+        try {        
           let completion;
           if (selectedPrompt === 0) {
-            // Call generateATSResumeJSON if the first prompt is selected
             const result = await generateResume(profile);
             completion = result.completion;
           } else if (selectedPrompt === 1) {
-            // Call generateResumeWithJobDescription if the second prompt is selected
             const result = await generateResumeWithJobDescription(inputText, profile);
             completion = result.completion;
           } else {
@@ -116,41 +137,39 @@ export default function GenerateResumePage() {
           }
 
           console.log(completion)
-          setGenerationStatus('Validando currículo gerado...');
           const trimmedCompletion = trimToJSON(completion);
           console.log(resumeId);
 
           if (validateCompletion(trimmedCompletion)) {
             const resume = {
-              id: newResumeId, // Use the generated ID
+              id: newResumeId,
               contentJSON: trimmedCompletion,
             } as ResumeType;
-            setGenerationStatus('Currículo gerado com sucesso!');
-            await addResume(newResumeId, resume); // Use the generated ID
-            setIsGenerationComplete(true)
+            await addResume(newResumeId, resume);
+            setIsGenerationSuccessful(true)
             return;
-          } else {
-            setGenerationStatus('Currículo inválido, tentando gerar novamente...');
           }
         } catch (error) {
           console.error('Error generating resume:', error);
-          setGenerationStatus('Erro ao gerar currículo, tentando novamente...');
         }
-        attempts++;
-      } while (attempts < maxAttempts);
-  
-      setGenerationError(true)
-      setGenerationStatus('Ops, não foi possível gerar seu currículo. Tente novamente mais tarde.');
+        currentAttempt++
+        setGenerationAttempt(currentAttempt); 
+      } while (generationAttempt < maxAttempts);
+      setHasGenerationFaild(true)
     } catch (error) {
       console.error('Erro ao gerar currículo:', error);
-      setGenerationError(true)
-      setGenerationStatus('Erro ao gerar currículo. Por favor, tente novamente.');
+      setHasGenerationFaild(true)
     } finally {
       setIsGenerating(false)
     }
   }
 
   const handleGenerateCoverLetter = async () => {
+    if (noInteractions) {
+      setUpgradeDialogTitle('Interações')
+      setIsUpgradeDialogOpen(true)
+      return;
+    }
     if (!selectedProfile || !inputText) {
       console.error('Please select a profile and enter a job description');
       return;
@@ -166,10 +185,16 @@ export default function GenerateResumePage() {
       setIsGenerating(false)
       setCoverLetterCompletion(completion)
       setIsCoverLetterDialogOpen(true)
+      setTimeout(() => setRefreshKey(prevKey => prevKey + 1), 500); 
+      decrementQuota('interactions')
     }
   } 
 
   const handleGenerateLinkedinBio = async () => {
+    if (noInteractions) {
+      setIsUpgradeDialogOpen(true)
+      return;
+    }
     if (!selectedProfile) {
       console.error('Please select a profile');
       return;
@@ -184,15 +209,11 @@ export default function GenerateResumePage() {
     console.log(completion);
     setIsGenerating(false)
     setCoverLetterCompletion(completion)
+    setTimeout(() => setRefreshKey(prevKey => prevKey + 1), 500); 
     setIsCoverLetterDialogOpen(true)
-  } 
 
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false)
-    setIsGenerationComplete(false)
-    setGenerationError(false)
-    setGenerationStatus('')
-  }
+    decrementQuota('interactions')
+  } 
 
   return (
     <div className="flex-1 flex flex-col">
@@ -209,7 +230,7 @@ export default function GenerateResumePage() {
                 onValueChange={(value) => setSelectedProfile(value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Escolha um perfil" />
+                  <SelectValue placeholder={profiles.length === 0 ? "Crie seu primeiro perfil" : "Escolha um perfil"} />
                 </SelectTrigger>
                 <SelectContent> 
                   {profiles?.map((profile, index) => (
@@ -220,22 +241,32 @@ export default function GenerateResumePage() {
                     ) : null
                   ))}
                 </SelectContent>
-              </Select>
+              </Select>         
               <Button 
                 variant="outline" 
                 className="ml-4"
                 onClick={() => setIsProfileWizardOpen(true)}
-                disabled={profiles?.length >= 5}
+                disabled={quotas?.profiles === 0}
               >
-                <PlusSquare className="md:mr-2 h-4 w-4" /> 
+                <PlusSquare className="md:mr-2 h-4 w-4" />
                 <span className="hidden md:block">Perfil</span>
               </Button>
             </div>
             <Button 
               variant="ai" 
               className="rounded-full bg-primary text-primary-foreground"
-              onClick={selectedPrompt === 2 ? handleGenerateCoverLetter : selectedPrompt === 3 ? handleGenerateLinkedinBio : handleGenerateResume}
-              disabled={isGenerating || !selectedProfile || selectedPrompt === 1 && !inputText}
+              onClick={
+                  selectedPrompt === 2 ?
+                  handleGenerateCoverLetter :
+                  selectedPrompt === 3 ?
+                  handleGenerateLinkedinBio :
+                  handleGenerateResume
+              }
+              disabled={
+                isGenerating || 
+                ((selectedPrompt === 0 || selectedPrompt === 3) && !selectedProfile) ||
+                ((selectedPrompt === 1 || selectedPrompt === 2) && !inputText)
+              }
             >
               {isGenerating ? (
                 <span className="animate-spin md:mr-2">✨</span>
@@ -245,7 +276,6 @@ export default function GenerateResumePage() {
               <span className="hidden md:block">{selectedPrompt === 2 ? 'Gerar Carta de Apresentação' : selectedPrompt === 3 ? 'Gerar Biografia' : 'Gerar Currículo'}</span>
             </Button>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 md:mb-8">
             {prompts.map((prompt, index) => (
               <Button
@@ -288,46 +318,30 @@ export default function GenerateResumePage() {
           )}
         </Card>
       </div>
-
-      <ProfileWizardComponent 
+      <ProfileCreationDialogComponent 
         isOpen={isProfileWizardOpen} 
-        onClose={handleProfileWizardClose}
+        onClose={handleProfileCreationDialogClose}
       />
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-white">
-          <div className="flex flex-col items-center justify-center space-y-4">
-            {isGenerating && (
-              <Sparkles className="h-16 w-16 text-gray-500 animate-spin" />
-            )}
-            {isGenerationComplete && (
-              <FileCheck className="h-16 w-16 text-primary" />
-            )}
-            {generationError && (
-              <AlertCircle className="h-16 w-16 text-red-500" />
-            )}
-            <p className="text-center font-semibold">{generationStatus}</p>
-            {isGenerating && (
-              <p className="text-sm text-gray-500">Isso pode levar alguns minutos...</p>
-            )}
-          </div>
-          <DialogFooter>
-            {generationError && (
-              <Button onClick={handleCloseDialog}>Fechar</Button>
-            )}
-            {isGenerationComplete && (
-              <Button onClick={() => router.push(`/resume-preview?resumeId=${resumeId}`)}>
-                Ver Currículo
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      <CoverLetterDialog 
-        dialogTitle={selectedPrompt === 2 ? 'Carta de Apresentação' : 'Biografia para LinkedIn'}
-        completion={coverLetterCompletion}
+      <ResumeGenerationDialog
+        isDialogOpen={isDialogOpen}
+        onClose={handleResumeGenerationDialogClose}
+        isGenerationSuccessful={isGenerationSuccessful}
+        hasGenerationFailed={hasGenerationFailed}
+        generationAttempt={generationAttempt}
+        resumeId={resumeId || ''}
+        isGenerating={isGenerating}
+      />
+      <BioCoverLetterDialog 
         isOpen={isCoverLetterDialogOpen} 
         onClose={() => setIsCoverLetterDialogOpen(false)}
+        dialogTitle={selectedPrompt === 2 ? 'Carta de Apresentação' : 'Biografia para LinkedIn'}
+        completion={coverLetterCompletion}
+        quota={quotas?.interactions || 0}
+      />
+      <UpgradeDialog
+        isOpen={isUpgradeDialogOpen}
+        onClose={() => setIsUpgradeDialogOpen(false)}
+        title={upgradeDialogTitle}
       />
     </div>
   )

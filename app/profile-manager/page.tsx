@@ -8,13 +8,16 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Plus, Pencil, Check, X, Link as LinkIcon, Trash2 } from 'lucide-react'
-import ProfileWizardComponent from '@/components/profile-wizard/profile-wizard'
+import ProfileWizardComponent from '@/components/ProfileCreationDialog'
 import { useRouter } from 'next/navigation'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { PersonalInfoType } from '@/types/users'
 import { ProfileSectionType, ProfileType } from '@/types/profiles'
 import { getUserData } from '@/services/userServices'
 import { deleteProfile, getProfiles, updateProfile } from '@/services/profileServices'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { getQuotas } from '@/services/quotaServices'
+import { UpgradeDialog } from '@/components/UpgradeAlertDialog'
 
 export default function ProfileManagement() {
   const router = useRouter()
@@ -24,6 +27,8 @@ export default function ProfileManagement() {
   const [editingSection, setEditingSection] = useState<keyof ProfileSectionType | null>(null)
   const [localProfileChanges, setLocalProfileChanges] = useState<ProfileType | null>(null)
   const [isWizardOpen, setIsWizardOpen] = useState(false)
+  const [quota, setQuota] = useState(0)
+  const [isUpgradeAlertDialogOpen, setIsUpgradeAlertDialogOpen] = useState(false)
 
   const ProfileSectionTitle: Record<keyof ProfileSectionType, string> = {
     keywords: "Keywords",
@@ -36,8 +41,12 @@ export default function ProfileManagement() {
   const fetchData = async () => { 
     const fetchedUser = await getUserData()
     const fetchedProfiles = await getProfiles()
+    const fetchedQuotas = await getQuotas()
+
     setPersonalInfo(fetchedUser?.personalInfo || null)
     setProfiles(fetchedProfiles)
+    setQuota(fetchedQuotas.profiles)
+
     if (fetchedProfiles.length > 0) {
       setActiveProfile(fetchedProfiles[0].id)
     }
@@ -104,6 +113,14 @@ export default function ProfileManagement() {
     setRefreshKey(prevKey => prevKey + 1)
   }
 
+  const handleUpgradePlan = () => {
+    setIsUpgradeAlertDialogOpen(true)
+  }
+
+  const handleCloseUpgradeDialog = () => {
+    setIsUpgradeAlertDialogOpen(false)
+  }
+
   if (!personalInfo) {
     return <div>Loading profiles...</div>
   }
@@ -127,10 +144,19 @@ export default function ProfileManagement() {
               </TabsTrigger>
             ))}
           </TabsList>
-          <Button onClick={handleAddProfile} disabled={profiles.length >= 5} className='ml-2'>
-            <Plus className="h-4 w-4 md:mr-2" /> 
-            <p className="hidden md:block">Perfil</p>
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={quota === 0 ? handleUpgradePlan : handleAddProfile} className='ml-2'>
+                  <Plus className="h-4 w-4 md:mr-2" /> 
+                  <p className="hidden md:block">Perfil</p>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{`Voce ainda tem ${quota} perfis disponiveis`}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         {profiles.map((profile) => (
           <TabsContent key={profile.id} value={profile.id} className="space-y-6">
@@ -238,6 +264,11 @@ export default function ProfileManagement() {
     <ProfileWizardComponent 
       isOpen={isWizardOpen} 
       onClose={handleCloseWizard}
+    />
+    <UpgradeDialog 
+      title='Perfis'
+      isOpen={isUpgradeAlertDialogOpen}
+      onClose={handleCloseUpgradeDialog}
     />
     </div>
   )

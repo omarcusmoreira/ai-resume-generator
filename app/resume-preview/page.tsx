@@ -20,6 +20,7 @@ import { UserDataType } from '@/types/users'
 import { ResumeBodyType, ResumeType } from '@/types/resumes'
 import { deleteResume, getResume, updateResume } from '@/services/resumeServices'
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
+import { decrementQuota, getQuotaByType } from '@/services/quotaServices'
 
 export default function ResumePreviewPage() {
   const resumeId = useSearchParams().get('resumeId') as string
@@ -29,16 +30,20 @@ export default function ResumePreviewPage() {
   const [resumeBody, setResumeBody] = useState<ResumeBodyType>()
   const [localResumeBody, setLocalResumeBody] = useState<ResumeBodyType>()
   const [isEditing, setIsEditing] = useState<boolean>(false)
+  const [quota, setQuota] = useState<number>(0)
   const resumeRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
   const fetchUserData = async () => {
     const userData = await getUserData()
     const resume = await getResume(resumeId)
+    const fetchedQuota = await getQuotaByType('resumes')
     if (resume && userData) {
       setUserData(userData)
       setResume(resume)
       setResumeBody(JSON.parse(resume.contentJSON))
+      setIsAccepted(resume.isAccepted)
+      setQuota(fetchedQuota)
     }
   }
 
@@ -111,8 +116,10 @@ export default function ResumePreviewPage() {
     router.push('/')
   }
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     setIsAccepted(true)
+    await decrementQuota('resumes')
+    await updateResume(resumeId, { isAccepted: true } as Partial<ResumeType>)
   }
 
   const updateResumeData = (path: string[], value: string) => {
@@ -212,7 +219,7 @@ export default function ResumePreviewPage() {
       <div className={`p-4 mb-4 rounded-lg ${isAccepted ? 'bg-purple-400' : 'bg-yellow-100'}`}>
         <div className="flex justify-between items-center mb-2">
           <h2 className={`font-medium text-lg ${isAccepted ? 'text-white' : 'text-yellow-800'}`}>
-            {isAccepted ? 'Currículo aceito' : 'Revise seu currículo abaixo.'}
+            {isAccepted ? `Voce pode gerar mais ${quota} currículo(s).` : 'Revise seu currículo abaixo.'}
           </h2>
           {isAccepted && (
             <div className="sm:hidden">
@@ -275,6 +282,7 @@ export default function ResumePreviewPage() {
       <Card className="w-full max-w-4xl mx-auto relative pb-8" ref={resumeRef}>
         <CardContent className="pt-4">
           <div className="flex items-center mb-6">
+            { userData?.personalInfo.profilePicture &&
             <Image
               src={userData?.personalInfo.profilePicture || ''}
               alt={userData?.personalInfo.name || ''}
@@ -282,8 +290,9 @@ export default function ResumePreviewPage() {
               height={80}
               className="rounded-full mr-4"
             />
+            }
             <div>
-              <h1 className="text-xl font-bold">{userData?.personalInfo.name}</h1>
+              <h1 className="text-2xl font-bold">{userData?.personalInfo.name}</h1>
               <p className="text-sm">{userData?.personalInfo.email} | {userData?.personalInfo.phone}</p>
               <p className="text-sm">{userData?.personalInfo.city}</p>
               <a href={userData?.personalInfo.linkedinURL} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center text-sm">

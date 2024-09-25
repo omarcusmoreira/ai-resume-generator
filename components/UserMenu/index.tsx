@@ -18,24 +18,31 @@ import AvatarPlaceholder from '@/public/avatar_placeholder.png'
 import Image from 'next/image'
 import Logo from '@/public/assets/images/logo_horizontal.png';
 import { UserDataType } from '@/types/users'
-import { PlanHistory } from '@/types'
+import { PlanTypeEnum } from '@/types/planHistory'
 import { getUserData } from '@/services/userServices'
-import { getCurrentPlanHistory } from '@/services/planHistoryService'
+import { getCurrentPlan } from '@/services/planHistoryService'
 
 export default function UserMenu() {
     const router = useRouter();
     const [userData, setUserData] = useState<UserDataType>();
-    const [planHistory, setPlanHistory] = useState<PlanHistory>();
+    const [currentPlan, setCurrentPlan] = useState<PlanTypeEnum>();
+
+    const fetchUserData = async () => {
+      const fetchedPlan = await getCurrentPlan();  
+      const fetchedUserData = await getUserData();
+      console.log('Do menu:',fetchedUserData)
+      console.log('Plano', fetchedPlan)
+      console.log(userData?.personalInfo.name || 'Nada aqui ainda...')
+
+      if( fetchedUserData){
+        setUserData(fetchedUserData);
+      }
+      if(fetchedPlan){
+        setCurrentPlan(fetchedPlan);
+      }
+    }
 
     useEffect(() => {
-      const fetchUserData = async () => {
-        const fetchedPlanHistory = await getCurrentPlanHistory();  
-        const fetchedUserData = await getUserData();
-        if (fetchedUserData && fetchedPlanHistory) {
-          setUserData(fetchedUserData);
-          setPlanHistory(fetchedPlanHistory);
-        }
-      }
       fetchUserData();
     }, []);
 
@@ -74,7 +81,7 @@ export default function UserMenu() {
         <DropdownMenuLabel>
           <div className="flex items-center justify-between">
             <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-              {planHistory?.plan || '...'}
+              {currentPlan || PlanTypeEnum.FREE}
             </span>
             <Link href='/user-info'>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">

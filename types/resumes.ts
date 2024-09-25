@@ -1,7 +1,10 @@
 export type ResumeType = {
     id: string;
-    isAccepted: boolean;
+    resumeName: string;
     profileName: string;
+    createdAt: string;
+    updatedAt: string;
+    isAccepted: boolean;
     contentJSON: string; 
   };
 

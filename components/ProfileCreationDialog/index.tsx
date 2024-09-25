@@ -12,6 +12,7 @@ import { v4 } from 'uuid'
 import { ProfileType } from '@/types/profiles'
 import { addProfile } from '@/services/profileServices'
 import { generateKeywords } from '@/hooks/useAi'
+import { decrementQuota } from '@/services/quotaServices'
  
 const initialState: ProfileType = {
   id: '',
@@ -70,7 +71,7 @@ type ProfileWizardComponentProps = {
    onClose: () => void,
   }
 
-export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizardComponentProps) {
+export default function ProfileCreationDialog({ isOpen, onClose }: ProfileWizardComponentProps) {
   const [step, setStep] = useState(1)
   const [profile, setProfile] = useState<ProfileType>(initialState)
   const [suggesting, setSuggesting] = useState<boolean>(false)
@@ -138,10 +139,11 @@ export default function ProfileWizardComponent({ isOpen, onClose }: ProfileWizar
     setProfile(prev => ({ ...prev, profileName: value }))
   }
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     if (user) {
       const profileId = v4();
-      addProfile(profileId, profile)
+      await addProfile(profileId, profile)
+      await decrementQuota('profiles')
       onClose();
     }
   }

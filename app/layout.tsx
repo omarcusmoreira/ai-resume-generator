@@ -3,18 +3,16 @@
 import { usePathname } from 'next/navigation'; // Import usePathname
 import "./globals.css";
 import { AuthProvider } from '@/context/AuthContext';
-import Sidebar from "@/components/Sidebar/page";
+import Sidebar from "@/components/Sidebar/";
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, PlusSquare, Users } from 'lucide-react';
+import { PlusSquare, Settings, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../public/assets/images/logo_quadrado.ico';
-import UserMenu from '@/components/UserMenu/page';
+import UserMenu from '@/components/UserMenu';
 import { useEffect, useState } from 'react';
 import { UserDataType } from '@/types/users';
 import { getUserData } from '@/services/userServices';
-import { getCurrentPlanHistory } from '@/services/planHistoryService';
-import { PlanHistory } from '@/types/planHistory';
 import { useAuth } from '@/context/AuthContext'; // Import useAuth
 import { Progress } from '@/components/ui/progress';
 
@@ -37,7 +35,6 @@ export default function RootLayout({
 function LayoutWithAuth({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [userData, setUserData] = useState<UserDataType | null>(null);
-  const [planHistory, setPlanHistory] = useState<PlanHistory | null>(null);
   const { user, loading } = useAuth();
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
@@ -45,13 +42,11 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
     const fetchData = async () => {
       if (user) {
         try {
-          const [fetchedUser, fetchedLatestPlanHistory] = await Promise.all([
+          const [fetchedUser] = await Promise.all([
             getUserData(),
-            getCurrentPlanHistory()
           ]);
 
           setUserData(fetchedUser);
-          setPlanHistory(fetchedLatestPlanHistory);
         } catch (error) {
           console.error("Error fetching user data:", error);
         } finally {
@@ -94,7 +89,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
         {children}
         
         {/* Floating bottom navbar for mobile */}
-        {pathname !== '/auth-page' && pathname !== '/landing-page' && userData && planHistory && (
+        {pathname !== '/auth-page' && pathname !== '/landing-page' && userData && (
           <nav className="z-50 md:hidden fixed bottom-4 left-4 right-4 bg-pink-50 border-2 border-purple-200 rounded-full shadow-lg p-2 flex justify-around items-center">
             <Link href="/generate-resume" passHref>
               <Button variant="ghost" size="icon" className="w-8 h-8">
@@ -109,9 +104,11 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
             <div className="w-10 h-10 relative">
               <Image src={logo} alt="Logo" layout="fill" objectFit="contain" />
             </div>
+            <Link href="/user-info" passHref>
             <Button variant="ghost" size="icon" className="w-8 h-8">
-              <LayoutDashboard className="h-5 w-5 text-gray-500" />
+              <Settings className="h-5 w-5 text-gray-500" />
             </Button>
+            </Link>
             <div className="w-10 h-10 flex items-center justify-center">
               <UserMenu/>
             </div>

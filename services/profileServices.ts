@@ -35,7 +35,6 @@ export const addProfile = async (profileId: string, profile: ProfileType): Promi
     const docRef = doc(profilesCollection, profileId);
     const updatedProfile = { ...profile, id: profileId };
     await setDoc(docRef, updatedProfile);
-    
     // Update session storage
     const cachedProfiles = getSessionData() || [];
     setSessionData([...cachedProfiles, updatedProfile]);

@@ -11,9 +11,16 @@ interface CoverLetterDialogProps {
   isOpen: boolean
   onClose: () => void
   dialogTitle: string
+  quota: number
 }
 
-export default function CoverLetterDialog({ completion, isOpen, onClose, dialogTitle }: CoverLetterDialogProps) {
+export default function BioCoverLetterDialog({
+  completion,
+  isOpen,
+  onClose,
+  dialogTitle,
+  quota,
+}: CoverLetterDialogProps) {
   const [coverLetter, setCoverLetter] = useState(completion)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -59,9 +66,13 @@ export default function CoverLetterDialog({ completion, isOpen, onClose, dialogT
             </pre>
           )}
         </div>
-        <div className="flex justify-end space-x-2 mt-4">
-          {isEditing ? (
-            <Button onClick={handleSave}>
+        <div className="flex justify-between items-center space-x-2 mt-4">
+          <div className="text-sm text-gray-500">
+          {`Voce pode gerar mais ${quota-1} ${dialogTitle}.`} 
+          </div>
+          <div className='flex gap-2'>
+            {isEditing ? (
+              <Button onClick={handleSave}>
                 <Save className="h-4 w-4 mr-2" />
                 Salvar
             </Button>
@@ -77,6 +88,7 @@ export default function CoverLetterDialog({ completion, isOpen, onClose, dialogT
             </Button>
             </>
           )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

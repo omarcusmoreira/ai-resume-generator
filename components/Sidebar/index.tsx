@@ -2,7 +2,7 @@ import { FileText, LayoutDashboard, PlusSquare, Settings, Users } from "lucide-r
 import { Button } from "../ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import UserMenu from "../UserMenu/page";
+import UserMenu from "../UserMenu";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 import Image from "next/image";
@@ -30,22 +30,24 @@ const Sidebar = () => {
                 <Image src={logo} alt="Logo" width={20} height={20} />
                 <Link href="/generate-resume" passHref>
                     <Button variant="ghost" size="icon" className="w-6 h-6">
-                        <PlusSquare className={pathname === "/generate-resume" ? "h-4 w-4 text-purple-500" : "h-4 w-4 text-gray-500"} />
+                        <PlusSquare className={pathname === "/generate-resume" ? "h-4 w-4 text-purple-600" : "h-4 w-4 text-gray-500"} />
                     </Button>
                 </Link>
                 <Link href="/profile-manager" passHref>
-                    <Button variant="ghost" size="icon" className="w-6 h-6">
-                        <Users className={pathname === "/profile-manager" ? "h-4 w-4 text-purple-500" : "h-4 w-4 text-gray-500"} />
-                    </Button>
+                <Button variant="ghost" size="icon" className="w-6 h-6">
+                    <Users className={pathname === "/profile-manager" ? "h-4 w-4 text-purple-600" : "h-4 w-4 text-gray-500"} />
+                </Button>
+                </Link>
+                <Link href="/user-info" passHref>
+                <Button variant="ghost" size="icon" className="w-6 h-6">
+                    <Settings className={pathname === "/user-info" ? "h-4 w-4 text-purple-600" : "h-4 w-4 text-gray-500"} />
+                </Button>
                 </Link>
                 <Button variant="ghost" size="icon" className="w-6 h-6">
                     <LayoutDashboard className="h-4 w-4 text-gray-300" />
                 </Button>
                 <Button variant="ghost" size="icon" className="w-6 h-6">
                     <FileText className="h-4 w-4 text-gray-300" />
-                </Button>
-                <Button variant="ghost" size="icon" className="w-6 h-6">
-                    <Settings className="h-4 w-4 text-gray-300" />
                 </Button>
                 <Button variant="ghost" size="icon" className="w-6 h-6" onClick={handleLogout}>
                     <p className="text-gray-300">.....</p>
