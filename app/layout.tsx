@@ -5,7 +5,7 @@ import "./globals.css";
 import { AuthProvider } from '@/context/AuthContext';
 import Sidebar from "@/components/Sidebar/";
 import { Button } from '@/components/ui/button';
-import { PlusSquare, Settings, Users } from 'lucide-react';
+import { Files, PlusSquare, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../public/assets/images/logo_quadrado.ico';
@@ -91,9 +91,9 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
         {/* Floating bottom navbar for mobile */}
         {pathname !== '/auth-page' && pathname !== '/landing-page' && userData && (
           <nav className="z-50 md:hidden fixed bottom-4 left-4 right-4 bg-pink-50 border-2 border-purple-200 rounded-full shadow-lg p-2 flex justify-around items-center">
-            <Link href="/generate-resume" passHref>
+            <Link href="/resume-generate" passHref>
               <Button variant="ghost" size="icon" className="w-8 h-8">
-                <PlusSquare className={pathname === "/generate-resume" ? "h-5 w-5 text-purple-500" : "h-5 w-5 text-gray-500"} />
+                <PlusSquare className={pathname === "/resume-generate" ? "h-5 w-5 text-purple-500" : "h-5 w-5 text-gray-500"} />
               </Button>
             </Link>
             <Link href="/profile-manager" passHref>
@@ -104,9 +104,9 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
             <div className="w-10 h-10 relative">
               <Image src={logo} alt="Logo" layout="fill" objectFit="contain" />
             </div>
-            <Link href="/user-info" passHref>
+            <Link href="/resume-manager" passHref>
             <Button variant="ghost" size="icon" className="w-8 h-8">
-              <Settings className="h-5 w-5 text-gray-500" />
+              <Files className="h-5 w-5 text-gray-500" />
             </Button>
             </Link>
             <div className="w-10 h-10 flex items-center justify-center">

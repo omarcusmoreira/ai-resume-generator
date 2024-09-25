@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Sparkles, FileCheck, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { errorMessages, validationProcessMessages } from "@/app/generate-resume/validationProcessMessages";
+import { errorMessages, validationProcessMessages } from "@/app/resume-generate/validationProcessMessages";
 import { useEffect, useState } from "react";
 
 type ResumeGenerationDialogProps = {

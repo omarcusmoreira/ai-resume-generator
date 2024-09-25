@@ -88,7 +88,7 @@ export default function ResumePreviewPage() {
       if (userData && resume) {
         const opt = {
           margin: 5,
-          filename: `CV_${userData.personalInfo.name.replace(/\s+/g, '_')}.pdf`,
+          filename: resume.resumeName,
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { scale: 2 },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },

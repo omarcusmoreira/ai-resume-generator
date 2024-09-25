@@ -1,9 +1,11 @@
+import { Timestamp } from "firebase/firestore";
+
 export type ResumeType = {
     id: string;
     resumeName: string;
     profileName: string;
-    createdAt: string;
-    updatedAt: string;
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
     isAccepted: boolean;
     contentJSON: string; 
   };

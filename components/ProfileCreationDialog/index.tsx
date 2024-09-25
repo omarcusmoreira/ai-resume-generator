@@ -75,6 +75,7 @@ export default function ProfileCreationDialog({ isOpen, onClose }: ProfileWizard
   const [step, setStep] = useState(1)
   const [profile, setProfile] = useState<ProfileType>(initialState)
   const [suggesting, setSuggesting] = useState<boolean>(false)
+  const [isSaving, setIsSaving] = useState<boolean>(false)
   const totalSteps = 6
 
   const { user } = useAuth();
@@ -142,9 +143,11 @@ export default function ProfileCreationDialog({ isOpen, onClose }: ProfileWizard
   const handleFinish = async () => {
     if (user) {
       const profileId = v4();
+      setIsSaving(true)
       await addProfile(profileId, profile)
       await decrementQuota('profiles')
       onClose();
+      setIsSaving(false)
     }
   }
 
@@ -271,7 +274,7 @@ export default function ProfileCreationDialog({ isOpen, onClose }: ProfileWizard
               </Button>
               <Button 
                 onClick={step === totalSteps ? handleFinish : handleNext}
-                disabled={!isStepValid()}
+                disabled={!isStepValid() || isSaving}
               >
                 {step === totalSteps ? 'Salvar' : 'Avançar'}
               </Button>

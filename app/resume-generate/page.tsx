@@ -26,6 +26,7 @@ import ProfileCreationDialogComponent from '@/components/ProfileCreationDialog'
 import { decrementQuota, getQuotas } from '@/services/quotaServices'
 import { QuotasType } from '@/types/planHistory'
 import { UpgradeDialog } from '@/components/UpgradeAlertDialog'
+import { Timestamp } from 'firebase/firestore'
 
 export default function GenerateResumePage() {
 
@@ -108,6 +109,10 @@ export default function GenerateResumePage() {
       console.error('Please select a profile and enter a job description');
       return;
     }
+    if (!userData){
+      console.error('No user');
+      return
+    }
     setIsDialogOpen(true)
     setIsGenerating(true)
     
@@ -143,7 +148,12 @@ export default function GenerateResumePage() {
           if (validateCompletion(trimmedCompletion)) {
             const resume = {
               id: newResumeId,
+              createdAt: Timestamp.now(),
+              resumeName: `CV_${userData.personalInfo.name.replace(/\s+/g, '_')}_${profile.profileName.replace(/\s+/g, '_')}.pdf`,
               contentJSON: trimmedCompletion,
+              isAccepted: false,
+              profileName: profile.profileName, 
+              updatedAt: Timestamp.now(),
             } as ResumeType;
             await addResume(newResumeId, resume);
             setIsGenerationSuccessful(true)
