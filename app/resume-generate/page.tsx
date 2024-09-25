@@ -238,19 +238,20 @@ export default function GenerateResumePage() {
               <Select 
                 key={refreshKey}
                 onValueChange={(value) => setSelectedProfile(value)}
+                disabled={profiles.length === 0}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={profiles.length === 0 ? "Crie seu primeiro perfil" : "Escolha um perfil"} />
+                  <SelectValue placeholder={profiles.length === 0 ? "Crie seu primeiro perfil" : "Escolha um perfil"}/>
                 </SelectTrigger>
                 <SelectContent> 
-                  {profiles?.map((profile, index) => (
-                    profile.id ? (
-                      <SelectItem key={profile.id} value={profile.id}>
-                        {profile.profileName || `Profile ${index + 1}`}
-                      </SelectItem>
-                    ) : null
-                  ))}
-                </SelectContent>
+                {profiles?.map((profile, index) => (
+                  profile.id ? (
+                    <SelectItem key={profile.id} value={profile.id}>
+                      {profile.profileName || `Profile ${index + 1}`}
+                    </SelectItem>
+                  ) : null
+                ))}
+              </SelectContent>
               </Select>         
               <Button 
                 variant="outline" 
