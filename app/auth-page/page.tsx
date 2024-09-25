@@ -54,6 +54,8 @@ export default function AuthPage() {
 
   const [rememberMe, setRememberMe] = useState(false)
 
+  const [isCreating, setIsCreating] = useState(false)
+
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -83,7 +85,7 @@ export default function AuthPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setSignupError('') // Reset error state
-
+    setIsCreating(true)
     // Basic Validation
     if (!signupName || !signupEmail || !signupPassword || !signupConfirmPassword) {
       setSignupError('Por favor, preencha todos os campos.')
@@ -130,6 +132,7 @@ export default function AuthPage() {
       await addPlanHistory(planHistoryId, planHistory)
 
       router.push('/')
+      setIsCreating(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Sign-up error', error)
@@ -307,7 +310,7 @@ export default function AuthPage() {
                   {signupError && (
                     <p className="text-red-500 text-sm">{signupError}</p>
                   )}
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" disabled={isCreating}>
                     Cadastrar
                   </Button>
                   <Button
