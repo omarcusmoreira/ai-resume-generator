@@ -113,10 +113,12 @@ export default function UserMenu() {
           <Crown   className="mr-2 h-4 w-4" />
           Preços
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Bug   className="mr-2 h-4 w-4" />
-          Relatar Problema
-        </DropdownMenuItem>
+        <Link href={'https://forms.gle/9KKkaRSKpsaHNqz67'}>
+          <DropdownMenuItem>
+            <Bug   className="mr-2 h-4 w-4" />
+            Relatar Problema
+          </DropdownMenuItem>
+        </Link>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-red-500 focus:text-red-500 focus:bg-red-100" onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4"/>

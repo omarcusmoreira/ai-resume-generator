@@ -102,13 +102,16 @@ export default function LandingPage() {
         </Link>
         <nav className="ml-auto flex items-center gap-4 sm:gap-6">
           <Link className="text-sm font-medium hover:underline underline-offset-4 hidden sm:inline-block" href="#features">
-            Features
+            Recursos
           </Link>
           <Link className="text-sm font-medium hover:underline underline-offset-4 hidden sm:inline-block" href="#testimonials">
-            Testimonials
+            Relatos
           </Link>
           <Link className="text-sm font-medium hover:underline underline-offset-4 hidden sm:inline-block" href="#pricing">
-            Pricing
+            Preços
+          </Link>
+          <Link className="text-sm font-medium hover:underline underline-offset-4 hidden sm:inline-block" href="https://forms.gle/9KKkaRSKpsaHNqz67">
+            <Button size="sm" variant='destructive'>Problemas?</Button>
           </Link>
           <Link href="/auth-page">
             <Button size="sm">Register/Login</Button>
@@ -296,6 +299,14 @@ export default function LandingPage() {
         </section>
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
+        <div className="flex flex-col items-center md:hidden">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Encontrou algum problema? Ajude-nos a melhorar.</p>
+          <Link href="https://forms.gle/9KKkaRSKpsaHNqz67" className="text-">
+            <Button type="submit" variant="destructive">
+              Relatar
+            </Button>
+          </Link>
+        </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">© 2023 MeContrata.ai - Todos os direitos reservados.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4" href="#">
