@@ -49,6 +49,7 @@ export default function ResumePreviewPage() {
 
   useEffect(() => {
     fetchUserData()
+    //eslint-disable-next-line
   }, [])
 
   useEffect(() => {

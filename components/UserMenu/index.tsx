@@ -44,6 +44,7 @@ export default function UserMenu() {
 
     useEffect(() => {
       fetchUserData();
+      //eslint-disable-next-line
     }, []);
 
 
