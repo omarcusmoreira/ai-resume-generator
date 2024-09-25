@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation'
 import { signOut } from 'firebase/auth'
 import { auth } from '@/firebaseConfig'
 import Link from 'next/link'
-import AvatarPlaceholder from '@/public/avatar_placeholder.png'
+import AvatarPlaceholder from '@/public/assets/images/avatar_placeholder.jpg'
 import Image from 'next/image'
 import Logo from '@/public/assets/images/logo_horizontal.png';
 import { UserDataType } from '@/types/users'
@@ -61,7 +61,7 @@ export default function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-        <Avatar className="h-6 w-6 cursor-pointer hover:opacity-80 transition-opacity rounded-full">
+        <Avatar className="h-6 w-6 cursor-pointer hover:opacity-80 transition-opacity rounded-full border-2 border-purple-400">
           {userData?.personalInfo.profilePicture ?  (
             <AvatarImage
               src={userData.personalInfo.profilePicture}
