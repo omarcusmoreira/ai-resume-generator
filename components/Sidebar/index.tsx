@@ -40,7 +40,7 @@ const Sidebar = () => {
                 </Link>
                 <Link href="/resume-manager" passHref>
                 <Button variant="ghost" size="icon" className="w-6 h-6">
-                    <Files className={pathname === "/profile-manager" ? "h-4 w-4 text-purple-600" : "h-4 w-4 text-gray-500"} />
+                    <Files className={pathname === "/resume-manager" ? "h-4 w-4 text-purple-600" : "h-4 w-4 text-gray-500"} />
                 </Button>
                 </Link>
                 <Link href="/user-info" passHref>
