@@ -128,8 +128,8 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="space-x-4">
-                <Button className="bg-white text-black hover:bg-gray-200">Get Started</Button>
-                <Button variant="outline" className="text-white border-white hover:bg-white hover:text-black">Learn More</Button>
+                <Button className="bg-white text-black hover:bg-gray-200">Comece Agora</Button>
+                <Button variant="outline" className="text-white border-white hover:bg-white hover:text-black">Saiba Mais</Button>
               </div>
             </div>
           </div>
@@ -137,42 +137,42 @@ export default function LandingPage() {
         <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 light:bg-gray-800 flex justify-center">
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12">
-              Features
+              Recursos
             </h2>
             <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <CardContent className="flex flex-col items-center space-y-4 p-6">
                   <FileText className="h-12 w-12 text-primary" />
-                  <h3 className="text-xl font-bold">AI-Powered Resume Generation</h3>
+                  <h3 className="text-xl font-bold">Geração de Currículo com IA</h3>
                   <p className="text-center text-gray-500 dark:text-gray-400">
-                    Create tailored resumes for each job opportunity with our advanced AI technology.
+                    Crie currículos personalizados para cada oportunidade de emprego com nossa tecnologia avançada de IA.
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="flex flex-col items-center space-y-4 p-6">
                   <User className="h-12 w-12 text-primary" />
-                  <h3 className="text-xl font-bold">Profile Management</h3>
+                  <h3 className="text-xl font-bold">Gerenciamento de Perfil</h3>
                   <p className="text-center text-gray-500 dark:text-gray-400">
-                    Easily manage and update your professional profile to stay current in your job search.
+                    Gerencie e atualize facilmente seu perfil profissional para se manter atualizado em sua busca de emprego.
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="flex flex-col items-center space-y-4 p-6">
                   <History className="h-12 w-12 text-primary" />
-                  <h3 className="text-xl font-bold">Application Tracking</h3>
+                  <h3 className="text-xl font-bold">Rastreamento de Candidaturas</h3>
                   <p className="text-center text-gray-500 dark:text-gray-400">
-                    Keep track of all your job applications and their statuses in one place.
+                    Acompanhe todas as suas candidaturas e seus status em um só lugar.
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="flex flex-col items-center space-y-4 p-6">
                   <BarChart className="h-12 w-12 text-primary" />
-                  <h3 className="text-xl font-bold">Performance Analytics</h3>
+                  <h3 className="text-xl font-bold">Análise de Desempenho</h3>
                   <p className="text-center text-gray-500 dark:text-gray-400">
-                    Gain insights into your job search performance with detailed statistics and data visualization.
+                    Obtenha insights sobre o desempenho da sua busca de emprego com estatísticas detalhadas e visualização de dados.
                   </p>
                 </CardContent>
               </Card>
@@ -182,24 +182,24 @@ export default function LandingPage() {
         <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 flex justify-center">
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12">
-              What Our Users Say
+              O que nossos usuários dizem
             </h2>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 {
-                  name: "Alex Johnson",
-                  role: "Software Engineer",
-                  content: "AI Resume Pro helped me land my dream job! The tailored resumes made all the difference."
+                  name: "Caio Pereira",
+                  role: "Gestor de mídias sociais",
+                  content: "Estou muito satisfeito com a velocidade de criação dos currículos. É impressionante, com apenas um clique eu posso sentar e aguardar que a IA fazer tudo pra mim!"
                 },
                 {
-                  name: "Sarah Lee",
-                  role: "Marketing Specialist",
-                  content: "The application tracking feature is a game-changer. I'm more organized than ever in my job search."
+                  name: "Bruno Leonardo",
+                  role: "Desenvolvedor de Software",
+                  content: "Eu estava cansado de ser ignorado pelos algorítmos de recrutamento. Agora com um Currículo feito especialmente para cada vaga, minhas chances dobraram!"
                 },
                 {
-                  name: "Michael Chen",
-                  role: "Data Analyst",
-                  content: "The performance analytics gave me insights that helped me improve my job search strategy significantly."
+                  name: "Thiago Moreira",
+                  role: "Deisgner",
+                  content: "A experiência de se cadastrar em várias oportunidades sempre foi muito dificil, mas agora com apenas um clique eu posso criar um currículo para enviar para várias vagas ."
                 }
               ].map((testimonial, index) => (
                 <Card key={index}>
@@ -219,7 +219,7 @@ export default function LandingPage() {
         <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800 flex justify-center">
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12">
-              Choose Your Plan
+              Escolha seu plano
             </h2>
             <div className="overflow-x-auto">
               <Table>
@@ -259,8 +259,8 @@ export default function LandingPage() {
             </div>
             <div className="mt-10 flex justify-center space-x-4">
               {pricingPlans.map((plan) => (
-                <Button key={plan.name} variant={plan.name === "Plus" ? "default" : "outline"}>
-                  Choose {plan.name}
+                <Button disabled key={plan.name} variant={plan.name === "Plus" ? "default" : "outline"}>
+                  {plan.name}
                 </Button>
               ))}
             </div>
@@ -271,23 +271,23 @@ export default function LandingPage() {
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Ready to Revolutionize Your Job Search?
+                  Pronto para revolucionar sua busca de emprego?
                 </h2>
                 <p className="mx-auto max-w-[600px] text-primary-foreground/90 md:text-xl">
-                  Join AI Resume Pro today and take the first step towards your dream career.
+                  Junte-se ao MeContrata.ai hoje e dê o primeiro passo em direção à sua carreira dos sonhos.
                 </p>
               </div>
               <div className="w-full max-w-sm space-y-2">
                 <form className="flex space-x-2">
-                  <Input className="max-w-lg flex-1 bg-primary-foreground text-primary" placeholder="Enter your email" type="email" />
+                  <Input className="max-w-lg flex-1 bg-primary-foreground text-primary" placeholder="Entre seu email" type="email" />
                   <Button type="submit" variant="secondary">
-                    Get Started
+                    Cadastrar
                   </Button>
                 </form>
                 <p className="text-xs text-primary-foreground/90">
-                  By signing up, you agree to our{" "}
+                  Ao se inscrever, você concorda com nossos{" "}
                   <Link className="underline underline-offset-2" href="#">
-                    Terms & Conditions
+                    Termos e Condições
                   </Link>
                 </p>
               </div>
@@ -296,13 +296,13 @@ export default function LandingPage() {
         </section>
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-gray-500 dark:text-gray-400">© 2023 AI Resume Pro. All rights reserved.</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">© 2023 MeContrata.ai - Todos os direitos reservados.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Terms of Service
+            Termos de Serviço
           </Link>
           <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Privacy
+            Privacidade
           </Link>
         </nav>
       </footer>
