@@ -189,7 +189,7 @@ export default function ProfileManagement() {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Deseja mesmo deletar o perfil?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Atenção, Esta ação não pode ser desfeita. 
+                        Atenção! Esta ação não pode ser desfeita. 
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

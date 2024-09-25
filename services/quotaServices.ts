@@ -97,10 +97,6 @@ export const incrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opport
 
             const currentQuota = planData.quotas[quotaType];
 
-            if (currentQuota <= 0) {
-                throw new Error(`No ${quotaType} quotas left`);
-            }
-
             const updatedQuota = currentQuota + 1;
 
             // Update the quota in the document
@@ -108,12 +104,12 @@ export const incrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opport
                 [`quotas.${quotaType}`]: updatedQuota,
             });
 
-            console.log(`Quota for ${quotaType} decremented successfully. New quota: ${updatedQuota}`);
+            console.log(`Quota for ${quotaType} incremented successfully. New quota: ${updatedQuota}`);
         });
 
     } catch (error) {
         console.error('Error decrementing quota:', error);
-        throw new Error('Failed to decrement quota');
+        throw new Error('Failed to increment quota');
     }
 };
 export const getQuotaByType = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions'): Promise<number> => {
