@@ -158,6 +158,15 @@ export default function AuthPage() {
         personalInfo: personalInfo,
       }
       await addUser(userState)
+      const planHistoryId = v4()
+      const planHistory = new PlanHistory({
+        id: planHistoryId,
+        plan: PlanTypeEnum.FREE,
+        changeType: PlanChangeTypeEnum.NEW,
+        amountPaid: 0,
+      })
+
+      await addPlanHistory(planHistoryId, planHistory)
       router.push('/')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
