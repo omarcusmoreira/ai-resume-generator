@@ -60,6 +60,62 @@ export const decrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opport
     }
 };
 
+export const incrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions'): Promise<void> => {
+    try {
+        // Get Firebase Firestore and Auth instances
+        const db = getFirestore();
+        const auth = getAuth();
+        const user = auth.currentUser;
+
+        if (!user) {
+            throw new Error('User must be authenticated');
+        }
+
+        const userId = user.uid;
+
+        // Get the latest plan history document for the user
+        const planHistoryRef = collection(db, 'users', userId, 'planHistory');
+        const planHistoryQuery = query(planHistoryRef, orderBy('planChangeDate', 'desc'), limit(1));
+
+        const planHistorySnap = await getDocs(planHistoryQuery);
+
+        if (planHistorySnap.empty) {
+            throw new Error('Plan history not found');
+        }
+
+        const latestPlanDoc = planHistorySnap.docs[0];
+        const latestPlanDocRef = doc(db, 'users', userId, 'planHistory', latestPlanDoc.id);
+
+        // Run a transaction to ensure atomicity
+        await runTransaction(db, async (transaction) => {
+            const planDoc = await transaction.get(latestPlanDocRef);
+            const planData = planDoc.data();
+
+            if (!planData || !planData.quotas.hasOwnProperty(quotaType)) {
+                throw new Error('Invalid quota type');
+            }
+
+            const currentQuota = planData.quotas[quotaType];
+
+            if (currentQuota <= 0) {
+                throw new Error(`No ${quotaType} quotas left`);
+            }
+
+            const updatedQuota = currentQuota + 1;
+
+            // Update the quota in the document
+            transaction.update(latestPlanDocRef, {
+                [`quotas.${quotaType}`]: updatedQuota,
+            });
+
+            console.log(`Quota for ${quotaType} decremented successfully. New quota: ${updatedQuota}`);
+        });
+
+    } catch (error) {
+        console.error('Error decrementing quota:', error);
+        throw new Error('Failed to decrement quota');
+    }
+};
 export const getQuotaByType = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions'): Promise<number> => {
     const db = getFirestore();
     const auth = getAuth(); 

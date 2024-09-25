@@ -16,7 +16,7 @@ import { ProfileSectionType, ProfileType } from '@/types/profiles'
 import { getUserData } from '@/services/userServices'
 import { deleteProfile, getProfiles, updateProfile } from '@/services/profileServices'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { getQuotas } from '@/services/quotaServices'
+import { getQuotas, incrementQuota } from '@/services/quotaServices'
 import { UpgradeDialog } from '@/components/UpgradeAlertDialog'
 
 export default function ProfileManagement() {
@@ -104,6 +104,7 @@ export default function ProfileManagement() {
 
   const handleDeleteProfile = async (profileId: string) => {
     await deleteProfile(profileId);
+    await incrementQuota('profiles');
     if (profiles.length > 1) {
       const newActiveProfile = profiles.find(p => p.id !== profileId)?.id;
       if (newActiveProfile) {
