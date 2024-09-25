@@ -134,7 +134,7 @@ export default function ProfileManagement() {
       { profiles.length === 0 ? (
         <div className="flex justify-center items-center flex-col">
           <UserX className='h-20 w-20 text-gray-300 mb-4'/>
-          <p className="text-2xl text-gray-400">Voce ainda não tem nenhum perfil cadastrado.</p>
+          <p className="text-2xl text-gray-400">Voce ainda não tem nenhum perfil.</p>
           <p className="text-base text-gray-600 mb-4">Cadastre seu primeiro perfil para poder começar a criar seus currículos.</p>
           <Button onClick={quota === 0 ? handleUpgradePlan : handleAddProfile} className='mt-4 mb-6'>
               <Plus className="h-4 w-4 md:mr-2" /> 
