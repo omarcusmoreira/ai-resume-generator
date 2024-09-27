@@ -28,22 +28,22 @@ export type QuotasType = {
       interactions: 20,
       profiles: 2,
       resumes: 5,
-      opportunities: 3,
-      contacts: 3,
+      opportunities: 10,
+      contacts: 10,
     },
     [PlanTypeEnum.BASIC]: {
       interactions: 50,
       profiles: 5,
       resumes: 15,
-      opportunities: 20,
-      contacts: 20,
+      opportunities: 30,
+      contacts: 30,
     },
     [PlanTypeEnum.PREMIUM]: {
       interactions: 100,
       profiles: 10,
       resumes: 30,
       opportunities: 100,
-      contacts: 100,
+      contacts: 200,
     },
   };
 

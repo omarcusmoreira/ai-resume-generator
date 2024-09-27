@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card"
 import { Briefcase, Users, Calendar } from "lucide-react"
 import { Timestamp } from 'firebase/firestore'
-import { OpportunityType } from "@/types/opportunities"
+import { OpportunityStatusEnum, OpportunityType } from "@/types/opportunities"
 import { TimestampRenderer } from "@/utils/TimestampRender"
 import { useEffect, useState } from "react"
 import { UserDataType } from "@/types/users"
@@ -92,7 +92,7 @@ return(
                 <div>
                     <CardDescription className="text-xs text-purple-800">Entrevistas Agendadas</CardDescription>
                     <CardTitle className="text-md font-bold text-purple-600">
-                    {opportunities.filter(opp => opp.nextInterviewDate).length}
+                    {opportunities.filter(opp => opp.status === OpportunityStatusEnum.INTERVIEW).length}
                     </CardTitle>
                 </div>
                 </CardContent>

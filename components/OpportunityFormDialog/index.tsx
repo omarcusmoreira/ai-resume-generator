@@ -57,7 +57,7 @@ export function OpportunityFormDialog({
         contactName: initialOpportunity.contactName || '',
         contactPhone: initialOpportunity.contactPhone || '',
         opportunityDate: initialOpportunity.opportunityDate || undefined,
-        nextInterviewDate: initialOpportunity.nextInterviewDate || undefined,
+        nextInterviewDate: initialOpportunity.nextInterviewDate || null,
       });
     }
   }, [initialOpportunity]);
@@ -231,12 +231,12 @@ export function OpportunityFormDialog({
 
                 {/* Next Interview */}
                 <div className="space-y-2">
-                    <Label htmlFor="company" className="text-purple-800">Entrevista</Label>
+                    <Label htmlFor="nextInterviewDate" className="text-purple-800">Entrevista</Label>
                     <Input 
-                        id="company" 
+                        id="nextInterviewDate" 
                         value={opportunity.nextInterviewDate ? opportunity.nextInterviewDate.toDate().toISOString().split('T')[0] : ''}
                         type='date' 
-                        onChange={(e) => setOpportunity({ ...opportunity, nextInterviewDate: Timestamp.fromDate(new Date(e.target.value)) })}
+                        onChange={(e) => setOpportunity({ ...opportunity, nextInterviewDate: e.target.value ? Timestamp.fromDate(new Date(e.target.value)) : null })}
                         placeholder="Nome da empresa" 
                         className="border-purple-300 focus:border-purple-500" 
                     /> 

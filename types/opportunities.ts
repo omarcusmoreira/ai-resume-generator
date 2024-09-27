@@ -20,7 +20,7 @@ export type OpportunityType = {
     resumeName: string;
     profileName: string;
     opportunityDate: Timestamp;
-    nextInterviewDate?: Timestamp;
+    nextInterviewDate?: Timestamp | null;
     source?: string;
 };
   

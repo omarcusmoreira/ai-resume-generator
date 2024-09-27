@@ -162,7 +162,7 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
         <Card className="bg-white shadow rounded-lg overflow-hidden">
           <CardHeader className="bg-purple-100 p-4">
             <CardTitle className="text-xl font-bold text-purple-800">Oportunidades Atuais</CardTitle>
-            <CardDescription className="text-purple-600">{`Gerencie suas oportunidades de emprego em andamento - Voce ainda tem ${opportunityQuota} vagas`}</CardDescription>
+            <CardDescription className="text-purple-600">{`Gerencie suas oportunidades de emprego em andamento - Voce tem mais ${opportunityQuota} vagas para cadastrar`}</CardDescription>
             <div className="mt-2 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input

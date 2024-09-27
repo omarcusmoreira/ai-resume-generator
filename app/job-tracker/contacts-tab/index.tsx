@@ -119,7 +119,7 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
     <Card className="bg-white shadow rounded-lg overflow-hidden">
       <CardHeader className="bg-purple-100 p-4">
         <CardTitle className="text-xl font-bold text-purple-800">Contatos de RH</CardTitle>
-        <CardDescription className="text-purple-600">{`Lista de contatos de RH registrados - ${contactQuota} Contatos Restantes`}</CardDescription>
+        <CardDescription className="text-purple-600">{`Lista de contatos de RH registrados - Voce tem mais ${contactQuota} contatos para cadastrar`}</CardDescription>
         <div className="mt-2 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
