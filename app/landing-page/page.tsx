@@ -1,293 +1,226 @@
+import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { CardContent, Card } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { FileText, History, BarChart, User, CheckCircle, X } from "lucide-react"
-import Link from "next/link"
-import logoImg from '../../public/assets/images/logo_horizontal.png'
-import Image from 'next/image'
-
-type Features = {
-  "Geração do CV com interações": string;
-  "Criação de perfis": string;
-  "Número de CVs": string;
-  "Sugestão de palavras chave": boolean;
-  "Histórico de CVs enviados": boolean;
-  "Lembrete de feedback": boolean;
-  "Criar página de CVs compartilhável": boolean;
-  "Exportar CV": string;
-  "Recomendação de preparação para entrevista": boolean;
-  "Tradução do CV": string | boolean;
-};
-
-type PricingPlan = {
-  name: string;
-  price: string;
-  features: Features;
-};
-
-const pricingPlans: PricingPlan[] = [
-  {
-    name: "Free",
-    price: "R$0",
-    features: {
-      "Geração do CV com interações": "Limitado",
-      "Criação de perfis": "1",
-      "Número de CVs": "1",
-      "Sugestão de palavras chave": true,
-      "Histórico de CVs enviados": false,
-      "Lembrete de feedback": false,
-      "Criar página de CVs compartilhável": false,
-      "Exportar CV": "PDF",
-      "Recomendação de preparação para entrevista": false,
-      "Tradução do CV": false
-    }
-  },
-  {
-    name: "Basic",
-    price: "R$29,99/mês",
-    features: {
-      "Geração do CV com interações": "Ilimitado",
-      "Criação de perfis": "3",
-      "Número de CVs": "5",
-      "Sugestão de palavras chave": true,
-      "Histórico de CVs enviados": true,
-      "Lembrete de feedback": true,
-      "Criar página de CVs compartilhável": false,
-      "Exportar CV": "PDF, Word",
-      "Recomendação de preparação para entrevista": false,
-      "Tradução do CV": false
-    }
-  },
-  {
-    name: "Plus",
-    price: "R$49,99/mês",
-    features: {
-      "Geração do CV com interações": "Ilimitado",
-      "Criação de perfis": "5",
-      "Número de CVs": "10",
-      "Sugestão de palavras chave": true,
-      "Histórico de CVs enviados": true,
-      "Lembrete de feedback": true,
-      "Criar página de CVs compartilhável": true,
-      "Exportar CV": "PDF, Word, TXT",
-      "Recomendação de preparação para entrevista": true,
-      "Tradução do CV": "1 idioma"
-    }
-  },
-  {
-    name: "Premium",
-    price: "R$79,99/mês",
-    features: {
-      "Geração do CV com interações": "Ilimitado",
-      "Criação de perfis": "Ilimitado",
-      "Número de CVs": "Ilimitado",
-      "Sugestão de palavras chave": true,
-      "Histórico de CVs enviados": true,
-      "Lembrete de feedback": true,
-      "Criar página de CVs compartilhável": true,
-      "Exportar CV": "Todos os formatos",
-      "Recomendação de preparação para entrevista": true,
-      "Tradução do CV": "Múltiplos idiomas"
-    }
-  }
-]
+import { FileText, Zap, Target, Rocket, Star, Bug, Menu } from "lucide-react"
+import logo_horizontal from '../../public/assets/images/logo_horizontal.png'
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="px-4 lg:px-6 h-16 flex items-center">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-purple-100 to-white">
+      <header className="px-4 lg:px-6 h-16 flex items-center justify-between sticky top-0 bg-white bg-opacity-90 backdrop-blur-sm z-50">
         <Link className="flex items-center justify-center" href="#">
-          <Image src={logoImg} alt="Logo" width={150} height={40} />
+          <Image src={logo_horizontal} alt="MeContrata.ai Logo" width={150} height={40} />
         </Link>
-        <nav className="ml-auto flex items-center gap-4 sm:gap-6">
-          <Link className="text-sm font-medium hover:underline underline-offset-4 hidden sm:inline-block" href="#features">
-            Recursos
-          </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4 hidden sm:inline-block" href="#testimonials">
-            Relatos
-          </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4 hidden sm:inline-block" href="#pricing">
-            Preços
-          </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4 hidden sm:inline-block" href="https://forms.gle/9KKkaRSKpsaHNqz67">
-            <Button size="sm" variant='destructive'>Problemas?</Button>
-          </Link>
+        <div className="flex items-center gap-4">
+          <nav className="hidden md:flex items-center gap-4 sm:gap-6">
+            <Link className="text-sm font-medium hover:underline underline-offset-4" href="#features">
+              Recursos
+            </Link>
+            <Link className="text-sm font-medium hover:underline underline-offset-4" href="#how-it-works">
+              Como Funciona
+            </Link>
+            <Link className="text-sm font-medium hover:underline underline-offset-4" href="#pricing">
+              Preços
+            </Link>
+            <Link href="https://forms.gle/9KKkaRSKpsaHNqz67" target="_blank" rel="noopener noreferrer">
+              <Button size="sm" variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-100">
+                <Bug className="h-4 w-4 mr-2" />
+                Reportar Bug
+              </Button>
+            </Link>
+          </nav>
           <Link href="/auth-page">
-            <Button size="sm">Register/Login</Button>
+            <Button size="sm" className="bg-purple-600 hover:bg-purple-700">Entrar / Registrar</Button>
           </Link>
-        </nav>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" className="md:hidden">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="bg-white">
+              <nav className="flex flex-col gap-4">
+                <Link className="text-sm font-medium hover:underline underline-offset-4" href="#features">
+                  Recursos
+                </Link>
+                <Link className="text-sm font-medium hover:underline underline-offset-4" href="#how-it-works">
+                  Como Funciona
+                </Link>
+                <Link className="text-sm font-medium hover:underline underline-offset-4" href="#pricing">
+                  Preços
+                </Link>
+                <Link href="https://forms.gle/9KKkaRSKpsaHNqz67" target="_blank" rel="noopener noreferrer">
+                  <Button size="sm" variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-100">
+                    <Bug className="h-4 w-4 mr-2" />
+                    Reportar Bug
+                  </Button>
+                </Link>
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
       </header>
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 flex justify-center bg-cover bg-center" style={{ backgroundImage: "url('/hero_image.jpg')" }}>
-          <div className="container px-4 md:px-6 relative z-10">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+          <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-white">
-                Potencialize sua busca de emprego com IA
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-purple-800">
+                  Encontre seu emprego dos sonhos com IA
                 </h1>
-                <p className="mx-auto max-w-[700px] text-gray-200 md:text-xl">
-                Crie currículos personalizados, gerencie seu perfil e acompanhe suas candidaturas com o poder da IA.
+                <p className="mx-auto max-w-[700px] text-gray-600 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Gerencie suas candidaturas, crie currículos personalizados e aumente suas chances de sucesso com o poder da Inteligência Artificial.
                 </p>
               </div>
               <div className="space-x-4">
-                <Button className="bg-white text-black hover:bg-gray-200">Comece Agora</Button>
-                <Button variant="outline" className="text-white border-white hover:bg-white hover:text-black">Saiba Mais</Button>
+                <Button className="bg-purple-600 hover:bg-purple-700">Comece Grátis</Button>
+                <Button variant="outline">Veja Como Funciona</Button>
               </div>
             </div>
           </div>
         </section>
-        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 light:bg-gray-800 flex justify-center">
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-white">
           <div className="container px-4 md:px-6">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12">
-              Recursos
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12 text-purple-800">
+              Recursos Incríveis
             </h2>
             <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <CardContent className="flex flex-col items-center space-y-4 p-6">
-                  <FileText className="h-12 w-12 text-primary" />
+                  <Zap className="h-12 w-12 text-purple-600" />
                   <h3 className="text-xl font-bold">Geração de Currículo com IA</h3>
                   <p className="text-center text-gray-500 dark:text-gray-400">
-                    Crie currículos personalizados para cada oportunidade de emprego com nossa tecnologia avançada de IA.
+                    Crie currículos personalizados para cada vaga com um clique, usando nossa IA avançada.
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="flex flex-col items-center space-y-4 p-6">
-                  <User className="h-12 w-12 text-primary" />
-                  <h3 className="text-xl font-bold">Gerenciamento de Perfil</h3>
-                  <p className="text-center text-gray-500 dark:text-gray-400">
-                    Gerencie e atualize facilmente seu perfil profissional para se manter atualizado em sua busca de emprego.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="flex flex-col items-center space-y-4 p-6">
-                  <History className="h-12 w-12 text-primary" />
+                  <Target className="h-12 w-12 text-purple-600" />
                   <h3 className="text-xl font-bold">Rastreamento de Candidaturas</h3>
                   <p className="text-center text-gray-500 dark:text-gray-400">
-                    Acompanhe todas as suas candidaturas e seus status em um só lugar.
+                    Acompanhe todas as suas candidaturas e status em um só lugar, nunca perca uma oportunidade.
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="flex flex-col items-center space-y-4 p-6">
-                  <BarChart className="h-12 w-12 text-primary" />
-                  <h3 className="text-xl font-bold">Análise de Desempenho</h3>
+                  <Rocket className="h-12 w-12 text-purple-600" />
+                  <h3 className="text-xl font-bold">Otimização para ATS</h3>
                   <p className="text-center text-gray-500 dark:text-gray-400">
-                    Obtenha insights sobre o desempenho da sua busca de emprego com estatísticas detalhadas e visualização de dados.
+                    Aumente suas chances de passar pelos sistemas de rastreamento de candidatos (ATS) com currículos otimizados.
                   </p>
                 </CardContent>
               </Card>
             </div>
           </div>
         </section>
-        <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 flex justify-center">
+        <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-purple-50">
           <div className="container px-4 md:px-6">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12">
-              O que nossos usuários dizem
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12 text-purple-800">
+              Como Funciona
             </h2>
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {[
-                {
-                  name: "Caio Pereira",
-                  role: "Gestor de mídias sociais",
-                  content: "Estou muito satisfeito com a velocidade de criação dos currículos. É impressionante, com apenas um clique eu posso sentar e aguardar que a IA fazer tudo pra mim!"
-                },
-                {
-                  name: "Bruno Leonardo",
-                  role: "Desenvolvedor de Software",
-                  content: "Eu estava cansado de ser ignorado pelos algorítmos de recrutamento. Agora com um Currículo feito especialmente para cada vaga, minhas chances dobraram!"
-                },
-                {
-                  name: "Thiago Moreira",
-                  role: "Deisgner",
-                  content: "A experiência de se cadastrar em várias oportunidades sempre foi muito dificil, mas agora com apenas um clique eu posso criar um currículo para enviar para várias vagas ."
-                }
-              ].map((testimonial, index) => (
-                <Card key={index}>
-                  <CardContent className="flex flex-col items-center space-y-4 p-6">
-                    <CheckCircle className="h-12 w-12 text-green-500" />
-                    <p className="text-center italic">{`"${testimonial.content}"`}</p>
-                    <div className="text-center">
-                      <h4 className="font-bold">{testimonial.name}</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="grid gap-8 items-center justify-center md:grid-cols-2 lg:grid-cols-3">
+              <div className="flex flex-col items-center text-center">
+                <div className="rounded-full bg-purple-100 p-3 mb-4">
+                  <FileText className="h-6 w-6 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">1. Crie seu Perfil</h3>
+                <p className="text-gray-600">Adicione suas informações profissionais e experiências.</p>
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <div className="rounded-full bg-purple-100 p-3 mb-4">
+                  <Zap className="h-6 w-6 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">2. Gere Currículos com IA</h3>
+                <p className="text-gray-600">Nossa IA cria currículos personalizados para cada vaga.</p>
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <div className="rounded-full bg-purple-100 p-3 mb-4">
+                  <Star className="h-6 w-6 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">3. Acompanhe seu Sucesso</h3>
+                <p className="text-gray-600">Gerencie suas candidaturas e aumente suas chances de contratação.</p>
+              </div>
             </div>
           </div>
         </section>
-        <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800 flex justify-center">
+        <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 bg-white">
           <div className="container px-4 md:px-6">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12">
-              Escolha seu plano
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12 text-purple-800">
+              Planos e Preços
             </h2>
-            <div className="overflow-x-auto">
+            <div className="max-w-3xl mx-auto text-center mb-8">
+              <p className="text-lg text-gray-600 mb-4">
+                Comece com um período de teste gratuito de 7 dias e escolha o plano que melhor atende às suas necessidades.
+              </p>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[200px]">Feature</TableHead>
-                    {pricingPlans.map((plan) => (
-                      <TableHead key={plan.name} className="text-center">
-                        {plan.name}
-                        <br />
-                        <span className="font-normal">{plan.price}</span>
-                      </TableHead>
-                    ))}
+                    <TableHead className="w-[200px]">Recurso</TableHead>
+                    <TableHead>Básico</TableHead>
+                    <TableHead>Premium</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {Object.keys(pricingPlans[0].features).map((feature) => (
-                    <TableRow key={feature}>
-                      <TableCell className="font-medium">{feature}</TableCell>
-                      {pricingPlans.map((plan) => (
-                        <TableCell key={`${plan.name}-${feature}`} className="text-center">
-                          {typeof plan.features[feature as keyof Features] === 'boolean' ? (
-                            plan.features[feature as keyof Features] ? (
-                              <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
-                            ) : (
-                              <X className="h-5 w-5 text-red-500 mx-auto" />
-                            )
-                          ) : (
-                            plan.features[feature as keyof Features]
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
+                  <TableRow>
+                    <TableCell className="font-medium">Currículos</TableCell>
+                    <TableCell>10/mês</TableCell>
+                    <TableCell>20/mês</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Perfis</TableCell>
+                    <TableCell>3</TableCell>
+                    <TableCell>Ilimitado</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Interações IA</TableCell>
+                    <TableCell>10/mês</TableCell>
+                    <TableCell>50/mês</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Acompanhamento de vagas</TableCell>
+                    <TableCell>15/mês</TableCell>
+                    <TableCell>Ilimitado</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Contatos</TableCell>
+                    <TableCell>5/mês</TableCell>
+                    <TableCell>Ilimitado</TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </div>
-            <div className="mt-10 flex justify-center space-x-4">
-              {pricingPlans.map((plan) => (
-                <Button disabled key={plan.name} variant={plan.name === "Plus" ? "default" : "outline"}>
-                  {plan.name}
-                </Button>
-              ))}
+            <div className="flex justify-center space-x-4">
+              <Button className="bg-purple-600 hover:bg-purple-700">Escolher Plano Básico</Button>
+              <Button className="bg-purple-800 hover:bg-purple-900">Escolher Plano Premium</Button>
             </div>
           </div>
         </section>
-        <section id="cta" className="w-full py-12 md:py-24 lg:py-32 bg-primary text-black flex justify-center">
+        <section id="cta" className="w-full py-12 md:py-24 lg:py-32 bg-purple-600 text-white">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Pronto para revolucionar sua busca de emprego?
+                  Pronto para impulsionar sua carreira?
                 </h2>
-                <p className="mx-auto max-w-[600px] text-black/90 md:text-xl">
-                  Junte-se ao MeContrata.ai hoje e dê o primeiro passo em direção à sua carreira dos sonhos.
+                <p className="mx-auto max-w-[600px] text-purple-100 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Junte-se ao MeContrata.ai hoje e dê o primeiro passo em direção ao seu emprego dos sonhos.
                 </p>
               </div>
               <div className="w-full max-w-sm space-y-2">
                 <form className="flex space-x-2">
-                  <Input className="max-w-lg flex-1 bg-primary-foreground text-primary" placeholder="Entre seu email" type="email" />
-                  <Button type="submit" variant="secondary">
-                    Cadastrar
+                  <Input className="max-w-lg flex-1 bg-purple-50 text-purple-900" placeholder="Seu melhor email" type="email" />
+                  <Button type="submit" className="bg-white text-purple-600 hover:bg-purple-100">
+                    Começar
                   </Button>
                 </form>
-                <p className="text-xs text-black/90">
+                <p className="text-xs text-purple-100">
                   Ao se inscrever, você concorda com nossos{" "}
                   <Link className="underline underline-offset-2" href="#">
                     Termos e Condições
@@ -298,16 +231,8 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <div className="flex flex-col items-center md:hidden">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Encontrou algum problema? Ajude-nos a melhorar.</p>
-          <Link href="https://forms.gle/9KKkaRSKpsaHNqz67" className="text-">
-            <Button type="submit" variant="destructive">
-              Relatar
-            </Button>
-          </Link>
-        </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400">© 2023 MeContrata.ai - Todos os direitos reservados.</p>
+      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t bg-purple-50">
+        <p className="text-xs text-gray-500">© 2023 MeContrata.ai - Todos os direitos reservados.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4" href="#">
             Termos de Serviço

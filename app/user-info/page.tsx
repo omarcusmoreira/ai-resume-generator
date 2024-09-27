@@ -85,7 +85,7 @@ export default function UserInfo() {
                     {userData?.personalInfo?.profilePicture ? '' : 'Upload'}
                   </AvatarFallback>
                 </Avatar>
-                <label htmlFor="picture-upload" className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer">
+                <label htmlFor="picture-upload" className="absolute bottom-0 right-0 bg-primary text-black rounded-full p-2 cursor-pointer">
                   <Upload className="h-4 w-4" />
                 </label>
                 <input

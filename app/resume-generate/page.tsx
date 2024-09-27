@@ -165,7 +165,7 @@ export default function GenerateResumePage() {
         currentAttempt++;
         setGenerationAttempt(currentAttempt); 
       } while (currentAttempt < maxAttempts);
-      
+
       setHasGenerationFaild(true)
     } catch (error) {
       console.error('Erro ao gerar currículo:', error);
@@ -266,7 +266,7 @@ export default function GenerateResumePage() {
             </div>
             <Button 
               variant="ai" 
-              className="rounded-full bg-primary text-primary-foreground"
+              className="rounded-full bg-primary text-black"
               onClick={
                   selectedPrompt === 2 ?
                   handleGenerateCoverLetter :
