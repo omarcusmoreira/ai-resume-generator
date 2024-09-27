@@ -142,6 +142,7 @@ export default function AuthPage() {
 
   // Handle Google Sign-In
   const handleGoogleSignIn = async () => {
+    setIsCreating(true)
     const provider = new GoogleAuthProvider()
     try {
       const result = await signInWithPopup(auth, provider)
@@ -172,6 +173,7 @@ export default function AuthPage() {
     } catch (error: any) {
       console.error('Google sign-in error', error)
     }
+    setIsCreating(false)
   }
 
   return (
@@ -327,8 +329,9 @@ export default function AuthPage() {
                     variant="outline"
                     className="w-full flex items-center justify-center"
                     onClick={handleGoogleSignIn}
+                    disabled={isCreating}
                   >
-                    <GoogleIcon className="mr-2 h-5 w-5" />
+                    <GoogleIcon className="mr-2 h-5 w-5"/>
                     Cadastrar com Google
                   </Button>
                 </div>
