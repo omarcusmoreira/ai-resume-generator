@@ -48,11 +48,11 @@ useEffect(() => {
         <Dashboard opportunities={opportunities} />
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <Tabs defaultValue="opportunities" className="mt-6">
-          <TabsList>
+          <TabsList className='sm:mx-4'>
             <TabsTrigger value="opportunities">Oportunidades</TabsTrigger>
             <TabsTrigger value="contacts">Contatos</TabsTrigger>
           </TabsList> 
-            <TabsContent value="opportunities">
+            <TabsContent value="opportunities" className='sm: m-4'>
                 <OpportunitiesTab 
                     contacts={contacts}
                     resumes={resumes}
@@ -61,7 +61,7 @@ useEffect(() => {
                     setOpportunities={setOpportunities}
                 />
             </TabsContent>
-          <TabsContent value="contacts">
+          <TabsContent value="contacts" className='sm: m-4'>
             <ContactsTab
                 contacts={contacts}
                 setContacts={setContacts}
