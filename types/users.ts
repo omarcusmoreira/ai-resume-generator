@@ -12,4 +12,5 @@ export type PersonalInfoType = {
   export type UserDataType = {
     userId: string;
     personalInfo: PersonalInfoType;
+    stripeCustomerId?:string; 
   };

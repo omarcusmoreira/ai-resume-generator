@@ -31,6 +31,7 @@ export default function ResumePreviewPage() {
   const [localResumeBody, setLocalResumeBody] = useState<ResumeBodyType>()
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const [quota, setQuota] = useState<number>(0)
+  const [isSaving, setIsSaving] = useState(false)
   const resumeRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
@@ -62,6 +63,7 @@ export default function ResumePreviewPage() {
 
   const handleSave = useCallback(async () => {
     setIsEditing(false)
+    setIsSaving(true)
     const resumeData = { ...resume, contentJSON: JSON.stringify(localResumeBody) }
     if (resumeData.contentJSON) {
       console.log('Updating resume with data:', resumeData)
@@ -74,6 +76,7 @@ export default function ResumePreviewPage() {
       }
     }
     console.log('Salvando alterações...', localResumeBody)
+    setIsSaving(false)
   }, [localResumeBody, resumeId, resume])
 
   const handleShare = () => {
@@ -118,9 +121,11 @@ export default function ResumePreviewPage() {
   }
 
   const handleAccept = async () => {
+    setIsSaving(true)
     setIsAccepted(true)
     await decrementQuota('resumes')
     await updateResume(resumeId, { isAccepted: true } as Partial<ResumeType>)
+    setIsSaving(false)
   }
 
   const updateResumeData = (path: string[], value: string) => {
@@ -173,7 +178,7 @@ export default function ResumePreviewPage() {
     <div className="flex w-full justify-between gap-2">
       <div className="flex gap-2">
         {isEditing ? (
-          <Button onClick={handleSave} size="sm" className="bg-green-500 hover:bg-green-600 text-white">
+          <Button onClick={handleSave} size="sm" disabled={isSaving} className="bg-green-500 hover:bg-green-600 text-white">
             <Save className="h-4 w-4 mr-2" />
             <span className="hidden sm:inline">Salvar</span>
           </Button>):(
@@ -268,7 +273,7 @@ export default function ResumePreviewPage() {
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Refazer
               </Button>
-              <Button onClick={handleAccept} size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-white">
+              <Button onClick={handleAccept} disabled={isSaving} size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-white">
                 <Check className="h-4 w-4 mr-2" />
                 Aceitar
               </Button>

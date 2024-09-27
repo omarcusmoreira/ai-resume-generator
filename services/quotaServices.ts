@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { QuotasType } from "@/types/planHistory";
 
 // Call Firestore directly to decrement quotas
-export const decrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions'): Promise<void> => {
+export const decrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'contacts'): Promise<void> => {
     try {
         // Get Firebase Firestore and Auth instances
         const db = getFirestore();
@@ -60,7 +60,7 @@ export const decrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opport
     }
 };
 
-export const incrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions'): Promise<void> => {
+export const incrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'contacts'): Promise<void> => {
     try {
         // Get Firebase Firestore and Auth instances
         const db = getFirestore();
@@ -112,7 +112,7 @@ export const incrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opport
         throw new Error('Failed to increment quota');
     }
 };
-export const getQuotaByType = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions'): Promise<number> => {
+export const getQuotaByType = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'contacts'): Promise<number> => {
     const db = getFirestore();
     const auth = getAuth(); 
     const user = auth.currentUser;
@@ -170,7 +170,8 @@ export const getQuotas = async (): Promise<QuotasType> => {
         profiles: 0,
         resumes: 0,
         opportunities: 0,
-        interactions: 0
+        interactions: 0,
+        contacts: 0,
     }
 
     planHistorySnap.forEach((doc) => {

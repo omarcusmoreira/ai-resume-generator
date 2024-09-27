@@ -101,9 +101,11 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
                 <Users className={pathname === "/profile-manager" ? "h-5 w-5 text-purple-500" : "h-5 w-5 text-gray-500"} />
               </Button>
             </Link>
+            <Link href="/job-tracker" passHref>
             <div className="w-10 h-10 relative">
               <Image src={logo} alt="Logo" layout="fill" objectFit="contain" />
             </div>
+            </Link>
             <Link href="/resume-manager" passHref>
             <Button variant="ghost" size="icon" className="w-8 h-8">
               <Files className="h-5 w-5 text-gray-500" />

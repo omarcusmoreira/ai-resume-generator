@@ -28,20 +28,17 @@ const setSessionData = (data: OpportunityType[]) => {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
 };
 
-// Add an opportunity
-export const addOpportunity = async (
-  opportunityId: string, opportunity: OpportunityType
-): Promise<void> => {
-    const userId = getUserId();
-    const opportunitiesCollection = collection(db, 'users', userId, 
-                                               'opportunities');
-    const docRef = doc(opportunitiesCollection, opportunityId);
-    const updatedOpportunity = { ...opportunity, id: opportunityId };
-    await setDoc(docRef, updatedOpportunity);
-    
-    // Update session storage
-    const cachedOpportunities = getSessionData() || [];
-    setSessionData([...cachedOpportunities, updatedOpportunity]);
+
+export const addOpportunity = async (opportunityId: string, opportunity: OpportunityType): Promise<void> => {
+  const userId = getUserId();
+  const opportunitiesCollection = collection(db, 'users', userId, 'opportunities');
+  const docRef = doc(opportunitiesCollection, opportunityId);
+  const updatedOpportunities = { ...opportunity, id: opportunityId };
+  await setDoc(docRef, updatedOpportunities);
+  
+  // Update session storage
+  const cachedOpportunities = getSessionData() || [];
+  setSessionData([...cachedOpportunities, updatedOpportunities]);
 };
 
 // Get all opportunities
@@ -64,12 +61,10 @@ export const getOpportunities = async (): Promise<OpportunityType[]> => {
 };
 
 // Update an opportunity
-export const updateOpportunity = async (
-  opportunityId: string, opportunity: Partial<OpportunityType>
-): Promise<void> => {
+export const updateOpportunity = async (opportunity: Partial<OpportunityType>): Promise<void> => {
+    console.log(opportunity)
     const userId = getUserId();
-    const opportunityRef = doc(db, 'users', userId, 'opportunities', 
-                               opportunityId);
+    const opportunityRef = doc(db, 'users', userId, 'opportunities', opportunity.id || '');
     await updateDoc(opportunityRef, opportunity);
     
     // Update session storage
@@ -77,7 +72,7 @@ export const updateOpportunity = async (
     if (cachedOpportunities) {
         const updatedOpportunities = cachedOpportunities.map((o: 
           OpportunityType) =>
-          o.id === opportunityId ? { ...o, ...opportunity } : o
+          o.id === opportunity.id ? { ...o, ...opportunity } : o
         );
         setSessionData(updatedOpportunities);
     }
