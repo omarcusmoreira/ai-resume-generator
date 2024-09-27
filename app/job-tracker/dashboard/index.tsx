@@ -5,11 +5,26 @@ import { Briefcase, Users, Calendar } from "lucide-react"
 import { Timestamp } from 'firebase/firestore'
 import { OpportunityType } from "@/types/opportunities"
 import { TimestampRenderer } from "@/utils/TimestampRender"
+import { useEffect, useState } from "react"
+import { UserDataType } from "@/types/users"
+import { getUserData } from "@/services/userServices"
 
 type DashboardProps = {
     opportunities: OpportunityType[];
 }
 export default function Dashboard({opportunities}: DashboardProps) {
+
+  const [userData, setUserData]=useState<UserDataType>()
+
+  useEffect(()=>{
+    const fetchUserData = async ()=>{
+      const fetchedUserData = await getUserData();
+      if (fetchedUserData){
+        setUserData(fetchedUserData);
+      }
+    }
+    fetchUserData();
+  },[]);
 
     const ensureDate = (date: Timestamp | Date | string | number | null | undefined): Date | null => {
         console.log('Parsing date:', date);
@@ -57,7 +72,7 @@ return(
         <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
             <h1 className="text-3xl font-bold text-purple-800">
-                Olá, <span className="text-purple-600">Marcus Moreira</span>
+                Olá, <span className="text-purple-600">{userData?.personalInfo.name || 'Usuário'}</span>
             </h1>
             <p className="mt-1 text-sm text-gray-600">Vamos gerenciar suas oportunidades de emprego?</p>
             </div>
