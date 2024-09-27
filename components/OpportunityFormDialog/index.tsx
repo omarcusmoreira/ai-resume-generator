@@ -105,7 +105,7 @@ export function OpportunityFormDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogContent className="sm:max-w-[425px] bg-white max-h-screen overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -120,6 +120,7 @@ export function OpportunityFormDialog({
               onChange={(e) => setOpportunity({ ...opportunity, companyName: e.target.value })}
               placeholder="Nome da empresa" 
               className="border-purple-300 focus:border-purple-500" 
+              required
             />
           </div>
 
@@ -132,6 +133,7 @@ export function OpportunityFormDialog({
               onChange={(e) => setOpportunity({ ...opportunity, position: e.target.value })}
               placeholder="Título do cargo" 
               className="border-purple-300 focus:border-purple-500" 
+              required
             />
           </div>
 

@@ -236,11 +236,11 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
                   <div className="space-y-2">
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-2 text-purple-600 flex-shrink-0" />
-                      <span className="text-purple-600">{opportunity.contactName}</span>
+                      <span className="text-purple-600">{opportunity.contactName || 'Sem contato atrelado'}</span>
                     </div>
                     <div className="flex items-center">
                       <Phone className="h-4 w-4 mr-2 text-purple-600 flex-shrink-0" />
-                      <span className="text-purple-600">{opportunity.contactPhone}</span>
+                      <span className="text-purple-600">{opportunity.contactPhone || 'Sem telefone atrelado'}</span>
                     </div>
                     <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-2 text-purple-600 flex-shrink-0" />                        

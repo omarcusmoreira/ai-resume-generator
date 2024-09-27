@@ -69,7 +69,7 @@ export default function GenerateResumePage() {
       if(quotas.resumes === 0)
         setNoResumes(true)
     }
-  }, [quotas])
+  }, [quotas, isCoverLetterDialogOpen, isDialogOpen, isProfileWizardOpen])
 
   const fetchData = async () => {
     const fetchedUser = await getUserData();
@@ -162,9 +162,10 @@ export default function GenerateResumePage() {
         } catch (error) {
           console.error('Error generating resume:', error);
         }
-        currentAttempt++
+        currentAttempt++;
         setGenerationAttempt(currentAttempt); 
-      } while (generationAttempt < maxAttempts);
+      } while (currentAttempt < maxAttempts);
+      
       setHasGenerationFaild(true)
     } catch (error) {
       console.error('Erro ao gerar currículo:', error);

@@ -52,7 +52,7 @@ export function ContactFormDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogContent className="sm:max-w-[425px] bg-white  max-h-screen overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -66,6 +66,7 @@ export function ContactFormDialog({
               onChange={(e) => setContact({...contact, name: e.target.value})}
               placeholder="Nome do contato" 
               className="border-purple-300 focus:border-purple-500" 
+              required
             />
           </div>
           <div className="space-y-2">
@@ -77,6 +78,7 @@ export function ContactFormDialog({
               onChange={(e) => setContact({...contact, email: e.target.value})}
               placeholder="email@exemplo.com" 
               className="border-purple-300 focus:border-purple-500" 
+              
             />
           </div>
           <div className="space-y-2">
@@ -98,6 +100,7 @@ export function ContactFormDialog({
               onChange={(e) => setContact({...contact, company: e.target.value})}
               placeholder="Nome da empresa" 
               className="border-purple-300 focus:border-purple-500" 
+              required
             />
           </div>
           <div className="space-y-2">

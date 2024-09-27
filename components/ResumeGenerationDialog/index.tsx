@@ -63,7 +63,7 @@ export const ResumeGenerationDialog = ({
                 <AlertCircle className="h-16 w-16 text-red-500" />
                 )}
                 <p className="text-center font-semibold">{title}</p>
-                {isGenerating && (
+                {(isGenerating || hasGenerationFailed) && (
                 <p className="text-sm text-gray-500">{message}</p>
                 )}
             </div>

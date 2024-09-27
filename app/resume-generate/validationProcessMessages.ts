@@ -30,23 +30,23 @@ export const validationProcessMessages:MessagesType = {
       message: "Vamos lá, estou confiante que dessa vez vai funcionar!"
     },
     5: {
-      title: "6. Quase pronto!",
+      title: "Quase pronto!",
       message: "Só mais um instante, estamos verificando tudo!"
     },
     6: {
-      title: "7. Só mais um pouquinho",
+      title: "Só mais um pouquinho",
       message: "Estamos torcendo por você, logo ficará pronto!"
     },
     7: {
-      title: "8. Ultima tentativa!",
+      title: "Ultima tentativa!",
       message: "Também estou ansiosa para ver seu currículo!"
     },
     8: {
-      title: "9.Pronto!",
-      message: "Seu currículo está pronto, aproveite!"
+      title: "Quase pronto!",
+      message: "Só mais um instante, estamos verificando tudo!"
     },
     9: {
-      title: "10. Poxa, não conseguimos gerar seu currículo",
+      title: "Poxa, não conseguimos gerar seu currículo",
       message: "Tente novamente mais tarde ou fale com o suporte, estamos aqui para ajudar!"
     }
   }
@@ -66,30 +66,30 @@ export const validationProcessMessages:MessagesType = {
     },
     3: {
       title: "Poxa, não conseguimos gerar seu currículo",
-      message: "Tente novamente mais tarde ou fale com o suporte, estamos aqui para ajudar!"
+      message: "Dê mais uma olhada no seu perfil, pequenos ajustes podem ajudar."
     },
     4: {
       title: "Poxa, não conseguimos gerar seu currículo",
-      message: "Tente novamente mais tarde ou fale com o suporte, estamos aqui para ajudar!"
+      message: "Dê mais uma olhada no seu perfil, pequenos ajustes podem ajudar."
     },
     5: {
       title: "Poxa, não conseguimos gerar seu currículo",
-      message: "Tente novamente mais tarde ou fale com o suporte, estamos aqui para ajudar!"
+      message: "Dê mais uma olhada no seu perfil, pequenos ajustes podem ajudar."
     },
     6: {
       title: "Poxa, não conseguimos gerar seu currículo",
-      message: "Tente novamente mais tarde ou fale com o suporte, estamos aqui para ajudar!"
+      message: "Dê mais uma olhada no seu perfil, pequenos ajustes podem ajudar."
     },
     7: {
       title: "Poxa, não conseguimos gerar seu currículo",
-      message: "Tente novamente mais tarde ou fale com o suporte, estamos aqui para ajudar!"
+      message: "Dê mais uma olhada no seu perfil, pequenos ajustes podem ajudar."
     },
     8: {
       title: "Poxa, não conseguimos gerar seu currículo",
-      message: "Tente novamente mais tarde ou fale com o suporte, estamos aqui para ajudar!"
+      message: "Dê mais uma olhada no seu perfil, pequenos ajustes podem ajudar."
     },
     9: {
       title: "Poxa, não conseguimos gerar seu currículo",
-      message: "Tente novamente mais tarde ou fale com o suporte, estamos aqui para ajudar!"
+      message: "Dê mais uma olhada no seu perfil, pequenos ajustes podem ajudar."
     }
   } 
