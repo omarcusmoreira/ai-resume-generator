@@ -4,7 +4,7 @@ import { Dispatch, useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PlusCircle, Search, Edit2, Trash2, Mail, Phone, Building2 } from "lucide-react"
+import { PlusCircle, Search, Edit2, Trash2, Mail, Phone, Building2, Contact } from "lucide-react"
 import { ContactType } from '@/types/contacts'
 import { addContact, deleteContact, updateContact } from '@/services/contactsService'
 import { v4 } from 'uuid'
@@ -121,6 +121,11 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
       </CardHeader>
       <CardContent className="p-4">
         <div className="space-y-4">
+          {contacts.length === 0 && 
+          <div className='flex flex-col w-full items-center justify-center py-10'>
+            <Contact className='h-20 w-20 text-gray-300 mb-4'/>
+            <p className="text-2xl text-gray-400 text-center">Voce ainda não tem nenhum contato.</p>
+          </div>}
           {filteredContacts.map((contact) => (
             <div key={contact.id} className="flex items-center justify-between p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors duration-200">
               <div>

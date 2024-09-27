@@ -4,7 +4,7 @@ import { Dispatch, useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Briefcase, PlusCircle, Search, Edit2, FileText, CalendarDays, User, Clock, Trash2, Phone } from "lucide-react"
+import { Briefcase, PlusCircle, Search, Edit2, FileText, CalendarDays, User, Clock, Trash2, Phone, Handshake } from "lucide-react"
 import { OpportunityStatusEnum, OpportunityType } from '@/types/opportunities'
 import { v4 } from 'uuid'
 import { OpportunityFormDialog } from '@/components/OpportunityFormDialog'
@@ -164,6 +164,11 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
             </div>
           </CardHeader>
           <CardContent className="p-4">
+          {opportunities.length === 0 && 
+          <div className='flex flex-col w-full items-center justify-center py-10'>
+            <Handshake className='h-20 w-20 text-gray-300 mb-4'/>
+            <p className="text-2xl text-gray-400 text-center">Voce ainda não está participando de nenhum processo.</p>
+          </div>}
             <div className="space-y-4">
               {filteredOpportunities.map((opportunity) => (
                 <div key={opportunity.id} className="border border-purple-200 rounded-lg p-4 hover:bg-purple-50 transition-colors duration-200">
