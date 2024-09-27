@@ -21,6 +21,7 @@ interface OpportunityFormDialogProps {
   resumes: ResumeType[];
   profiles: ProfileType[];
   contacts: ContactType[];
+  isLoading: boolean
 }
 
 export function OpportunityFormDialog({
@@ -34,6 +35,7 @@ export function OpportunityFormDialog({
   resumes,
   profiles,
   contacts,
+  isLoading
 }: OpportunityFormDialogProps) {
   const [opportunity, setOpportunity] = useState<Omit<OpportunityType, 'id'>>({
     companyName: '',
@@ -60,7 +62,7 @@ export function OpportunityFormDialog({
         nextInterviewDate: initialOpportunity.nextInterviewDate || null,
       });
     }
-  }, [initialOpportunity]);
+  }, [initialOpportunity, isLoading]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -241,7 +243,7 @@ export function OpportunityFormDialog({
                         className="border-purple-300 focus:border-purple-500" 
                     /> 
             </div>
-          <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+          <Button type="submit" disabled={isLoading} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
             {submitButtonText}
           </Button>
         </form>

@@ -28,6 +28,8 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
   const [contactToDelete, setContactToDelete] = useState<ContactType | null>(null); // Track the opportunity to be deleted
   const [contactQuota, setContactQuota] = useState(0)
   const [isUpgradeDialogOpen, setIsUpgradeAlertDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
 
   const handleAddButtonAction = ()=>{
       if (contactQuota > 0){
@@ -53,6 +55,7 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
   );
 
   const handleAddContact = async (newContact: Omit<ContactType, 'id'>) => {
+    setIsLoading(true)
     try {
       const contactId = v4();
       await addContact(contactId, { ...newContact, id: contactId });
@@ -63,6 +66,7 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
       console.error('Error adding contact:', error);
       // Handle error (e.g., show error message to user)
     }
+    setIsLoading(false)
   };
 
   const handleUpdateContact = async (updatedContact: Omit<ContactType, 'id'>) => {
@@ -106,14 +110,6 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
       <Button onClick={handleAddButtonAction} className="bg-purple-600 hover:bg-purple-700 text-white">
           <PlusCircle className="mr-2 h-5 w-5" /> Novo Contato
       </Button>
-      <ContactFormDialog
-          isOpen={isNewContactOpen}
-          onOpenChange={setIsNewContactOpen}
-          onSubmit={handleAddContact}
-          title="Adicionar Novo Contato"
-          description="Registre informações de contatos de RH"
-          submitButtonText="Adicionar Contato"
-      />
     </div>
     
     <Card className="bg-white shadow rounded-lg overflow-hidden">
@@ -160,22 +156,32 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
                 <Trash2 className="h-4 w-4" />
               </Button>
               </div>
-              <ContactFormDialog
-                  isOpen={!!editingContact} // Ensure dialog opens when editingContact is not null
-                  onOpenChange={(open) => {
-                      if (!open) setEditingContact(null); // Reset editingContact when dialog closes
-                  }}
-                  onSubmit={handleUpdateContact}
-                  initialContact={editingContact || undefined} // Pass the editingContact
-                  title="Editar Contato"
-                  description="Atualize as informações do contato"
-                  submitButtonText="Atualizar Contato"
-              />
             </div>
           ))}
         </div>
       </CardContent>
     </Card>
+    <ContactFormDialog
+          isOpen={isNewContactOpen}
+          onOpenChange={setIsNewContactOpen}
+          onSubmit={handleAddContact}
+          title="Adicionar Novo Contato"
+          description="Registre informações de contatos de RH"
+          submitButtonText="Adicionar Contato"
+          isLoading={isLoading}
+      />
+    <ContactFormDialog
+        isOpen={!!editingContact} // Ensure dialog opens when editingContact is not null
+        onOpenChange={(open) => {
+            if (!open) setEditingContact(null); // Reset editingContact when dialog closes
+        }}
+        onSubmit={handleUpdateContact}
+        initialContact={editingContact || undefined} // Pass the editingContact
+        title="Editar Contato"
+        description="Atualize as informações do contato"
+        submitButtonText="Atualizar Contato"
+        isLoading={isLoading}
+    />
     <DeleteDialog 
       isOpen={isDeleteDialogOpen} 
       onOpenChange={setIsDeleteDialogOpen} 

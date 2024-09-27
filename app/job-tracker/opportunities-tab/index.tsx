@@ -39,6 +39,7 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
     const [opportunityToDelete, setOpportunityToDelete] = useState<OpportunityType | null>(null); // Track the opportunity to be deleted
     const [opportunityQuota, setOpportunityQuota] = useState(0)
     const [isUpgradeDialogOpen, setIsUpgradeAlertDialogOpen] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
     const handleAddButtonAction = ()=>{
         if (opportunityQuota > 0){
@@ -78,7 +79,8 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
     }
   
     const handleAddOpportunity = async (newOpportunity: Omit<OpportunityType, 'id'>) => {
-      try {
+      setIsLoading(true)
+        try {
         const opportunityId = v4();
         await addOpportunity(opportunityId, { ...newOpportunity, id: opportunityId });
         await decrementQuota('opportunities');
@@ -88,6 +90,7 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
         console.error('Error adding opportunity:', error);
         // Handle error (e.g., show error message to user)
       }
+      setIsLoading(false)
     };
   
     const handleUpdateOpportunity = async (updatedOpportunity: Omit<OpportunityType, 'id'>) => {
@@ -127,36 +130,10 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
     return (
         <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-purple-800">Oportunidades</h2>
-          <OpportunityFormDialog 
-              contacts={contacts}
-              isOpen={isNewOpportunityOpen}
-              onOpenChange={setIsNewOpportunityOpen}
-              onSubmit={handleAddOpportunity}
-              profiles={profiles}
-              resumes={resumes}
-              title="Adicionar Nova Vaga"
-              description="Preencha os detalhes da nova oportunidade de emprego"
-              submitButtonText="Adicionar Vaga"
-          />
-          <OpportunityFormDialog 
-              contacts={contacts}
-              isOpen={!!editingOpportunity} // Ensure dialog opens when editingContact is not null
-              onOpenChange={(open) => {
-                  if (!open) setEditingOpportunity(null); // Reset editingContact when dialog closes
-              }}
-              onSubmit={handleUpdateOpportunity}
-              initialOpportunity={editingOpportunity || undefined} 
-              profiles={profiles}
-              resumes={resumes}
-              title="Editar Vaga"
-              description="Atualize as informações da sua oportunidade"
-              submitButtonText="Atualizar Vaga"
-          />
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={handleAddButtonAction}>
+            <h2 className="text-2xl font-bold text-purple-800">Oportunidades</h2>
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={handleAddButtonAction}>
                 <PlusCircle className="mr-2 h-5 w-5" /> Nova Oportunidade
-              </Button>
-
+            </Button>
         </div>
         
         <Card className="bg-white shadow rounded-lg overflow-hidden">
@@ -256,6 +233,33 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
             </div>
           </CardContent>
         </Card>
+        <OpportunityFormDialog 
+              contacts={contacts}
+              isOpen={isNewOpportunityOpen}
+              onOpenChange={setIsNewOpportunityOpen}
+              onSubmit={handleAddOpportunity}
+              profiles={profiles}
+              resumes={resumes}
+              title="Adicionar Nova Vaga"
+              description="Preencha os detalhes da nova oportunidade de emprego"
+              submitButtonText="Adicionar Vaga"
+              isLoading={isLoading}
+          />
+          <OpportunityFormDialog 
+              contacts={contacts}
+              isOpen={!!editingOpportunity}
+              onOpenChange={(open) => {
+                  if (!open) setEditingOpportunity(null);
+              }}
+              onSubmit={handleUpdateOpportunity}
+              initialOpportunity={editingOpportunity || undefined} 
+              profiles={profiles}
+              resumes={resumes}
+              title="Editar Vaga"
+              description="Atualize as informações da sua oportunidade"
+              submitButtonText="Atualizar Vaga"
+              isLoading={isLoading}
+          />
         <DeleteDialog 
             isOpen={isDeleteDialogOpen} 
             onOpenChange={setIsDeleteDialogOpen} 

@@ -13,6 +13,7 @@ interface ContactFormDialogProps {
   title: string;
   description: string;
   submitButtonText: string;
+  isLoading: boolean;
 }
 
 export function ContactFormDialog({
@@ -22,7 +23,8 @@ export function ContactFormDialog({
   initialContact,
   title,
   description,
-  submitButtonText
+  submitButtonText,
+  isLoading
 }: ContactFormDialogProps) {
   const [contact, setContact] = React.useState<Omit<ContactType, 'id'>>({
     name: '',
@@ -43,7 +45,7 @@ export function ContactFormDialog({
         linkedin: initialContact.linkedin,
       });
     }
-  }, [initialContact]);
+  }, [initialContact, isLoading]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +115,7 @@ export function ContactFormDialog({
               className="border-purple-300 focus:border-purple-500" 
             />
           </div>
-          <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+          <Button type="submit" disabled={isLoading} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
             {submitButtonText}
           </Button>
         </form>
