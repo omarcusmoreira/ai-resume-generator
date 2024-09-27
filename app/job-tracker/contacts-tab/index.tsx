@@ -11,6 +11,7 @@ import { v4 } from 'uuid'
 import { ContactFormDialog } from '@/components/ContactFormDialog'
 import { DeleteDialog } from '@/components/DeleteDialog'
 import { decrementQuota, getQuotaByType, incrementQuota } from '@/services/quotaServices'
+import { UpgradeDialog } from '@/components/UpgradeAlertDialog'
 
 type ContactsTabProps = {
     contacts: ContactType[];
@@ -26,6 +27,16 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Track modal open state
   const [contactToDelete, setContactToDelete] = useState<ContactType | null>(null); // Track the opportunity to be deleted
   const [contactQuota, setContactQuota] = useState(0)
+  const [isUpgradeDialogOpen, setIsUpgradeAlertDialogOpen] = useState(false)
+
+  const handleAddButtonAction = ()=>{
+      if (contactQuota > 0){
+        setIsNewContactOpen(true)
+      }
+      else{
+        setIsUpgradeAlertDialogOpen(true)
+      }
+  }
 
   useEffect(()=>{
     const fetchQuotas = async () =>{
@@ -92,7 +103,7 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
     <div className="space-y-4">
     <div className="flex justify-between items-center">
       <h2 className="text-2xl font-bold text-purple-800">Contatos</h2>
-      <Button onClick={() => setIsNewContactOpen(true)} className="bg-purple-600 hover:bg-purple-700 text-white">
+      <Button onClick={handleAddButtonAction} className="bg-purple-600 hover:bg-purple-700 text-white">
           <PlusCircle className="mr-2 h-5 w-5" /> Novo Contato
       </Button>
       <ContactFormDialog
@@ -170,6 +181,11 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
       onOpenChange={setIsDeleteDialogOpen} 
       onConfirm={handleDeleteContact}
       isDeleting={isDeleting}
+    />
+    <UpgradeDialog
+      isOpen={isUpgradeDialogOpen}
+      onClose={() => setIsUpgradeAlertDialogOpen(false)}
+      title='Contatos'
     />
   </div>
 

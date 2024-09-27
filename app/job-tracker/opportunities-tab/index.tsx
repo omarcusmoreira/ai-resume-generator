@@ -17,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { TimestampRenderer } from '@/utils/TimestampRender'
 import { DeleteDialog } from '@/components/DeleteDialog'
 import { decrementQuota, getQuotaByType, incrementQuota } from '@/services/quotaServices'
+import { UpgradeDialog } from '@/components/UpgradeAlertDialog'
 
 type OpportunitiesTabProps = {
     contacts: ContactType[];
@@ -37,6 +38,15 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Track modal open state
     const [opportunityToDelete, setOpportunityToDelete] = useState<OpportunityType | null>(null); // Track the opportunity to be deleted
     const [opportunityQuota, setOpportunityQuota] = useState(0)
+    const [isUpgradeDialogOpen, setIsUpgradeAlertDialogOpen] = useState(false)
+
+    const handleAddButtonAction = ()=>{
+        if (opportunityQuota > 0){
+            setIsNewOpportunityOpen(true)
+        }else {
+            setIsUpgradeAlertDialogOpen(true)
+        }
+    }
 
     useEffect(()=>{
       const fetchQuotas = async () =>{
@@ -143,7 +153,7 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
               description="Atualize as informações da sua oportunidade"
               submitButtonText="Atualizar Vaga"
           />
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={() => setIsNewOpportunityOpen(true)}>
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={handleAddButtonAction}>
                 <PlusCircle className="mr-2 h-5 w-5" /> Nova Oportunidade
               </Button>
 
@@ -233,7 +243,8 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
                       <span className="text-purple-600">{opportunity.contactPhone}</span>
                     </div>
                     <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-2 text-purple-600 flex-shrink-0" />                        <span className="text-purple-600">
+                      <Clock className="h-4 w-4 mr-2 text-purple-600 flex-shrink-0" />                        
+                      <span className="text-purple-600">
                         Entrevista:
                         <TimestampRenderer fallback='Sem entrevistas' format='toLocale' timestamp={opportunity.nextInterviewDate} /> 
                         </span>
@@ -250,6 +261,11 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
             onOpenChange={setIsDeleteDialogOpen} 
             onConfirm={handleDeleteOpportunity}
             isDeleting={isDeleting}
+        />
+        <UpgradeDialog
+         isOpen={isUpgradeDialogOpen}
+         onClose={() => setIsUpgradeAlertDialogOpen(false)}
+         title='Vagas'
         />
       </div>
 

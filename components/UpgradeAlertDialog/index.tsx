@@ -1,6 +1,6 @@
 "use client"
 
-import { Zap, FileText, Users, Crown } from "lucide-react"
+import { Zap, FileText, Users, Crown, Handshake, Building2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 interface UpgradeDialogProps {
-  title: "Perfis" | "Currículos" | "Interações"
+  title: "Perfis" | "Currículos" | "Interações" | "Vagas" | "Contatos"
   isOpen: boolean
   onClose: () => void
 }
@@ -20,7 +20,9 @@ interface UpgradeDialogProps {
 const iconMap = {
   Perfis: Users,
   Currículos: FileText,
-  Interações: Zap
+  Interações: Zap,
+  Vagas: Handshake,
+  Contatos: Building2
 }
 
 export function UpgradeDialog({ title, isOpen, onClose }: UpgradeDialogProps) {
