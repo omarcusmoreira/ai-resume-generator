@@ -1,6 +1,7 @@
 {
     "name": "MeContrata.ai",
-    "short_name": "MeContrata.ai",
+    "short_name": "MeContrata.ai - Gerencie vagas de emprego",
+    "description": "Gerencie seus processos seletivos, crie currículos automatizados.",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",

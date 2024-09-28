@@ -26,7 +26,16 @@ export default function RootLayout({
   }, []);
 
   return (
-    <html lang="en">
+    <html lang="pt-BR">
+      <head>
+        {/* Meta tags para PWA */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="description" content="Gerencie seus processos seletivos com o MeContrata.ai" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </head>
       <body>
         <LayoutWithAuth>{children}</LayoutWithAuth>
       </body>
@@ -109,4 +118,3 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-
