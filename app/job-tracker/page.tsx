@@ -49,7 +49,7 @@ useEffect(() => {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <Tabs defaultValue="opportunities" className="mt-6">
           <TabsList className='sm:mx-4'>
-            <TabsTrigger value="opportunities">Oportunidades</TabsTrigger>
+            <TabsTrigger value="opportunities">Processos</TabsTrigger>
             <TabsTrigger value="contacts">Contatos</TabsTrigger>
           </TabsList> 
             <TabsContent value="opportunities" className='sm: m-4'>

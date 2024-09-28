@@ -8,23 +8,14 @@ import { useEffect, useState } from "react"
 import { UserDataType } from "@/types/users"
 import { getUserData } from "@/services/userServices"
 import { ensureDate } from "@/utils/ensureDate"
+import logo_horizontal from '../../../public/assets/images/logo_horizontal.png'
+import Image from "next/image"
+
 
 type DashboardProps = {
     opportunities: OpportunityType[];
 }
-export default function Dashboard({opportunities}: DashboardProps) {
-
-  const [userData, setUserData]=useState<UserDataType>()
-
-  useEffect(()=>{
-    const fetchUserData = async ()=>{
-      const fetchedUserData = await getUserData();
-      if (fetchedUserData){
-        setUserData(fetchedUserData);
-      }
-    }
-    fetchUserData();
-  },[]);      
+export default function Dashboard({opportunities}: DashboardProps) {      
 
 const getNextInterview = () => {
   const today = new Date(); // Get current date
@@ -54,10 +45,11 @@ return(
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-            <h1 className="text-3xl font-bold text-purple-800">
+            <Image src={logo_horizontal} alt="MeContrata.ai Logo" width={200}  />
+            {/* <h1 className="text-3xl font-bold text-purple-800">
                 Olá, <span className="text-purple-600">{userData?.personalInfo.name || 'Usuário'}</span>
             </h1>
-            <p className="mt-1 text-sm text-gray-600">Vamos gerenciar suas oportunidades de emprego?</p>
+            <p className="mt-1 text-sm text-gray-600">Vamos gerenciar suas oportunidades de emprego?</p> */}
             </div>
             <div className="flex space-x-4">
             <Card className="bg-white shadow-sm hidden md:block">
