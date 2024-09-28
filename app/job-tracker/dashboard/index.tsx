@@ -2,12 +2,12 @@
 
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card"
 import { Briefcase, Users, Calendar } from "lucide-react"
-import { Timestamp } from 'firebase/firestore'
 import { OpportunityStatusEnum, OpportunityType } from "@/types/opportunities"
 import { TimestampRenderer } from "@/utils/TimestampRender"
 import { useEffect, useState } from "react"
 import { UserDataType } from "@/types/users"
 import { getUserData } from "@/services/userServices"
+import { ensureDate } from "@/utils/ensureDate"
 
 type DashboardProps = {
     opportunities: OpportunityType[];
@@ -24,47 +24,30 @@ export default function Dashboard({opportunities}: DashboardProps) {
       }
     }
     fetchUserData();
-  },[]);
+  },[]);      
 
-    const ensureDate = (date: Timestamp | Date | string | number | null | undefined): Date | null => {
-        console.log('Parsing date:', date);
-        
-        if (!date) return null;
-        
-        if (date instanceof Date) return date;
-        
-        if (date instanceof Timestamp) {
-          // Check for invalid date (like 01-01-0000)
-          const dateObj = date.toDate();
-          if (dateObj.getFullYear() < 1970) return null; // Example: Only consider dates after 1970
-          return dateObj;
-        }
-        
-        if (typeof date === 'string' || typeof date === 'number') {
-          const parsedDate = new Date(date);
-          return isNaN(parsedDate.getTime()) ? null : parsedDate;
-        }
-        
-        return null;
-      };
+const getNextInterview = () => {
+  const today = new Date(); // Get current date
+
+  const interviews = opportunities
+    .filter(opp => {
+      const interviewDate = ensureDate(opp.nextInterviewDate);
+      return interviewDate && interviewDate >= today; // Filter out past dates
+    })
+    .sort((a, b) => {
+      const aDate = ensureDate(a.nextInterviewDate);
+      const bDate = ensureDate(b.nextInterviewDate);
+
+      if (!aDate || !bDate) return 0;
       
+      return aDate.getTime() - bDate.getTime();
+    });
 
-  const getNextInterview = () => {
-    const interviews = opportunities
-      .filter(opp => opp.nextInterviewDate != null)
-      .sort((a, b) => {
-        const aDate = ensureDate(a.nextInterviewDate);
-        const bDate = ensureDate(b.nextInterviewDate);
-          
-        if (!aDate || !bDate) return 0;
-  
-        return aDate.getTime() - bDate.getTime();
-      });
-    
-    return interviews[0];
-  };
+  console.log('INTERVIEW ', interviews[0]);
+  return interviews[0];
+};
 
-  const nextInterview = getNextInterview()
+const nextInterview = getNextInterview()
   
 return(
     <header className="bg-white shadow-sm">
@@ -81,7 +64,7 @@ return(
                 <CardContent className="p-4 flex items-center space-x-4">
                 <Briefcase className="h-8 w-8 text-purple-600" />
                 <div>
-                    <CardDescription className="text-xs text-purple-800">Total de Oportunidades</CardDescription>
+                    <CardDescription className="text-xs text-purple-800">Processos</CardDescription>
                     <CardTitle className="text-md font-bold text-purple-600">{opportunities.length}</CardTitle>
                 </div>
                 </CardContent>
@@ -90,7 +73,7 @@ return(
                 <CardContent className="p-4 flex items-center space-x-4">
                 <Users className="h-8 w-8 text-purple-600" />
                 <div>
-                    <CardDescription className="text-xs text-purple-800">Entrevistas Agendadas</CardDescription>
+                    <CardDescription className="text-xs text-purple-800">Entrevistas</CardDescription>
                     <CardTitle className="text-md font-bold text-purple-600">
                     {opportunities.filter(opp => opp.status === OpportunityStatusEnum.INTERVIEW).length}
                     </CardTitle>
@@ -105,7 +88,7 @@ return(
                     <CardTitle className="text-md font-bold text-purple-600">
                       <TimestampRenderer 
                         fallback='Sem entrevistas' 
-                        format='toLocale' 
+                        format='toISODate' 
                         timestamp={nextInterview?.nextInterviewDate ?? 0}
                       />
                     </CardTitle>

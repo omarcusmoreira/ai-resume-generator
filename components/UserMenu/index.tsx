@@ -30,9 +30,6 @@ export default function UserMenu() {
     const fetchUserData = async () => {
       const fetchedPlan = await getCurrentPlan();  
       const fetchedUserData = await getUserData();
-      console.log('Do menu:',fetchedUserData)
-      console.log('Plano', fetchedPlan)
-      console.log(userData?.personalInfo.name || 'Nada aqui ainda...')
 
       if( fetchedUserData){
         setUserData(fetchedUserData);

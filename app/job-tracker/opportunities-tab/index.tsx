@@ -3,7 +3,7 @@
 import { Dispatch, useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 import { Briefcase, PlusCircle, Search, Edit2, FileText, CalendarDays, User, Clock, Trash2, Phone, Handshake } from "lucide-react"
 import { OpportunityStatusEnum, OpportunityType } from '@/types/opportunities'
 import { v4 } from 'uuid'
@@ -130,16 +130,15 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
     return (
         <div className="space-y-4">
         <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-purple-800">Oportunidades</h2>
+            <h2 className="text-2xl font-bold text-purple-800">Processos seletivos</h2>
             <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={handleAddButtonAction}>
-                <PlusCircle className="mr-2 h-5 w-5" /> Nova Oportunidade
+                <PlusCircle className="mr-2 h-5 w-5" /> Processo seletivo
             </Button>
         </div>
         
         <Card className="bg-white shadow rounded-lg overflow-hidden">
           <CardHeader className="bg-purple-100 p-4">
-            <CardTitle className="text-xl font-bold text-purple-800">Oportunidades Atuais</CardTitle>
-            <CardDescription className="text-purple-600">{`Gerencie suas oportunidades de emprego em andamento - Voce tem mais ${opportunityQuota} vagas para cadastrar`}</CardDescription>
+            <CardDescription className="text-purple-600">{`Gerencie seus processos seletivos em andamento - Voce tem mais ${opportunityQuota} vagas para cadastrar`}</CardDescription>
             <div className="mt-2 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
@@ -154,7 +153,7 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
           {opportunities.length === 0 && 
           <div className='flex flex-col w-full items-center justify-center py-10'>
             <Handshake className='h-20 w-20 text-gray-300 mb-4'/>
-            <p className="text-2xl text-gray-400 text-center">Voce ainda não está participando de nenhum processo.</p>
+            <p className="text-2xl text-gray-400 text-center">Voce ainda não está participando de nenhum processo seletivo.</p>
           </div>}
             <div className="space-y-4">
               {filteredOpportunities.map((opportunity) => (
@@ -206,7 +205,7 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
                     <div className="flex items-center">
                       <CalendarDays className="h-4 w-4 mr-2 text-purple-600 flex-shrink-0" />
                       <span className="text-purple-600">
-                        <TimestampRenderer fallback='Sem registro' format='toLocale' timestamp={opportunity.opportunityDate}/>
+                        <TimestampRenderer fallback='Sem registro' format='toISODate' timestamp={opportunity.opportunityDate}/>
                       </span>
                     </div>
                   </div>
@@ -223,7 +222,7 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
                       <Clock className="h-4 w-4 mr-2 text-purple-600 flex-shrink-0" />                        
                       <span className="text-purple-600">
                         Entrevista:
-                        <TimestampRenderer fallback='Sem entrevistas' format='toLocale' timestamp={opportunity.nextInterviewDate} /> 
+                        <TimestampRenderer fallback='Sem entrevistas' format='toISODate' timestamp={opportunity.nextInterviewDate} /> 
                         </span>
                     </div>
                   </div>

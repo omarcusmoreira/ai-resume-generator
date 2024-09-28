@@ -9,6 +9,7 @@ import { Timestamp } from 'firebase/firestore';
 import { ResumeType } from '@/types/resumes';
 import { ProfileType } from '@/types/profiles';
 import { ContactType } from '@/types/contacts';
+import { ensureDate } from '@/utils/ensureDate';
 
 interface OpportunityFormDialogProps {
   isOpen: boolean;
@@ -236,7 +237,11 @@ export function OpportunityFormDialog({
                     <Label htmlFor="nextInterviewDate" className="text-purple-800">Entrevista</Label>
                     <Input 
                         id="nextInterviewDate" 
-                        value={opportunity.nextInterviewDate ? opportunity.nextInterviewDate.toDate().toISOString().split('T')[0] : ''}
+                        value={
+                            ensureDate(opportunity.nextInterviewDate) 
+                              ? ensureDate(opportunity.nextInterviewDate)?.toISOString().split('T')[0] 
+                              : ''
+                          }
                         type='date' 
                         onChange={(e) => setOpportunity({ ...opportunity, nextInterviewDate: e.target.value ? Timestamp.fromDate(new Date(e.target.value)) : null })}
                         placeholder="Nome da empresa" 

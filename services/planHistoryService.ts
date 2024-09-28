@@ -75,13 +75,11 @@ export const getCurrentPlan = async (): Promise<PlanTypeEnum> => {
     );
 
     const querySnapshot = await getDocs(planHistoryQuery);
-    console.log(querySnapshot)
     if (querySnapshot.empty) {
         return PlanTypeEnum.FREE;
     }
 
     const planData = querySnapshot.docs[0].data();
-    console.log(planData.plan)
     return planData.plan as PlanTypeEnum;
 }
 

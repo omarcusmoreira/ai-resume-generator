@@ -143,7 +143,6 @@ export default function GenerateResumePage() {
 
           console.log(completion)
           const trimmedCompletion = trimToJSON(completion);
-          console.log(resumeId);
 
           if (validateCompletion(trimmedCompletion)) {
             const resume = {
@@ -266,7 +265,7 @@ export default function GenerateResumePage() {
             </div>
             <Button 
               variant="ai" 
-              className="rounded-full bg-primary text-black"
+              className="rounded-full bg-primary text-white"
               onClick={
                   selectedPrompt === 2 ?
                   handleGenerateCoverLetter :

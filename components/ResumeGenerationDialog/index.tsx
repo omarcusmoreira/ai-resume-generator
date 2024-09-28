@@ -64,7 +64,7 @@ export const ResumeGenerationDialog = ({
                 )}
                 <p className="text-center font-semibold">{title}</p>
                 {(isGenerating || hasGenerationFailed) && (
-                <p className="text-sm text-gray-500">{message}</p>
+                <p className="text-sm text-gray-500 text-center">{message}</p>
                 )}
             </div>
             <DialogFooter>

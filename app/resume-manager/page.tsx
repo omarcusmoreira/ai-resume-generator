@@ -44,7 +44,27 @@ export default function ResumeManagerPage() {
 
       <Card className='w-full max-w-3xl p-4 md:p-6'>
         <div className="container mx-auto p-4 space-y-6">
+          <div className='flex w-full justify-between'>
+
           <h1 className="text-3xl font-bold">Meus Currículos</h1>
+        
+                <TooltipProvider>
+                    <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Link href="/resume-generate" passHref>
+                            <Button variant="ai" className="rounded-full bg-primary text-white"
+                            >
+                                <Sparkles className='h-4 w-4 mr-2' />
+                                Gerar Currículo
+                            </Button>
+                        </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>{`Voce ainda tem ${quota} currículos disponiveis`}</p>
+                    </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+              </div>
           <div className="flex space-x-4">
             <div className="relative flex-grow">
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -99,23 +119,6 @@ export default function ResumeManagerPage() {
                 Nenhum currículo encontrado.
                 </div>
             )}
-            <div className="flex justify-center mt-6">
-                <TooltipProvider>
-                    <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Link href="/resume-generate" passHref>
-                            <Button>
-                                <Sparkles className='h-4 w-4 mr-2' />
-                                Gerar Currículo
-                            </Button>
-                        </Link>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>{`Voce ainda tem ${quota} currículos disponiveis`}</p>
-                    </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
-            </div>
         </div>
       </Card>
     </div>

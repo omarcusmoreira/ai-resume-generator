@@ -117,7 +117,7 @@ export default function ResumePreviewPage() {
   }
 
   const handleRegenerate = () => {
-    router.push('/')
+    router.push('/generate-resume')
   }
 
   const handleAccept = async () => {
@@ -262,9 +262,14 @@ export default function ResumePreviewPage() {
           )}
         </div>
         {!isAccepted && (
-          <p className="text-[12px] mb-4 text-yellow-700">
-            Ao refazer o currículo, sua cota não será afetada.
+          <>
+          <p className="text-[12px] text-yellow-700">
+            Aceite para editar ou fazer o download do seu currículo.
+          </p> 
+           <p className="text-[12px] mb-4 text-yellow-700">
+            Caso opte por refazer, sua cota não será afetada.
           </p>
+          </>
         )}
         <div className="flex flex-wrap gap-2">
           {!isAccepted ? (
@@ -385,6 +390,11 @@ export default function ResumePreviewPage() {
               <>
                 <h2 className="text-lg font-semibold mb-2 mt-4">Atividades Extracurriculares</h2>
                 {/* Render extra-curricular activities here if any */}
+                <EditableField
+                  value={typeof localResumeBody?.extraCurricular === 'string' ? localResumeBody.extraCurricular : ''} 
+                  onChange={(value) => updateResumeData(['extraCurricular'], value)}
+                  multiline
+                />
               </>
             )}
           </div>

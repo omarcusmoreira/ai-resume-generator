@@ -25,23 +25,23 @@ export type QuotasType = {
   
   const PlanQuotas: { [key in PlanTypeEnum]: QuotasType } = {
     [PlanTypeEnum.FREE]: {
-      interactions: 20,
+      interactions: 10,
       profiles: 2,
-      resumes: 5,
+      resumes: 3,
       opportunities: 10,
       contacts: 10,
     },
     [PlanTypeEnum.BASIC]: {
-      interactions: 50,
+      interactions: 30,
       profiles: 5,
-      resumes: 15,
+      resumes: 10,
       opportunities: 30,
       contacts: 30,
     },
     [PlanTypeEnum.PREMIUM]: {
-      interactions: 100,
+      interactions: 60,
       profiles: 10,
-      resumes: 30,
+      resumes: 20,
       opportunities: 100,
       contacts: 200,
     },
