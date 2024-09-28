@@ -1,14 +1,20 @@
 'use client';
 
+declare global {
+  interface Navigator {
+    standalone?: boolean;
+  }
+}
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { Progress } from '@/components/ui/progress';
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuthStore(); 
+  const { user, loading } = useAuthStore();
   const router = useRouter();
-  const [progress, setProgress] = useState(17); 
+  const [progress, setProgress] = useState(17);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -16,7 +22,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
         if (prev < 100) {
           return prev + 20;
         }
-        clearInterval(timer); 
+        clearInterval(timer);
         return prev;
       });
     }, 100);
@@ -25,8 +31,22 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const isPWA = () => {
+      // Check if the app is running in standalone mode
+      return (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true
+      );
+    };
+
     if (!loading && !user) {
-      router.push('/landing-page'); // Redirect to landing page if not authenticated
+      if (isPWA()) {
+        // If the user is in PWA mode, redirect to auth-page
+        router.push('/auth-page');
+      } else {
+        // Otherwise, redirect to landing-page
+        router.push('/landing-page');
+      }
     }
   }, [user, loading, router]);
 
