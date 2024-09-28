@@ -6,10 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import { OpportunityStatusEnum, OpportunityType } from '@/types/opportunities';
 import { Timestamp } from 'firebase/firestore';
-import { ResumeType } from '@/types/resumes';
-import { ProfileType } from '@/types/profiles';
-import { ContactType } from '@/types/contacts';
 import { ensureDate } from '@/utils/ensureDate';
+import { useProfileStore } from '@/stores/profileStore';
+import { useResumeStore } from '@/stores/resumeStore';
+import { useOpportunityStore } from '@/stores/opportunityStore';
+import { useContactStore } from '@/stores/contactStore';
 
 interface OpportunityFormDialogProps {
   isOpen: boolean;
@@ -19,10 +20,6 @@ interface OpportunityFormDialogProps {
   description: string;
   submitButtonText: string;
   initialOpportunity?: OpportunityType;
-  resumes: ResumeType[];
-  profiles: ProfileType[];
-  contacts: ContactType[];
-  isLoading: boolean
 }
 
 export function OpportunityFormDialog({
@@ -33,11 +30,14 @@ export function OpportunityFormDialog({
   description,
   submitButtonText,
   initialOpportunity,
-  resumes,
-  profiles,
-  contacts,
-  isLoading
 }: OpportunityFormDialogProps) {
+
+    const { profiles } = useProfileStore();
+    const { resumes } = useResumeStore();
+    const { contacts } = useContactStore();
+    const { loading } = useOpportunityStore();
+
+
   const [opportunity, setOpportunity] = useState<Omit<OpportunityType, 'id'>>({
     companyName: '',
     position: '',
@@ -63,7 +63,7 @@ export function OpportunityFormDialog({
         nextInterviewDate: initialOpportunity.nextInterviewDate || null,
       });
     }
-  }, [initialOpportunity, isLoading]);
+  }, [initialOpportunity, loading]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -248,7 +248,7 @@ export function OpportunityFormDialog({
                         className="border-purple-300 focus:border-purple-500" 
                     /> 
             </div>
-          <Button type="submit" disabled={isLoading} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+          <Button type="submit" disabled={loading} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
             {submitButtonText}
           </Button>
         </form>

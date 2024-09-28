@@ -2,17 +2,15 @@
 
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card"
 import { Briefcase, Users, Calendar } from "lucide-react"
-import { OpportunityStatusEnum, OpportunityType } from "@/types/opportunities"
+import { OpportunityStatusEnum } from "@/types/opportunities"
 import { TimestampRenderer } from "@/utils/TimestampRender"
 import { ensureDate } from "@/utils/ensureDate"
 import logo_horizontal from '../../../public/assets/images/logo_horizontal.png'
 import Image from "next/image"
+import { useOpportunityStore } from "@/stores/opportunityStore"
 
-
-type DashboardProps = {
-    opportunities: OpportunityType[];
-}
-export default function Dashboard({opportunities}: DashboardProps) {      
+export default function Dashboard() {    
+  const { opportunities } = useOpportunityStore();  
 
 const getNextInterview = () => {
   const today = new Date(); // Get current date
@@ -31,7 +29,6 @@ const getNextInterview = () => {
       return aDate.getTime() - bDate.getTime();
     });
 
-  console.log('INTERVIEW ', interviews[0]);
   return interviews[0];
 };
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Dispatch, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
@@ -8,55 +8,34 @@ import { Briefcase, PlusCircle, Search, Edit2, FileText, CalendarDays, User, Clo
 import { OpportunityStatusEnum, OpportunityType } from '@/types/opportunities'
 import { v4 } from 'uuid'
 import { OpportunityFormDialog } from '@/components/OpportunityFormDialog'
-import { addOpportunity, deleteOpportunity, updateOpportunity } from '@/services/opportunityServices'
-import { ContactType } from '@/types/contacts'
-import { ResumeType } from '@/types/resumes'
-import { ProfileType } from '@/types/profiles'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { TimestampRenderer } from '@/utils/TimestampRender'
 import { DeleteDialog } from '@/components/DeleteDialog'
-import { decrementQuota, getQuotaByType, incrementQuota } from '@/services/quotaServices'
 import { UpgradeDialog } from '@/components/UpgradeAlertDialog'
+import { useOpportunityStore } from '@/stores/opportunityStore'
+import { useQuotaStore } from '@/stores/quotaStore'
 
-type OpportunitiesTabProps = {
-    contacts: ContactType[];
-    resumes: ResumeType[];
-    profiles: ProfileType[];
-    opportunities: OpportunityType[];
-    setOpportunities: Dispatch<React.SetStateAction<OpportunityType[]>>
-}
+export const OpportunitiesTab = () => {
 
-
-export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, setOpportunities}: OpportunitiesTabProps) => {
-
+    const { opportunities, addOpportunity, deleteOpportunity, updateOpportunity, loading } = useOpportunityStore();
+    const { quotas, decreaseQuota, increaseQuota } = useQuotaStore();
+    console.log('cotas: ', quotas)
     const [isNewOpportunityOpen, setIsNewOpportunityOpen] = useState(false)
     const [opportunitySearch, setOpportunitySearch] = useState('')
     const [editingOpportunity, setEditingOpportunity] = useState<OpportunityType | null>(null)
 
-    const [isDeleting, setIsDeleting] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Track modal open state
     const [opportunityToDelete, setOpportunityToDelete] = useState<OpportunityType | null>(null); // Track the opportunity to be deleted
-    const [opportunityQuota, setOpportunityQuota] = useState(0)
     const [isUpgradeDialogOpen, setIsUpgradeAlertDialogOpen] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
 
     const handleAddButtonAction = ()=>{
-        if (opportunityQuota > 0){
+        if (quotas.opportunities > 0){
             setIsNewOpportunityOpen(true)
         }else {
             setIsUpgradeAlertDialogOpen(true)
         }
-    }
-
-    useEffect(()=>{
-      const fetchQuotas = async () =>{
-        const fetchedQuota = await getQuotaByType('opportunities')
-        setOpportunityQuota(fetchedQuota)
-      }
-      fetchQuotas()
-    }, [isNewOpportunityOpen, isDeleteDialogOpen])
-  
+    }  
   
     const filteredOpportunities = opportunities.filter(opp => 
       opp.companyName.toLowerCase().includes(opportunitySearch.toLowerCase()) ||
@@ -79,47 +58,35 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
     }
   
     const handleAddOpportunity = async (newOpportunity: Omit<OpportunityType, 'id'>) => {
-      setIsLoading(true)
         try {
         const opportunityId = v4();
         await addOpportunity(opportunityId, { ...newOpportunity, id: opportunityId });
-        await decrementQuota('opportunities');
-        setOpportunities(prevOpportunity => [...prevOpportunity, { ...newOpportunity, id: opportunityId }]);
+        await decreaseQuota('opportunities');
         setIsNewOpportunityOpen(false);
       } catch (error) {
         console.error('Error adding opportunity:', error);
         // Handle error (e.g., show error message to user)
       }
-      setIsLoading(false)
     };
   
     const handleUpdateOpportunity = async (updatedOpportunity: Omit<OpportunityType, 'id'>) => {
       if (!editingOpportunity) return;
       try {
         await updateOpportunity({ ...updatedOpportunity, id: editingOpportunity.id });
-        setOpportunities(prevOpportunities => 
-          prevOpportunities.map(o => o.id === editingOpportunity.id ? { ...updatedOpportunity, id: editingOpportunity.id } : o)
-        );
-        setEditingOpportunity(null);
+        setEditingOpportunity(null)
       } catch (error) {
         console.error('Error updating contact:', error);
-        // Handle error (e.g., show error message to user)
       }
     };
 
     const handleDeleteOpportunity = async () => {
         if (!opportunityToDelete) return;
-        setIsDeleting(true);
-        setOpportunities(prevOpportunities => prevOpportunities.filter(o => o.id !== opportunityToDelete.id));
         try {
           await deleteOpportunity(opportunityToDelete.id);
-          await incrementQuota('opportunities')
-          setIsDeleteDialogOpen(false);
-          setOpportunityToDelete(null);
+          await increaseQuota('opportunities')
         } catch (error) {
           console.log('Error deleting opportunity: ', error);
         }
-        setIsDeleting(false);
       };
     
       const openDeleteDialog = (opportunity: OpportunityType) => {
@@ -138,7 +105,7 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
         
         <Card className="bg-white shadow rounded-lg overflow-hidden">
           <CardHeader className="bg-purple-100 p-4">
-            <CardDescription className="text-purple-600">{`Gerencie seus processos seletivos em andamento - Voce tem mais ${opportunityQuota} vagas para cadastrar`}</CardDescription>
+            <CardDescription className="text-purple-600">{`Gerencie seus processos seletivos em andamento - Voce tem mais ${quotas.opportunities} vagas para cadastrar`}</CardDescription>
             <div className="mt-2 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
@@ -233,37 +200,32 @@ export const OpportunitiesTab = ({contacts, resumes, profiles, opportunities, se
           </CardContent>
         </Card>
         <OpportunityFormDialog 
-              contacts={contacts}
-              isOpen={isNewOpportunityOpen}
-              onOpenChange={setIsNewOpportunityOpen}
-              onSubmit={handleAddOpportunity}
-              profiles={profiles}
-              resumes={resumes}
-              title="Adicionar Nova Vaga"
-              description="Preencha os detalhes da nova oportunidade de emprego"
-              submitButtonText="Adicionar Vaga"
-              isLoading={isLoading}
-          />
-          <OpportunityFormDialog 
-              contacts={contacts}
-              isOpen={!!editingOpportunity}
-              onOpenChange={(open) => {
-                  if (!open) setEditingOpportunity(null);
-              }}
-              onSubmit={handleUpdateOpportunity}
-              initialOpportunity={editingOpportunity || undefined} 
-              profiles={profiles}
-              resumes={resumes}
-              title="Editar Vaga"
-              description="Atualize as informações da sua oportunidade"
-              submitButtonText="Atualizar Vaga"
-              isLoading={isLoading}
-          />
+            isOpen={isNewOpportunityOpen && !editingOpportunity} // Open only when adding
+            onOpenChange={setIsNewOpportunityOpen}
+            onSubmit={handleAddOpportunity}
+            title="Adicionar Nova Vaga"
+            description="Preencha os detalhes da nova oportunidade de emprego"
+            submitButtonText="Adicionar Vaga"
+        />
+        <OpportunityFormDialog 
+            isOpen={!!editingOpportunity} // Open only when editing
+            onOpenChange={(open) => {
+                if (!open) {
+                    setEditingOpportunity(null); // Reset the editing opportunity when closing
+                }
+                setIsNewOpportunityOpen(open);
+            }}
+            onSubmit={handleUpdateOpportunity}
+            initialOpportunity={editingOpportunity || undefined} 
+            title="Editar Vaga"
+            description="Atualize as informações da sua oportunidade"
+            submitButtonText="Atualizar Vaga"
+        />
         <DeleteDialog 
             isOpen={isDeleteDialogOpen} 
             onOpenChange={setIsDeleteDialogOpen} 
             onConfirm={handleDeleteOpportunity}
-            isDeleting={isDeleting}
+            isDeleting={loading}
         />
         <UpgradeDialog
          isOpen={isUpgradeDialogOpen}

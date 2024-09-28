@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ContactType } from '@/types/contacts';
+import { useContactStore } from '@/stores/contactStore';
 
 interface ContactFormDialogProps {
   isOpen: boolean;
@@ -13,7 +14,6 @@ interface ContactFormDialogProps {
   title: string;
   description: string;
   submitButtonText: string;
-  isLoading: boolean;
 }
 
 export function ContactFormDialog({
@@ -24,8 +24,10 @@ export function ContactFormDialog({
   title,
   description,
   submitButtonText,
-  isLoading
 }: ContactFormDialogProps) {
+    
+    const { loading } = useContactStore();
+
   const [contact, setContact] = React.useState<Omit<ContactType, 'id'>>({
     name: '',
     email: '',
@@ -45,13 +47,13 @@ export function ContactFormDialog({
         linkedin: initialContact.linkedin,
       });
     }
-  }, [initialContact, isLoading]);
+  }, [initialContact]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(contact);
   };
-
+ 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] bg-white  max-h-screen overflow-y-auto">
@@ -115,7 +117,7 @@ export function ContactFormDialog({
               className="border-purple-300 focus:border-purple-500" 
             />
           </div>
-          <Button type="submit" disabled={isLoading} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+          <Button type="submit" disabled={loading} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
             {submitButtonText}
           </Button>
         </form>

@@ -13,45 +13,44 @@ import { useRouter } from 'next/navigation'
 // Client-side only import for html2pdf
 const html2pdf = dynamic(() => import('html2pdf.js'), { ssr: false })
 void html2pdf
-
-import { getUserData } from '@/services/userServices'
 import { useSearchParams } from 'next/navigation'
-import { UserDataType } from '@/types/users'
 import { ResumeBodyType, ResumeType } from '@/types/resumes'
-import { deleteResume, getResume, updateResume } from '@/services/resumeServices'
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
-import { decrementQuota, getQuotaByType } from '@/services/quotaServices'
+import { useResumeStore } from '@/stores/resumeStore'
+import { useQuotaStore } from '@/stores/quotaStore'
+import { useUserDataStore } from '@/stores/userDataStore'
 
 export default function ResumePreviewPage() {
+
   const resumeId = useSearchParams().get('resumeId') as string
-  const [isAccepted, setIsAccepted] = useState<boolean>(false)
-  const [userData, setUserData] = useState<UserDataType>()
+  const router = useRouter()
+
+  const { userData } = useUserDataStore();
+  const { resumes, loading, updateResume, deleteResume } = useResumeStore();
+  const { quotas, decreaseQuota } = useQuotaStore();
+
   const [resume, setResume] = useState<ResumeType>()
   const [resumeBody, setResumeBody] = useState<ResumeBodyType>()
   const [localResumeBody, setLocalResumeBody] = useState<ResumeBodyType>()
   const [isEditing, setIsEditing] = useState<boolean>(false)
-  const [quota, setQuota] = useState<number>(0)
-  const [isSaving, setIsSaving] = useState(false)
   const resumeRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
-
-  const fetchUserData = async () => {
-    const userData = await getUserData()
-    const resume = await getResume(resumeId)
-    const fetchedQuota = await getQuotaByType('resumes')
-    if (resume && userData) {
-      setUserData(userData)
-      setResume(resume)
-      setResumeBody(JSON.parse(resume.contentJSON))
-      setIsAccepted(resume.isAccepted)
-      setQuota(fetchedQuota)
-    }
-  }
 
   useEffect(() => {
-    fetchUserData()
-    //eslint-disable-next-line
-  }, [])
+    const resumeToPreview = resumes.find(resume => resume.id === resumeId);
+    setResume(resumeToPreview);
+  }, [resumes, resumeId]);
+  
+  useEffect(() => {
+    if (resume && resume.contentJSON) {
+      try {
+        const parsedBody = JSON.parse(resume.contentJSON);
+        setResumeBody(parsedBody);
+      } catch (error) {
+        console.error('Error parsing resume content:', error);
+      }
+    }
+  }, [resume]);
+  
 
   useEffect(() => {
     setLocalResumeBody(resumeBody)
@@ -63,20 +62,18 @@ export default function ResumePreviewPage() {
 
   const handleSave = useCallback(async () => {
     setIsEditing(false)
-    setIsSaving(true)
     const resumeData = { ...resume, contentJSON: JSON.stringify(localResumeBody) }
     if (resumeData.contentJSON) {
       console.log('Updating resume with data:', resumeData)
       try {
         const response = await updateResume(resumeId, resumeData)
         console.log('Update response:', response)
-        setResumeBody(localResumeBody) // Update the main state after successful save
+        setResumeBody(localResumeBody)
       } catch (error) {
         console.error('Error updating resume:', error)
       }
     }
-    console.log('Salvando alterações...', localResumeBody)
-    setIsSaving(false)
+    //eslint-disable-next-line
   }, [localResumeBody, resumeId, resume])
 
   const handleShare = () => {
@@ -113,19 +110,16 @@ export default function ResumePreviewPage() {
 
   const handleDelete = async() => {
     await deleteResume(resumeId)
-    router.push('/')
+    router.push('/resume-manager')
   }
 
   const handleRegenerate = () => {
-    router.push('/generate-resume')
+    router.push('/resume-generate')
   }
 
   const handleAccept = async () => {
-    setIsSaving(true)
-    setIsAccepted(true)
-    await decrementQuota('resumes')
     await updateResume(resumeId, { isAccepted: true } as Partial<ResumeType>)
-    setIsSaving(false)
+    await decreaseQuota('resumes')
   }
 
   const updateResumeData = (path: string[], value: string) => {
@@ -178,7 +172,7 @@ export default function ResumePreviewPage() {
     <div className="flex w-full justify-between gap-2">
       <div className="flex gap-2">
         {isEditing ? (
-          <Button onClick={handleSave} size="sm" disabled={isSaving} className="bg-green-500 hover:bg-green-600 text-white">
+          <Button onClick={handleSave} size="sm" disabled={loading} className="bg-green-500 hover:bg-green-600 text-white">
             <Save className="h-4 w-4 mr-2" />
             <span className="hidden sm:inline">Salvar</span>
           </Button>):(
@@ -211,7 +205,7 @@ export default function ResumePreviewPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600 text-white">
+            <AlertDialogAction onClick={handleDelete} disabled={loading} className="bg-red-500 hover:bg-red-600 text-white">
               Apagar
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -222,12 +216,12 @@ export default function ResumePreviewPage() {
 
   return (
     <div className="w-full max-w-4xl mx-auto relative pb-8 mt-4">
-      <div className={`p-4 mb-4 rounded-lg ${isAccepted ? 'bg-purple-400' : 'bg-yellow-100'}`}>
+      <div className={`p-4 mb-4 rounded-lg ${resume?.isAccepted ? 'bg-purple-400' : 'bg-yellow-100'}`}>
         <div className="flex justify-between items-center mb-2">
-          <h2 className={`font-medium text-lg ${isAccepted ? 'text-white' : 'text-yellow-800'}`}>
-            {isAccepted ? `Voce pode gerar mais ${quota} currículo(s).` : 'Revise seu currículo abaixo.'}
+          <h2 className={`font-medium text-lg ${resume?.isAccepted ? 'text-white' : 'text-yellow-800'}`}>
+            {resume?.isAccepted ? `Voce pode gerar mais ${quotas.resumes} currículo(s).` : 'Revise seu currículo abaixo.'}
           </h2>
-          {isAccepted && (
+          {resume?.isAccepted && (
             <div className="sm:hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -261,7 +255,7 @@ export default function ResumePreviewPage() {
             </div>
           )}
         </div>
-        {!isAccepted && (
+        {!resume?.isAccepted && (
           <>
           <p className="text-[12px] text-yellow-700">
             Aceite para editar ou fazer o download do seu currículo.
@@ -272,13 +266,13 @@ export default function ResumePreviewPage() {
           </>
         )}
         <div className="flex flex-wrap gap-2">
-          {!isAccepted ? (
+          {!resume?.isAccepted ? (
             <>
               <Button onClick={handleRegenerate} variant="outline" size="sm" className="bg-white hover:bg-yellow-50">
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Refazer
               </Button>
-              <Button onClick={handleAccept} disabled={isSaving} size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-white">
+              <Button onClick={handleAccept} disabled={loading} size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-white">
                 <Check className="h-4 w-4 mr-2" />
                 Aceitar
               </Button>

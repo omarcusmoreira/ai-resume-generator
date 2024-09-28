@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { FileCode2, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
 import { Card } from '@/components/ui/card'
@@ -10,12 +10,7 @@ import { cn } from "@/lib/utils"
 import { generateResume } from '@/aiPrompts/generateResume'
 import { generateResumeWithJobDescription } from '@/aiPrompts/generateResumeWithJobDescription'
 import { v4 } from 'uuid'
-import { getUserData } from '@/services/userServices'
-import { getProfiles } from '@/services/profileServices'
-import { UserDataType } from '@/types/users'
-import { ProfileType } from '@/types/profiles'
 import { ResumeType } from '@/types/resumes'
-import { addResume } from '@/services/resumeServices'
 import { validateCompletion } from '../utils/validateJSONCompletion'
 import { trimToJSON } from '../utils/trimToJSON'
 import { generateCoverLetter } from '@/aiPrompts/generateCoverLetter'
@@ -23,15 +18,20 @@ import { generateLinkedinBio } from '@/aiPrompts/generateLinkedinBio'
 import { ResumeGenerationDialog } from '@/components/ResumeGenerationDialog'
 import BioCoverLetterDialog from '@/components/BioCoverLetterDialog/'
 import ProfileCreationDialogComponent from '@/components/ProfileCreationDialog'
-import { decrementQuota, getQuotas } from '@/services/quotaServices'
-import { QuotasType } from '@/types/planHistory'
 import { UpgradeDialog } from '@/components/UpgradeAlertDialog'
 import { Timestamp } from 'firebase/firestore'
+import { useUserDataStore } from '@/stores/userDataStore'
+import { useProfileStore } from '@/stores/profileStore'
+import { useQuotaStore } from '@/stores/quotaStore'
+import { useResumeStore } from '@/stores/resumeStore'
 
 export default function GenerateResumePage() {
 
-  const [userData, setUserData] = useState<UserDataType>()
-  const [profiles, setProfiles] = useState<ProfileType[]>([])
+  const { userData } = useUserDataStore();
+  const { profiles } = useProfileStore();
+  const { addResume } = useResumeStore();
+  const { quotas, decreaseQuota } = useQuotaStore();
+
   const [inputText, setInputText] = useState('')
   const [selectedPrompt, setSelectedPrompt] = useState<number>(0)
   const [isProfileWizardOpen, setIsProfileWizardOpen] = useState(false)
@@ -45,10 +45,7 @@ export default function GenerateResumePage() {
   const [generationAttempt, setGenerationAttempt] = useState<number>(0)
   const [hasGenerationFailed, setHasGenerationFaild] = useState(false)
   const [isGenerationSuccessful, setIsGenerationSuccessful] = useState(false)
-  const [quotas, setQuotas] = useState<QuotasType>()
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false)
-  const [noInteractions, setNoInteractions] = useState(false)
-  const [noResumes, setNoResumes] = useState(false)
   const [upgradeDialogTitle, setUpgradeDialogTitle] = useState<'Perfis' | 'Currículos' | 'Interações'>('Interações')
 
   const prompts = [
@@ -57,31 +54,6 @@ export default function GenerateResumePage() {
     'Escrever uma carta de apresentação para enviar para recrutadores.',
     'Criar Biografia profissional para LinkedIn.'
   ]
-
-  useEffect(() => {
-    fetchData();
-  }, [refreshKey]);
-
-  useEffect(()=>{
-    if(quotas){
-      if (quotas.interactions === 0)
-        setNoInteractions(true)
-      if(quotas.resumes === 0)
-        setNoResumes(true)
-    }
-  }, [quotas, isCoverLetterDialogOpen, isDialogOpen, isProfileWizardOpen])
-
-  const fetchData = async () => {
-    const fetchedUser = await getUserData();
-    const fetchedProfiles = await getProfiles();
-    const fetchedQuotas = await getQuotas();
-
-    if (fetchedUser && fetchedProfiles) {
-      setUserData(fetchedUser);
-      setProfiles(fetchedProfiles);
-      setQuotas(fetchedQuotas);
-    }
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputText(e.target.value.slice(0, 1000)) 
@@ -100,7 +72,7 @@ export default function GenerateResumePage() {
   }
 
   const handleGenerateResume = async () => {
-    if (noResumes) {
+    if (quotas.resumes <= 0) {
       setUpgradeDialogTitle('Currículos')
       setIsUpgradeDialogOpen(true)
       return;
@@ -175,7 +147,7 @@ export default function GenerateResumePage() {
   }
 
   const handleGenerateCoverLetter = async () => {
-    if (noInteractions) {
+    if (quotas.interactions <= 0) {
       setUpgradeDialogTitle('Interações')
       setIsUpgradeDialogOpen(true)
       return;
@@ -196,12 +168,12 @@ export default function GenerateResumePage() {
       setCoverLetterCompletion(completion)
       setIsCoverLetterDialogOpen(true)
       setTimeout(() => setRefreshKey(prevKey => prevKey + 1), 500); 
-      decrementQuota('interactions')
+      decreaseQuota('interactions')
     }
   } 
 
   const handleGenerateLinkedinBio = async () => {
-    if (noInteractions) {
+    if (quotas.interactions <= 0) {
       setIsUpgradeDialogOpen(true)
       return;
     }
@@ -222,7 +194,7 @@ export default function GenerateResumePage() {
     setTimeout(() => setRefreshKey(prevKey => prevKey + 1), 500); 
     setIsCoverLetterDialogOpen(true)
 
-    decrementQuota('interactions')
+    decreaseQuota('interactions')
   } 
 
   return (

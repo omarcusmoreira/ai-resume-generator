@@ -29,6 +29,7 @@ export const addUser = async (user: UserDataType): Promise<void> => {
     const userId = getUserId();
     const docRef = doc(db, 'users', userId);
     await setDoc(docRef, user);
+    
     setSessionData(SESSION_KEY, user); // Update session storage after adding user
 };
 

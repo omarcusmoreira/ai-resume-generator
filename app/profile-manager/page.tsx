@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,24 +11,35 @@ import { Plus, Pencil, Check, X, Link as LinkIcon, Trash2, UserX } from 'lucide-
 import ProfileWizardComponent from '@/components/ProfileCreationDialog'
 import { useRouter } from 'next/navigation'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { PersonalInfoType } from '@/types/users'
 import { ProfileSectionType, ProfileType } from '@/types/profiles'
-import { getUserData } from '@/services/userServices'
-import { deleteProfile, getProfiles, updateProfile } from '@/services/profileServices'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { getQuotas, incrementQuota } from '@/services/quotaServices'
 import { UpgradeDialog } from '@/components/UpgradeAlertDialog'
+import { useProfileStore } from '@/stores/profileStore'
+import { useQuotaStore } from '@/stores/quotaStore'
+import { useUserDataStore } from '@/stores/userDataStore'
 
 export default function ProfileManagement() {
   const router = useRouter()
-  const [personalInfo, setPersonalInfo] = useState<PersonalInfoType | null>(null)
-  const [profiles, setProfiles] = useState<ProfileType[]>([])
   const [activeProfile, setActiveProfile] = useState<string>('')
   const [editingSection, setEditingSection] = useState<keyof ProfileSectionType | null>(null)
   const [localProfileChanges, setLocalProfileChanges] = useState<ProfileType | null>(null)
   const [isWizardOpen, setIsWizardOpen] = useState(false)
-  const [quota, setQuota] = useState(0)
   const [isUpgradeAlertDialogOpen, setIsUpgradeAlertDialogOpen] = useState(false)
+  const [locaProfiles, setLocalProfiles] = useState<ProfileType[]>();
+
+  const { userData } = useUserDataStore();
+  const { profiles, updateProfile, deleteProfile  } = useProfileStore();
+  const { quotas, increaseQuota } = useQuotaStore();
+
+  useEffect(()=>{
+    const updateProfiles = ()=>{
+      setLocalProfiles(profiles)
+      if (profiles.length > 0 && !activeProfile) {
+        setActiveProfile(profiles[0].id);
+      }
+    }
+    updateProfiles();
+  }, [profiles, activeProfile])
 
   const ProfileSectionTitle: Record<keyof ProfileSectionType, string> = {
     keywords: "Keywords",
@@ -38,23 +49,6 @@ export default function ProfileManagement() {
     idioms: "Idiomas",
     extraCurricular: "Atividades Complementares/Certificações"
   }
-  const fetchData = async () => { 
-    const fetchedUser = await getUserData()
-    const fetchedProfiles = await getProfiles()
-    const fetchedQuotas = await getQuotas()
-
-    setPersonalInfo(fetchedUser?.personalInfo || null)
-    setProfiles(fetchedProfiles)
-    setQuota(fetchedQuotas.profiles)
-
-    if (fetchedProfiles.length > 0) {
-      setActiveProfile(fetchedProfiles[0].id)
-    }
-  }
-  const [refreshKey, setRefreshKey] = useState(0)
-  useEffect(() => {
-    fetchData()
-  }, [refreshKey]);
 
   const handleSectionChange = (profileId: string, sectionKey: keyof ProfileSectionType, content: string) => {
     setLocalProfileChanges(prev => {
@@ -76,7 +70,6 @@ export default function ProfileManagement() {
         }
       }
       await updateProfile(updatedProfile)
-      setProfiles(prev => prev.map(p => p.id === updatedProfile.id ? updatedProfile : p))
       setLocalProfileChanges(null)
       setEditingSection(null)
     }
@@ -95,7 +88,6 @@ export default function ProfileManagement() {
 
   const handleCloseWizard = () => {
     setIsWizardOpen(false)
-    setTimeout(() => setRefreshKey(prevKey => prevKey + 1), 500)
   }
 
   const handlePersonalInfoClick = () => {
@@ -104,14 +96,13 @@ export default function ProfileManagement() {
 
   const handleDeleteProfile = async (profileId: string) => {
     await deleteProfile(profileId);
-    await incrementQuota('profiles');
+    await increaseQuota('profiles');
     if (profiles.length > 1) {
       const newActiveProfile = profiles.find(p => p.id !== profileId)?.id;
       if (newActiveProfile) {
         setActiveProfile(newActiveProfile);
       }
     }
-    setRefreshKey(prevKey => prevKey + 1)
   }
 
   const handleUpgradePlan = () => {
@@ -122,10 +113,11 @@ export default function ProfileManagement() {
     setIsUpgradeAlertDialogOpen(false)
   }
 
-  if (!personalInfo) {
-    return <div>Loading profiles...</div>
+  if (!profiles){
+    return(
+      <div>carregando dados do usuário...</div>
+    )
   }
-
   return (
     <div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
       <Card className="w-full max-w-3xl p-4 md:p-6">
@@ -136,13 +128,13 @@ export default function ProfileManagement() {
           <UserX className='h-20 w-20 text-gray-300 mb-4'/>
           <p className="text-2xl text-gray-400 text-center">Voce ainda não tem nenhum perfil.</p>
           <p className="text-base text-gray-600 mb-4 text-center">Cadastre seu primeiro perfil para poder começar a criar seus currículos.</p>
-          <Button onClick={quota === 0 ? handleUpgradePlan : handleAddProfile} className='mt-4 mb-6'>
+          <Button onClick={quotas.profiles === 0 ? handleUpgradePlan : handleAddProfile} className='mt-4 mb-6'>
               <Plus className="h-4 w-4 md:mr-2" /> 
               <p className="hidden md:block">Perfil</p>
           </Button>
         </div>
       ) : (
-      <Tabs value={activeProfile} onValueChange={setActiveProfile} className="w-full" key={refreshKey}>
+      <Tabs value={activeProfile} onValueChange={setActiveProfile} className="w-full" >
         <div className="flex justify-between items-center mb-4">
           <TabsList>
             {profiles.map((profile) => (
@@ -154,13 +146,13 @@ export default function ProfileManagement() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button onClick={quota === 0 ? handleUpgradePlan : handleAddProfile} className='ml-2'>
+                <Button onClick={quotas.profiles === 0 ? handleUpgradePlan : handleAddProfile} className='ml-2'>
                   <Plus className="h-4 w-4 md:mr-2" /> 
                   <p className="hidden md:block">Perfil</p>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{`Voce ainda tem ${quota} perfis disponiveis`}</p>
+                <p>{`Voce ainda tem ${quotas.profiles} perfis disponiveis`}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -173,10 +165,10 @@ export default function ProfileManagement() {
                   <Input
                     value={profile.profileName}
                     onChange={(e) => {
-                      const updatedProfiles = profiles.map(p =>
+                      const updatedProfiles = locaProfiles?.map(p =>
                         p.id === profile.id ? { ...p, profileName: e.target.value } : p
                       );
-                      setProfiles(updatedProfiles);
+                      setLocalProfiles(updatedProfiles);
                     }}
                     onBlur={async () => {
                       await updateProfile(profile);
@@ -210,16 +202,16 @@ export default function ProfileManagement() {
               <CardContent className="space-y-6">
                 <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4">
                   <Avatar className="w-24 h-24 cursor-pointer" onClick={handlePersonalInfoClick}>
-                    <AvatarImage src={personalInfo.profilePicture} alt={personalInfo.name} />
-                    <AvatarFallback>{personalInfo.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    <AvatarImage src={userData?.personalInfo.profilePicture} alt={userData?.personalInfo.name} />
+                    <AvatarFallback>{userData?.personalInfo.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col flex-grow space-y-2 cursor-pointer justify-start" onClick={handlePersonalInfoClick}>
-                    <h2 className="text-2xl font-bold">{personalInfo.name}</h2>
-                    <p className="text-sm text-muted-foreground">{personalInfo.phone} | {personalInfo.email}</p>
-                    <p className="text-sm text-muted-foreground">{personalInfo.city}</p>
+                    <h2 className="text-2xl font-bold">{userData?.personalInfo.name}</h2>
+                    <p className="text-sm text-muted-foreground">{userData?.personalInfo.phone} | {userData?.personalInfo.email}</p>
+                    <p className="text-sm text-muted-foreground">{userData?.personalInfo.city}</p>
                     <p className="text-sm text-blue-600 flex items-center leading-tight">
                       <LinkIcon className="h-4 w-4 mr-1" />
-                      {personalInfo.linkedinURL}
+                      {userData?.personalInfo.linkedinURL}
                     </p>
                   </div>
                 </div>
@@ -263,7 +255,8 @@ export default function ProfileManagement() {
               </CardContent>
             </Card>
           </TabsContent>
-        ))}
+          )
+        )}
       </Tabs>
       )}
     </div>

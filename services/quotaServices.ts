@@ -181,6 +181,7 @@ export const getQuotas = async (): Promise<QuotasType> => {
             quotas.resumes += planData.quotas.resumes;
             quotas.opportunities += planData.quotas.opportunities;
             quotas.interactions += planData.quotas.interactions;
+            quotas.contacts =+ planData.quotas.contacts;
         }
     })  
 

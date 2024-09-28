@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -12,26 +12,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CalendarIcon, SearchIcon, FilterIcon, User, Sparkles } from 'lucide-react'
-import { getResumes } from '@/services/resumeServices'; // Import the function
-import { ResumeType } from '@/types/resumes'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { getQuotas } from '@/services/quotaServices'
+import { useResumeStore } from '@/stores/resumeStore'
+import { useQuotaStore } from '@/stores/quotaStore'
 
 export default function ResumeManagerPage() {
+
+  const { resumes } = useResumeStore();
+  const { quotas } = useQuotaStore();
   const [searchTerm, setSearchTerm] = useState("")
   const [filter, setFilter] = useState("all")
-  const [resumes, setResumes] = useState<ResumeType[]>([]);
-  const [quota, setQuota] = useState<number>(0)
 
-  useEffect(() => {
-    const fetchResumes = async () => {
-      const fetchedResumes = await getResumes(); 
-      const fetchedQuotas = await getQuotas()
-      setQuota(fetchedQuotas.resumes)
-      setResumes(fetchedResumes);
-    };
-    fetchResumes();
-  }, []); // Fetch resumes on component mount
 
   const filteredResumes = resumes ? resumes.filter(resume => 
     // Ensure resumeName and profileName are defined before applying toLowerCase
@@ -60,7 +51,7 @@ export default function ResumeManagerPage() {
                         </Link>
                     </TooltipTrigger>
                     <TooltipContent>
-                        <p>{`Voce ainda tem ${quota} currículos disponiveis`}</p>
+                        <p>{`Voce ainda tem ${quotas.resumes} currículos disponiveis`}</p>
                     </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>

@@ -1,24 +1,26 @@
 'use client'
 
-import { Dispatch, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 import { PlusCircle, Search, Edit2, Trash2, Mail, Phone, Building2, Contact } from "lucide-react"
 import { ContactType } from '@/types/contacts'
-import { addContact, deleteContact, updateContact } from '@/services/contactsService'
 import { v4 } from 'uuid'
 import { ContactFormDialog } from '@/components/ContactFormDialog'
 import { DeleteDialog } from '@/components/DeleteDialog'
-import { decrementQuota, getQuotaByType, incrementQuota } from '@/services/quotaServices'
 import { UpgradeDialog } from '@/components/UpgradeAlertDialog'
+import { useQuotaStore } from '@/stores/quotaStore'
+import { useContactStore } from '@/stores/contactStore'
 
-type ContactsTabProps = {
-    contacts: ContactType[];
-    setContacts: Dispatch<React.SetStateAction<ContactType[]>>
-}
 
-export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
+export default function ContactsTab() {
+
+  const { quotas, decreaseQuota, increaseQuota } = useQuotaStore();
+  const { contacts, addContact, deleteContact, updateContact } = useContactStore();
+
+  console.log('cotas: ', quotas)
+
   const [isNewContactOpen, setIsNewContactOpen] = useState(false)
   const [contactSearch, setContactSearch] = useState('')
   const [editingContact, setEditingContact] = useState<ContactType | null>(null)
@@ -26,27 +28,16 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Track modal open state
   const [contactToDelete, setContactToDelete] = useState<ContactType | null>(null); // Track the opportunity to be deleted
-  const [contactQuota, setContactQuota] = useState(0)
   const [isUpgradeDialogOpen, setIsUpgradeAlertDialogOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-
 
   const handleAddButtonAction = ()=>{
-      if (contactQuota > 0){
+      if (quotas.contacts > 0){
         setIsNewContactOpen(true)
       }
       else{
         setIsUpgradeAlertDialogOpen(true)
       }
   }
-
-  useEffect(()=>{
-    const fetchQuotas = async () =>{
-      const fetchedQuota = await getQuotaByType('contacts')
-      setContactQuota(fetchedQuota)
-    }
-    fetchQuotas()
-  }, [isDeleteDialogOpen, isNewContactOpen])
 
   const filteredContacts = contacts.filter(contact => 
     contact.name.toLowerCase().includes(contactSearch.toLowerCase()) ||
@@ -55,27 +46,20 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
   );
 
   const handleAddContact = async (newContact: Omit<ContactType, 'id'>) => {
-    setIsLoading(true)
     try {
       const contactId = v4();
       await addContact(contactId, { ...newContact, id: contactId });
-      await decrementQuota('contacts')
-      setContacts(prevContacts => [...prevContacts, { ...newContact, id: contactId }]);
+      await decreaseQuota('contacts')
       setIsNewContactOpen(false);
     } catch (error) {
       console.error('Error adding contact:', error);
-      // Handle error (e.g., show error message to user)
     }
-    setIsLoading(false)
   };
 
   const handleUpdateContact = async (updatedContact: Omit<ContactType, 'id'>) => {
     if (!editingContact) return;
     try {
       await updateContact({ ...updatedContact, id: editingContact.id });
-      setContacts(prevContacts => 
-        prevContacts.map(c => c.id === editingContact.id ? { ...updatedContact, id: editingContact.id } : c)
-      );
       setEditingContact(null);
     } catch (error) {
       console.error('Error updating contact:', error);
@@ -86,10 +70,9 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
   const handleDeleteContact = async () => {
     if (!contactToDelete) return;
     setIsDeleting(true);
-    setContacts(prevContact => prevContact.filter(o => o.id !== contactToDelete.id));
     try {
       await deleteContact(contactToDelete.id);
-      await incrementQuota('contacts')
+      await increaseQuota('contacts')
       setIsDeleteDialogOpen(false);
       setContactToDelete(null);
     } catch (error) {
@@ -114,7 +97,7 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
     
     <Card className="bg-white shadow rounded-lg overflow-hidden">
       <CardHeader className="bg-purple-100 p-4">
-        <CardDescription className="text-purple-600">{`Gerencie seus contatos de RH cadastrados - Voce tem mais ${contactQuota} contatos para cadastrar`}</CardDescription>
+        <CardDescription className="text-purple-600">{`Gerencie seus contatos de RH cadastrados - Voce tem mais ${quotas.contacts} contatos para cadastrar`}</CardDescription>
         <div className="mt-2 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
@@ -167,7 +150,6 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
           title="Adicionar Novo Contato"
           description="Registre informações de contatos de RH"
           submitButtonText="Adicionar Contato"
-          isLoading={isLoading}
       />
     <ContactFormDialog
         isOpen={!!editingContact} // Ensure dialog opens when editingContact is not null
@@ -179,7 +161,6 @@ export default function ContactsTab({contacts,setContacts}:ContactsTabProps) {
         title="Editar Contato"
         description="Atualize as informações do contato"
         submitButtonText="Atualizar Contato"
-        isLoading={isLoading}
     />
     <DeleteDialog 
       isOpen={isDeleteDialogOpen} 

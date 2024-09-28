@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useAuth } from '@/context/AuthContext'
 import { Sparkles } from 'lucide-react'
 import { DialogDescription } from '@radix-ui/react-dialog'
 import { v4 } from 'uuid'
 import { ProfileType } from '@/types/profiles'
-import { addProfile } from '@/services/profileServices'
-import { generateKeywords } from '@/hooks/useAi'
-import { decrementQuota } from '@/services/quotaServices'
+import { useAuthStore } from '@/stores/authStore'
+import { useQuotaStore } from '@/stores/quotaStore'
+import { useProfileStore } from '@/stores/profileStore'
+import { generateKeywords } from '@/aiPrompts/generateKeywords'
  
 const initialState: ProfileType = {
   id: '',
@@ -75,10 +75,11 @@ export default function ProfileCreationDialog({ isOpen, onClose }: ProfileWizard
   const [step, setStep] = useState(1)
   const [profile, setProfile] = useState<ProfileType>(initialState)
   const [suggesting, setSuggesting] = useState<boolean>(false)
-  const [isSaving, setIsSaving] = useState<boolean>(false)
   const totalSteps = 6
 
-  const { user } = useAuth();
+  const { user } = useAuthStore();
+  const { decreaseQuota } = useQuotaStore();
+  const { loading, addProfile } = useProfileStore();
 
   const handleNext = () => {
     if (isStepValid() && step < totalSteps) {
@@ -143,11 +144,9 @@ export default function ProfileCreationDialog({ isOpen, onClose }: ProfileWizard
   const handleFinish = async () => {
     if (user) {
       const profileId = v4();
-      setIsSaving(true)
       await addProfile(profileId, profile)
-      await decrementQuota('profiles')
+      await decreaseQuota('profiles')
       onClose();
-      setIsSaving(false)
     }
   }
 
@@ -274,7 +273,7 @@ export default function ProfileCreationDialog({ isOpen, onClose }: ProfileWizard
               </Button>
               <Button 
                 onClick={step === totalSteps ? handleFinish : handleNext}
-                disabled={!isStepValid() || isSaving}
+                disabled={!isStepValid() || loading}
               >
                 {step === totalSteps ? 'Salvar' : 'Avançar'}
               </Button>

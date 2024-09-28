@@ -1,26 +1,22 @@
 'use client';
-import { useState, ChangeEvent, useEffect } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Save, Upload } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { getUserData, updateUser } from '@/services/userServices';
-import { PersonalInfoType, UserDataType } from '@/types/users';
+import { useUserDataStore } from '@/stores/userDataStore';
+import { PersonalInfoType } from '@/types/users';
 
 export default function UserInfo() {
+  const { userData, fetchUserData, setUserData, updateUserData } = useUserDataStore();
   const [isSaving, setIsSaving] = useState(false);
-  const [userData, setUserData] = useState<UserDataType>();
 
   useEffect(() => {
-    const fetchData = async () => {
-      const userData = await getUserData();
-      if (userData) {
-        setUserData(userData);
-      }
-    };
-    fetchData();
-  }, []);
+    if (!userData) {
+      fetchUserData();
+    }
+  }, [userData, fetchUserData]);
 
   const handlePictureUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -30,13 +26,10 @@ export default function UserInfo() {
         if (userData) {
           setUserData({
             ...userData,
-          userId: userData.userId, 
-          personalInfo: {
-            ...userData.personalInfo,
-            name: userData.personalInfo.name,
-            email: userData.personalInfo.email,
-            profilePicture: reader.result as string
-            }
+            personalInfo: {
+              ...userData.personalInfo,
+              profilePicture: reader.result as string,
+            },
           });
         }
       };
@@ -48,7 +41,7 @@ export default function UserInfo() {
     setIsSaving(true);
     console.log("Saving personal info:", userData);
     if (userData) {
-      await updateUser(userData); 
+      await updateUserData(userData); // Use updateUserData from store
     }
     setIsSaving(false);
   };
@@ -57,17 +50,17 @@ export default function UserInfo() {
     if (userData) {
       setUserData({
         ...userData,
-      personalInfo: {
-        ...userData.personalInfo,
-        [key]: value,
-      },
+        personalInfo: {
+          ...userData.personalInfo,
+          [key]: value,
+        },
       });
     }
   };
 
   if (!userData) {
     return <div>Loading User Data...</div>;
-  } 
+  }
 
   return (
     <div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
@@ -85,7 +78,7 @@ export default function UserInfo() {
                     {userData?.personalInfo?.profilePicture ? '' : 'Upload'}
                   </AvatarFallback>
                 </Avatar>
-                <label htmlFor="picture-upload" className="absolute bottom-0 right-0 bg-primary text-black rounded-full p-2 cursor-pointer">
+                <label htmlFor="picture-upload" className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-2 cursor-pointer">
                   <Upload className="h-4 w-4" />
                 </label>
                 <input
@@ -144,7 +137,7 @@ export default function UserInfo() {
               key="city"
               label="City"
               id="city"
-              value={userData?.personalInfo?.city || '' }
+              value={userData?.personalInfo?.city || ''}
               placeholder="Enter your city"
               type="text"
               onChange={(e) => handleChange('city', e.target.value)}    
