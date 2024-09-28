@@ -4,9 +4,6 @@ import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/c
 import { Briefcase, Users, Calendar } from "lucide-react"
 import { OpportunityStatusEnum, OpportunityType } from "@/types/opportunities"
 import { TimestampRenderer } from "@/utils/TimestampRender"
-import { useEffect, useState } from "react"
-import { UserDataType } from "@/types/users"
-import { getUserData } from "@/services/userServices"
 import { ensureDate } from "@/utils/ensureDate"
 import logo_horizontal from '../../../public/assets/images/logo_horizontal.png'
 import Image from "next/image"
