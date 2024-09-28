@@ -17,6 +17,7 @@ import { UpgradeDialog } from '@/components/UpgradeAlertDialog'
 import { useProfileStore } from '@/stores/profileStore'
 import { useQuotaStore } from '@/stores/quotaStore'
 import { useUserDataStore } from '@/stores/userDataStore'
+import { ProfileNameInput } from '@/components/ProfileNameInput'
 
 export default function ProfileManagement() {
   const router = useRouter()
@@ -25,7 +26,6 @@ export default function ProfileManagement() {
   const [localProfileChanges, setLocalProfileChanges] = useState<ProfileType | null>(null)
   const [isWizardOpen, setIsWizardOpen] = useState(false)
   const [isUpgradeAlertDialogOpen, setIsUpgradeAlertDialogOpen] = useState(false)
-  const [locaProfiles, setLocalProfiles] = useState<ProfileType[]>();
 
   const { userData } = useUserDataStore();
   const { profiles, updateProfile, deleteProfile  } = useProfileStore();
@@ -33,7 +33,6 @@ export default function ProfileManagement() {
 
   useEffect(()=>{
     const updateProfiles = ()=>{
-      setLocalProfiles(profiles)
       if (profiles.length > 0 && !activeProfile) {
         setActiveProfile(profiles[0].id);
       }
@@ -162,20 +161,7 @@ export default function ProfileManagement() {
             <Card className="relative overflow-hidden">
               <CardHeader>
                 <CardTitle className='flex justify-between'>
-                  <Input
-                    value={profile.profileName}
-                    onChange={(e) => {
-                      const updatedProfiles = locaProfiles?.map(p =>
-                        p.id === profile.id ? { ...p, profileName: e.target.value } : p
-                      );
-                      setLocalProfiles(updatedProfiles);
-                    }}
-                    onBlur={async () => {
-                      await updateProfile(profile);
-                    }}
-                    className="text-2xl font-bold bg-transparent border-none hover:bg-gray-100 focus:bg-white"
-                    aria-label="Profile name"
-                  />
+                <ProfileNameInput profile={profile} />
                   <div>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
