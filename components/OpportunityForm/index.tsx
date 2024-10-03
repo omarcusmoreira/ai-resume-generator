@@ -170,7 +170,10 @@ export default function OpportunityForm({ opportunity, editMode = true }: { oppo
             Editar          
           </Button> :
           <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-            <PlusCircle className="mr-2 h-5 w-5" /> Processo seletivo
+            <PlusCircle className="h-5 w-5 sm:mr-2" /> 
+            <span className='hidden sm:block'>
+              Processo seletivo
+            </span>
           </Button>
         }
       </SheetTrigger>

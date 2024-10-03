@@ -10,7 +10,7 @@ export default function JobTrackerDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Dashboard />
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-6 px-2 sm:px-0">
         <Tabs defaultValue="opportunities" className="mt-6">
           <TabsList className='sm:mx-4'>
             <TabsTrigger value="opportunities">Processos</TabsTrigger>

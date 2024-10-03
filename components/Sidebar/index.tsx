@@ -15,7 +15,7 @@ const Sidebar = () => {
                 <Image src={logo} alt="Logo" width={20} height={20} />
                 <Link href="/job-tracker" passHref>
                 <Button variant="ghost" size="icon" className="w-6 h-6">
-                    <LayoutDashboard className={pathname === "/job-tracker" ? "h-4 w-4 text-purple-600" : "h-4 w-4 text-gray-500"} />
+                    <LayoutDashboard className={(pathname === "/job-tracker" || pathname === '/') ? "h-4 w-4 text-purple-600" : "h-4 w-4 text-gray-500"} />
                 </Button>
                 </Link>
                 <Link href="/resume-generate" passHref>

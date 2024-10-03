@@ -28,7 +28,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs'
-import { Mail, Lock, User } from 'lucide-react'
+import { Mail, Lock, User, Loader } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import logoHorizontal from '../../public/assets/images/logo_horizontal.png'
@@ -55,11 +55,14 @@ export default function AuthPage() {
   const [rememberMe, setRememberMe] = useState(false)
 
   const [isCreating, setIsCreating] = useState(false)
+  const [isCreatingWithGoogle, setIsCreatingWithGoogle] = useState(false)
+  const [isLoging, setIsLogin ] = useState(false)
 
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsLogin(true)
     setLoginError('')
 
     if (!loginEmail || !loginPassword) {
@@ -71,22 +74,22 @@ export default function AuthPage() {
       await signInWithEmailAndPassword(auth, loginEmail, loginPassword)
 
       console.log('Login successful')
-
       router.push('/')
-
+      
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Login error', error)
       setLoginError(error.message || 'Erro ao fazer login.')
     }
+    setIsLogin(false)
   }
 
   // Handle Sign Up
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSignupError('') // Reset error state
+    setSignupError('') 
     setIsCreating(true)
-    // Basic Validation
+    
     if (!signupName || !signupEmail || !signupPassword || !signupConfirmPassword) {
       setSignupError('Por favor, preencha todos os campos.')
       return
@@ -107,19 +110,16 @@ export default function AuthPage() {
 
       console.log('Sign-up successful')
 
-      // Initialize PersonalInfo without 'cpf'
       const initialPersonalInfo: PersonalInfoType = {
         name: signupName,
         email: signupEmail,
         }
 
-      // Initialize UserState
       const initialUserData: UserDataType = {
         userId: user.uid,
         personalInfo: initialPersonalInfo,
       }
 
-      // Save AppState to Firestore and localStorage
       await addUser(initialUserData)
       const planHistoryId = v4()
       const planHistory = new PlanHistory({
@@ -142,7 +142,7 @@ export default function AuthPage() {
 
   // Handle Google Sign-In
   const handleGoogleSignIn = async () => {
-    setIsCreating(true)
+    setIsCreatingWithGoogle(true)
     const provider = new GoogleAuthProvider()
     try {
       const result = await signInWithPopup(auth, provider)
@@ -173,7 +173,7 @@ export default function AuthPage() {
     } catch (error: any) {
       console.error('Google sign-in error', error)
     }
-    setIsCreating(false)
+    setIsCreatingWithGoogle(false)
   }
 
   return (
@@ -240,7 +240,8 @@ export default function AuthPage() {
                       Lembrar-me
                     </Label>
                   </div>
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" disabled={isLoging}>
+                    <Loader className={isLoging ? 'block animate-spin mr-2 h-4 w-4' : 'hidden mr-2'} />
                     Entrar
                   </Button>
                   <Button
@@ -322,6 +323,7 @@ export default function AuthPage() {
                     <p className="text-red-500 text-sm">{signupError}</p>
                   )}
                   <Button type="submit" className="w-full" disabled={isCreating}>
+                    <Loader className={isCreating ? 'block animate-spin mr-2 h-4 w-4' : 'hidden mr-2'} />
                     Cadastrar
                   </Button>
                   <Button
@@ -329,9 +331,10 @@ export default function AuthPage() {
                     variant="outline"
                     className="w-full flex items-center justify-center"
                     onClick={handleGoogleSignIn}
-                    disabled={isCreating}
+                    disabled={isCreatingWithGoogle}
                   >
-                    <GoogleIcon className="mr-2 h-5 w-5"/>
+                    <Loader className={isCreatingWithGoogle ? 'block animate-spin mr-2 h-4 w-4' : 'hidden mr-2'} />
+                    <GoogleIcon className={!isCreatingWithGoogle ? "mr-2 h-5 w-5" : "hidden"}/>
                     Cadastrar com Google
                   </Button>
                 </div>

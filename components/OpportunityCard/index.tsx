@@ -14,6 +14,7 @@ import { ResumeType } from "@/types/resumes"
 import { getStatusColor } from "@/utils/getStatusColor"
 import InterviewStagesDialog from "../InterviewStagesDialog"
 import { useProfileStore } from '@/stores/profileStore'
+import { useRouter } from 'next/navigation'
 
 type OpportunityCardProps = {
     opportunity: OpportunityType
@@ -21,6 +22,7 @@ type OpportunityCardProps = {
 }
 
 export const OpportunityCard = ({ opportunity, openDeleteDialog }: OpportunityCardProps) => {
+  const { push } = useRouter()
   const { recruiters } = useRecruiterStore()
   const { profiles } = useProfileStore()
   const { resumes } = useResumeStore()
@@ -41,47 +43,6 @@ export const OpportunityCard = ({ opportunity, openDeleteDialog }: OpportunityCa
     }
     return statusMap[status] || 'Desconhecido'
   }
-
-  // const getNextInterviewStage = (stages: InterviewStage[] | undefined): InterviewStage | null => {
-  //   if (!stages || !Array.isArray(stages) || stages.length === 0) {
-  //     console.warn('Invalid or empty stages array:', stages);
-  //     return null;
-  //   }
-  
-  //   const now = Date.now();
-  
-  //   //eslint-disable-next-line
-  //   const getTimestamp = (date: any): number | null => {
-  //     if (date && typeof date.toMillis === 'function') {
-  //       return date.toMillis(); // Firestore Timestamp
-  //     } else if (date && typeof date === 'object' && 'seconds' in date) {
-  //       return date.seconds * 1000; // Plain object with seconds
-  //     } else if (date && typeof date === 'object' && 'milliseconds' in date) {
-  //       return date.milliseconds; // Plain object with milliseconds
-  //     } else if (date && typeof date === 'number') {
-  //       return date; // Already a timestamp in milliseconds
-  //     }
-  //     console.warn('Invalid date format:', date);
-  //     return null;
-  //   };
-  
-  //   const upcomingStages = stages.filter(stage => {
-  //     const timestamp = getTimestamp(stage.expectedDate);
-  //     return timestamp !== null && timestamp > now;
-  //   });
-  
-  //   if (upcomingStages.length === 0) return null;
-  
-  //   return upcomingStages.reduce((earliest, current) => {
-  //     const earliestTimestamp = getTimestamp(earliest.expectedDate);
-  //     const currentTimestamp = getTimestamp(current.expectedDate);
-  //     if (currentTimestamp === null || earliestTimestamp === null) {
-  //       console.warn('Invalid timestamp in reduce:', { earliest, current });
-  //       return earliest;
-  //     }
-  //     return currentTimestamp < earliestTimestamp ? current : earliest;
-  //   });
-  // };
   
   const handleSaveInterviewStage = (newStage: InterviewStage) => {
     const currentStages = Array.isArray(opportunity.interviewStages) 
@@ -90,6 +51,12 @@ export const OpportunityCard = ({ opportunity, openDeleteDialog }: OpportunityCa
     const updatedStages = [...currentStages, newStage];
     const updatedOpportunity = { ...opportunity, interviewStages: updatedStages };
     updateOpportunity(updatedOpportunity);
+  }
+
+  const handleClickResume = (resumeId: string | undefined) => {
+    if (resumeId){
+      push(`/resume-preview?resumeId=${resumeId}`)
+    }
   }
 
   return (
@@ -136,20 +103,27 @@ export const OpportunityCard = ({ opportunity, openDeleteDialog }: OpportunityCa
           
           {/* Right column - Interview Stages */}
           <div className="space-y-2">
-            <h4 className="font-semibold text-purple-700">Entrevistas:</h4>
-            {opportunity.interviewStages && opportunity.interviewStages.length > 0 ? (
-              opportunity.interviewStages.map((stage: InterviewStage) => (
-                <div key={stage.id} className="text-xs">
-                  <div className="font-medium text-purple-800">{stage.name}</div>
-                  <div className="text-purple-600">
-                    <TimestampRenderer fallback='Sem data' format='toISODate' timestamp={stage.expectedDate} />
+      <h4 className="font-semibold text-purple-700">Entrevistas:</h4>
+      {opportunity.interviewStages && opportunity.interviewStages.length > 0 ? (
+              <div className="columns-2 gap-4 space-y-2 max-h-40 overflow-y-auto p-2 bg-white rounded">
+                {opportunity.interviewStages.map((stage, index) => (
+                  <div key={stage.id} className="text-xs bg-purple-50 p-2 rounded break-inside-avoid-column">
+                    <div className="font-medium text-purple-800">{`${index+1}. ${stage.name}`}</div>
+                    <div className="text-purple-600">
+                      <TimestampRenderer 
+                        fallback='Sem data' 
+                        format='toISODate' 
+                        timestamp={stage.expectedDate} 
+                      />
+                    </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
               <div className="text-purple-600 text-xs">Sem entrevistas agendadas</div>
             )}
           </div>
+          {/* Right column - Interview Stages */}
         </div>
       </div>
       
@@ -160,7 +134,9 @@ export const OpportunityCard = ({ opportunity, openDeleteDialog }: OpportunityCa
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-purple-800 truncate max-w-[150px]">{resume?.resumeName || 'Sem currículo'}</span>
+                  <span className="text-purple-800 truncate max-w-[250px] cursor-pointer hover:underline" onClick={()=>handleClickResume(resume?.id)}>
+                    {resume?.resumeName || 'Sem currículo'}
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{opportunity.resumeId}</p>
