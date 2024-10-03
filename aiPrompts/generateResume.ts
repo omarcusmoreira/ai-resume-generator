@@ -12,39 +12,32 @@ Nunca deixe campos vazios ou com dados de espaço reservado. Sempre forneça inf
 const userPrompt = `
 IMPORTANTE: RETORNE APENAS OBJETOS JSON COMPLETOS. NÃO RETORNE NENHUM OUTRO TEXTO.
 
-Use as seguintes palavras chaves para popular as informações faltantes do currículo:${profile.sections.keywords}
-informações fornecidas para preencher as seções abaixo. Caso as informações sejam limitadas ou mal elaboradas, invente dados relevantes e consistentes com o perfil de um candidato qualificado para a vaga.
+Use as seguintes palavras-chave para popular as informações faltantes do currículo: ${profile.sections.keywords}
 
+Abaixo estão as informações fornecidas sobre a experiência profissional do candidato. Organize essas informações de maneira estruturada e gere o JSON correspondente.
 
-${profile.sections.summary}
-Summary: 
-### Resumo:
-{
-  "summary": 'Crie um resumo detalhado e atraente de 6-7 frases que destaque as principais habilidades, experiências e conquistas do candidato. Inclua exemplos concretos que demonstrem suas competências e valor."
-}
+### Informações Profissionais fornecidas:
+"${profile.sections.professionalExperience}"
 
-### Experiência Profissional (complete com TODAS as experiências profissionais descritas acima):
+### JSON estruturado:
 {
   "professionalExperience": [
     {
-      "company": "${profile.sections.professionalExperience || 'Nome da segunda empresa fictícia respeitável'}"Itere sobre a lista de empresas fornecidas acima para montar esta sessão do currículo",
-      "position": "Crie um cargo apropriado para o perfil",
-      "dates": "Defina um período de tempo realista",
+      "company": "Extraia o nome da empresa de maneira apropriada",
+      "position": "Extraia o cargo do candidato",
+      "dates": "Extraia o período de tempo corretamente",
       "responsibilities": [
         "Crie uma lista de 7-8 responsabilidades relevantes e impactantes para a posição, detalhando cada uma com exemplos específicos de resultados alcançados e habilidades aplicadas.",
         "Invente projetos importantes que o candidato tenha liderado ou participado, com uma descrição mais rica das tarefas e resultados."
       ]
-    },
-    {
-      "company": "${profile.sections.professionalExperience || 'Nome da segunda empresa fictícia respeitável'}",
-      "position": "Crie um cargo apropriado para o perfil",
-      "dates": "Defina um período de tempo realista",
-      "responsibilities": [
-        "Crie uma lista de 7-8 responsabilidades relevantes e impactantes para a posição, detalhando cada uma com exemplos específicos de resultados alcançados e habilidades aplicadas.",
-        "Invente projetos importantes que o candidato tenha liderado ou participado, com uma descrição mais rica das tarefas e resultados."
-      ]
-    },
-  ] 
+    }
+    // Repita para todas as experiências fornecidas
+  ]
+}
+
+### Resumo:
+{
+  "summary": 'Crie um resumo detalhado e atraente de 6-7 frases que destaque as principais habilidades, experiências e conquistas do candidato. Inclua exemplos concretos que demonstrem suas competências e valor.'
 }
 
 ### Formação Acadêmica:
@@ -76,6 +69,32 @@ Summary:
 IMPORTANTE:
 - Não deixe nenhum campo em branco. Invente dados plausíveis para qualquer campo faltante.
 - Retorne SOMENTE os objetos JSON.
+
+### Estrutura esperada do JSON:
+{
+  "summary": "string",
+  "professionalExperience": [
+    {
+      "company": "string",
+      "position": "string",
+      "dates": "string",
+      "responsibilities": ["string"]
+    }
+  ],
+  "academicBackground": [
+    {
+      "degree": "string",
+      "institution": "string",
+      "graduationYear": "string"
+    }
+  ],
+  "languages": [
+    {
+      "language": "string",
+      "fluency": "string"
+    }
+  ]
+}
 `;
 
 const completion = await openAiService.generateChatCompletion([
@@ -86,6 +105,94 @@ const completion = await openAiService.generateChatCompletion([
 return { completion };
 
 }
+
+
+// V2 - DEPRECATED
+
+// export async function generateResume(profile: ProfileType) {
+
+// const systemPrompt = `Você é um gerador de currículos responsável por criar currículos completos e coerentes com base em informações parciais fornecidas. 
+// Se faltarem informações ou estiverem mal escritas, você deve inventar dados realistas para preencher o currículo. 
+// Nunca deixe campos vazios ou com dados de espaço reservado. Sempre forneça informações detalhadas e relevantes em português.`;
+
+// const userPrompt = `
+// IMPORTANTE: RETORNE APENAS OBJETOS JSON COMPLETOS. NÃO RETORNE NENHUM OUTRO TEXTO.
+
+// Use as seguintes palavras chaves para popular as informações faltantes do currículo:${profile.sections.keywords}
+
+// informações fornecidas para preencher as seções abaixo. Caso as informações sejam limitadas ou mal elaboradas, invente dados relevantes e consistentes com o perfil de um candidato qualificado para a vaga.
+
+
+// ${profile.sections.summary}
+// Summary: 
+// ### Resumo:
+// {
+//   "summary": 'Crie um resumo detalhado e atraente de 6-7 frases que destaque as principais habilidades, experiências e conquistas do candidato. Inclua exemplos concretos que demonstrem suas competências e valor."
+// }
+
+// ### Experiência Profissional (complete com TODAS as experiências profissionais descritas acima):
+// {
+//   "professionalExperience": [
+//     {
+//       "company": "${profile.sections.professionalExperience || 'Nome da segunda empresa fictícia respeitável'}"Itere sobre a lista de empresas fornecidas acima para montar esta sessão do currículo",
+//       "position": "Crie um cargo apropriado para o perfil",
+//       "dates": "Defina um período de tempo realista",
+//       "responsibilities": [
+//         "Crie uma lista de 7-8 responsabilidades relevantes e impactantes para a posição, detalhando cada uma com exemplos específicos de resultados alcançados e habilidades aplicadas.",
+//         "Invente projetos importantes que o candidato tenha liderado ou participado, com uma descrição mais rica das tarefas e resultados."
+//       ]
+//     },
+//     {
+//       "company": "${profile.sections.professionalExperience || 'Nome da segunda empresa fictícia respeitável'}",
+//       "position": "Crie um cargo apropriado para o perfil",
+//       "dates": "Defina um período de tempo realista",
+//       "responsibilities": [
+//         "Crie uma lista de 7-8 responsabilidades relevantes e impactantes para a posição, detalhando cada uma com exemplos específicos de resultados alcançados e habilidades aplicadas.",
+//         "Invente projetos importantes que o candidato tenha liderado ou participado, com uma descrição mais rica das tarefas e resultados."
+//       ]
+//     },
+//   ] 
+// }
+
+// ### Formação Acadêmica:
+// {
+//   "academicBackground": [
+//     {
+//       "degree": "${profile.sections.academicBackground || 'Invente um título acadêmico relevante'}",
+//       "institution": "Invente uma instituição de ensino de prestígio",
+//       "graduationYear": "Escolha um ano de graduação realista"
+//     }
+//   ]
+// }
+
+// ### Idiomas:
+// {
+//   "languages": [
+//     {
+//       "language": "${profile.sections.idioms || 'Português'}",
+//       "fluency": "${profile.sections.idioms ? 'Invente um nível de fluência' : 'Nativo'}"
+//     }
+//   ]
+// }
+
+// ### Atividades Extracurriculares:
+// {
+//   "extraCurricular": "${profile.sections.extraCurricular || 'Invente atividades extracurriculares relevantes e envolventes, como trabalho voluntário ou participação em clubes'}"
+// }
+
+// IMPORTANTE:
+// - Não deixe nenhum campo em branco. Invente dados plausíveis para qualquer campo faltante.
+// - Retorne SOMENTE os objetos JSON.
+// `;
+
+// const completion = await openAiService.generateChatCompletion([
+//   { role: 'system', content: systemPrompt },
+//   { role: 'user', content: userPrompt }
+// ]);
+
+// return { completion };
+
+// }
 
 // V1 - OLD PR
 

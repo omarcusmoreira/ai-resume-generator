@@ -1,8 +1,8 @@
-export type ContactType = {
+export type RecruiterType = {
     name: string;
     id: string;
-    email?: string;
+    email: string;
     phone: string;
     company: string;
-    linkedin?: string;
+    linkedin: string;
 };

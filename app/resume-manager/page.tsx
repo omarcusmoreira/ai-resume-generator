@@ -25,7 +25,6 @@ export default function ResumeManagerPage() {
 
 
   const filteredResumes = resumes ? resumes.filter(resume => 
-    // Ensure resumeName and profileName are defined before applying toLowerCase
     resume.resumeName?.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (filter === "all" || (resume.profileName && resume.profileName.toLowerCase().includes(filter.toLowerCase())) || (resume.resumeName && resume.resumeName.toLowerCase().includes(filter.toLowerCase())))
   ) : [];

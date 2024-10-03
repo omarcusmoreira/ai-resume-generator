@@ -2,7 +2,7 @@ import { OpportunityType } from "@/types/opportunities";
 import { db } from "@/firebaseConfig";
 import { 
     doc, setDoc, updateDoc, deleteDoc, 
-    collection, getDocs 
+    collection, getDocs, 
 } from 'firebase/firestore';
 import { getAuth } from "firebase/auth";
 
@@ -45,6 +45,7 @@ export const addOpportunity = async (opportunityId: string, opportunity: Opportu
 export const getOpportunities = async (): Promise<OpportunityType[]> => {
     const cachedOpportunities = getSessionData();
     if (cachedOpportunities) {
+        console.log('Cached...')
         return cachedOpportunities;
     }
 
@@ -57,15 +58,21 @@ export const getOpportunities = async (): Promise<OpportunityType[]> => {
     
     // Cache fetched opportunities
     setSessionData(opportunities);
+    console.log('From service: ', opportunities)
     return opportunities;
 };
 
 // Update an opportunity
 export const updateOpportunity = async (opportunity: Partial<OpportunityType>): Promise<void> => {
-    console.log(opportunity)
+    console.log('tentando update no service ')
     const userId = getUserId();
     const opportunityRef = doc(db, 'users', userId, 'opportunities', opportunity.id || '');
-    await updateDoc(opportunityRef, opportunity);
+    try{
+        await updateDoc(opportunityRef, opportunity);
+        console.log('chegou até o service com :', opportunity)
+    }catch(error){
+        console.log('deu ruim no service...', error)
+    }
     
     // Update session storage
     const cachedOpportunities = getSessionData();

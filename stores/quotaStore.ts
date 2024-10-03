@@ -7,9 +7,9 @@ interface QuotaState {
   loading: boolean;
   error: string | null;
   fetchQuotas: () => Promise<void>;
-  fetchQuotaByType: (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'contacts') => Promise<number>;
-  increaseQuota: (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'contacts') => Promise<void>;
-  decreaseQuota: (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'contacts') => Promise<void>;
+  fetchQuotaByType: (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'recruiters') => Promise<number>;
+  increaseQuota: (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'recruiters') => Promise<void>;
+  decreaseQuota: (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'recruiters') => Promise<void>;
 }
 
 export const useQuotaStore = create<QuotaState>((set) => ({
@@ -18,7 +18,7 @@ export const useQuotaStore = create<QuotaState>((set) => ({
     resumes: 0,
     opportunities: 0,
     interactions: 0,
-    contacts: 0,
+    recruiters: 0,
   },
   loading: false,
   error: null,
@@ -33,7 +33,7 @@ export const useQuotaStore = create<QuotaState>((set) => ({
     }
   },
 
-  fetchQuotaByType: async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'contacts') => {
+  fetchQuotaByType: async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'recruiters') => {
     set({ loading: true, error: null });
     try {
       const quota = await getQuotaByType(quotaType);
@@ -45,7 +45,7 @@ export const useQuotaStore = create<QuotaState>((set) => ({
     }
   },
 
-  increaseQuota: async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'contacts') => {
+  increaseQuota: async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'recruiters') => {
     set({ loading: true, error: null });
     try {
       await incrementQuota(quotaType);
@@ -61,7 +61,7 @@ export const useQuotaStore = create<QuotaState>((set) => ({
     }
   },
 
-  decreaseQuota: async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'contacts') => {
+  decreaseQuota: async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'recruiters') => {
     set({ loading: true, error: null });
     try {
       await decrementQuota(quotaType);

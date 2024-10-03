@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,8 +28,7 @@ export default function UserMenu() {
     const { userData } = useUserDataStore();
     const { currentPlan, fetchCurrentPlan } = usePlanHistoryStore();
 
-    // Fetch the current plan when the component mounts
-    useEffect(() => {
+    React.useEffect(() => {
       fetchCurrentPlan();
       //eslint-disable-next-line
     }, []);
@@ -92,22 +91,25 @@ export default function UserMenu() {
             </Button>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => console.log('Billing clicked')}>
             <CreditCard className="mr-2 h-4 w-4" />
             Cobrança
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => console.log('Pricing clicked')}>
             <Crown className="mr-2 h-4 w-4" />
             Preços
           </DropdownMenuItem>
-          <Link href={'https://forms.gle/9KKkaRSKpsaHNqz67'}>
-            <DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href={'https://forms.gle/9KKkaRSKpsaHNqz67'}>
               <Bug className="mr-2 h-4 w-4" />
               Relatar Problema
-            </DropdownMenuItem>
-          </Link>
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-red-500 focus:text-red-500 focus:bg-red-100" onClick={handleLogout}>
+          <DropdownMenuItem 
+            className="text-red-500 focus:text-red-500 focus:bg-red-100" 
+            onSelect={handleLogout}
+          >
             <LogOut className="mr-2 h-4 w-4" />
             Sair
           </DropdownMenuItem>

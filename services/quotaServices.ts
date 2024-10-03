@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { QuotasType } from "@/types/planHistory";
 
 // Call Firestore directly to decrement quotas
-export const decrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'contacts'): Promise<void> => {
+export const decrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'recruiters'): Promise<void> => {
     try {
         // Get Firebase Firestore and Auth instances
         const db = getFirestore();
@@ -60,7 +60,7 @@ export const decrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opport
     }
 };
 
-export const incrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'contacts'): Promise<void> => {
+export const incrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'recruiters'): Promise<void> => {
     try {
         // Get Firebase Firestore and Auth instances
         const db = getFirestore();
@@ -112,7 +112,7 @@ export const incrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opport
         throw new Error('Failed to increment quota');
     }
 };
-export const getQuotaByType = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'contacts'): Promise<number> => {
+export const getQuotaByType = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'recruiters'): Promise<number> => {
     const db = getFirestore();
     const auth = getAuth(); 
     const user = auth.currentUser;
@@ -171,7 +171,7 @@ export const getQuotas = async (): Promise<QuotasType> => {
         resumes: 0,
         opportunities: 0,
         interactions: 0,
-        contacts: 0,
+        recruiters: 0,
     }
 
     planHistorySnap.forEach((doc) => {
@@ -181,7 +181,7 @@ export const getQuotas = async (): Promise<QuotasType> => {
             quotas.resumes += planData.quotas.resumes;
             quotas.opportunities += planData.quotas.opportunities;
             quotas.interactions += planData.quotas.interactions;
-            quotas.contacts =+ planData.quotas.contacts;
+            quotas.recruiters =+ planData.quotas.recruiters;
         }
     })  
 

@@ -3,12 +3,14 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Save, Upload } from "lucide-react";
+import { Loader, Save, Upload } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { PersonalInfoType } from '@/types/users';
+import { useToast } from '@/hooks/use-toast';
 
 export default function UserInfo() {
+  const { toast } = useToast();
   const { userData, fetchUserData, setUserData, updateUserData } = useUserDataStore();
   const [isSaving, setIsSaving] = useState(false);
 
@@ -41,8 +43,10 @@ export default function UserInfo() {
     setIsSaving(true);
     console.log("Saving personal info:", userData);
     if (userData) {
-      await updateUserData(userData); // Use updateUserData from store
-    }
+      await updateUserData(userData); 
+      toast({
+        title: `Suas informações foram atualizadas com sucesso.`,
+      });    }
     setIsSaving(false);
   };
 
@@ -146,8 +150,20 @@ export default function UserInfo() {
         </CardContent>
         <CardFooter className="flex justify-end">
           <Button onClick={handleSavePersonalInfo} className="text-button text-white" disabled={isSaving}>
-            <Save className="mr-2 h-4 w-4" />
-            {isSaving ? "Salvando..." : "Salvar"}
+            
+              
+              {isSaving ? (
+                <>
+                <Loader className={'block animate-spin mr-2 h-4 w-4'} />
+                Salvar
+                </>
+              
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                Salvar
+                </>
+                )}
           </Button>
         </CardFooter>
       </Card>

@@ -117,10 +117,14 @@ export default function GenerateResumePage() {
           const trimmedCompletion = trimToJSON(completion);
 
           if (validateCompletion(trimmedCompletion)) {
+            const uniqueId = newResumeId.slice(0, 2); // Use the first 2 characters of the UUID
+            const currentDate = new Date();
+            const formattedDate = `${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getFullYear()}`;
+
             const resume = {
               id: newResumeId,
               createdAt: Timestamp.now(),
-              resumeName: `CV_${userData.personalInfo.name.replace(/\s+/g, '_')}_${profile.profileName.replace(/\s+/g, '_')}.pdf`,
+              resumeName: `CV_${uniqueId}_${formattedDate}_${userData.personalInfo.name.replace(/\s+/g, '_')}_${profile.profileName.replace(/\s+/g, '_')}.pdf`,
               contentJSON: trimmedCompletion,
               isAccepted: false,
               profileName: profile.profileName, 

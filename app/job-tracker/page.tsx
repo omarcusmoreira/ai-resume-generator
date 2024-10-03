@@ -2,8 +2,8 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OpportunitiesTab } from './opportunities-tab';
-import ContactsTab from './contacts-tab';
 import Dashboard from './dashboard';
+import RecruiterTab from "./recruiters-tab";
 
 export default function JobTrackerDashboard() {
 
@@ -20,7 +20,7 @@ export default function JobTrackerDashboard() {
             <OpportunitiesTab />
           </TabsContent>
           <TabsContent value="contacts" className='sm:m-4'>
-            <ContactsTab />
+            <RecruiterTab />
           </TabsContent>
         </Tabs>
       </main>
