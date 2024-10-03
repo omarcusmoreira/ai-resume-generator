@@ -264,10 +264,10 @@ export default function ResumePreviewPage() {
         {!resume?.isAccepted && (
           <>
           <p className="text-[12px] text-yellow-700">
-            Aceite para editar ou fazer o download do seu currículo.
+          Atenção: Os currículos gerado por IA, podem conter informações incorretas.
           </p> 
            <p className="text-[12px] mb-4 text-yellow-700">
-            Caso opte por refazer, sua cota não será afetada.
+           Aceite para editar ou fazer o download do seu currículo, caso opte por refazer, sua cota não será afetada.
           </p>
           </>
         )}

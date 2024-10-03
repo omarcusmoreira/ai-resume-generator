@@ -46,9 +46,9 @@ Abaixo estão as informações fornecidas sobre a experiência profissional do c
 {
   "academicBackground": [
     {
-      "degree": "${profile.sections.academicBackground || 'Invente um título acadêmico relevante'}",
-      "institution": "Invente uma instituição de ensino de prestígio",
-      "graduationYear": "Escolha um ano de graduação realista"
+      "degree": "${profile.sections.academicBackground}",
+      "institution": "Escreva a instituição de ensino descrita acima ou deixe em branco",
+      "graduationYear": "Entre com o ano de formação fornecido"
     }
   ]
 }

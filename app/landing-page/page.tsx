@@ -12,62 +12,64 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-purple-100 to-white">
       <header className="px-4 lg:px-6 h-16 flex items-center justify-between sticky top-0 bg-white bg-opacity-90 backdrop-blur-sm z-50">
-        <Link className="flex items-center justify-center" href="#">
-          <Image src={logo_horizontal} alt="MeContrata.ai Logo" width={150} height={40} />
-        </Link>
-        <div className="flex items-center gap-4">
-          <nav className="hidden md:flex items-center gap-4 sm:gap-6">
-            <Link className="text-sm font-medium hover:underline underline-offset-4" href="#features">
-              Recursos
-            </Link>
-            <Link className="text-sm font-medium hover:underline underline-offset-4" href="#how-it-works">
-              Como Funciona
-            </Link>
-            <Link className="text-sm font-medium hover:underline underline-offset-4" href="#pricing">
-              Preços
-            </Link>
-            <Link href="https://forms.gle/9KKkaRSKpsaHNqz67" target="_blank" rel="noopener noreferrer">
-              <Button size="sm" variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-100">
-                <Bug className="h-4 w-4 mr-2" />
-                Reportar Bug
-              </Button>
-            </Link>
-          </nav>
-          <Link href="/auth-page">
-            <Button size="sm" className="bg-purple-600 hover:bg-purple-700">Entrar / Registrar</Button>
+        <div className="container mx-auto flex justify-between items-center">
+          <Link className="flex items-center justify-center" href="#">
+            <Image src={logo_horizontal} alt="MeContrata.ai Logo" width={150} height={40} />
           </Link>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="md:hidden">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-white">
-              <nav className="flex flex-col gap-4">
-                <Link className="text-sm font-medium hover:underline underline-offset-4" href="#features">
-                  Recursos
-                </Link>
-                <Link className="text-sm font-medium hover:underline underline-offset-4" href="#how-it-works">
-                  Como Funciona
-                </Link>
-                <Link className="text-sm font-medium hover:underline underline-offset-4" href="#pricing">
-                  Preços
-                </Link>
-                <Link href="https://forms.gle/9KKkaRSKpsaHNqz67" target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-100">
-                    <Bug className="h-4 w-4 mr-2" />
-                    Reportar Bug
-                  </Button>
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
+          <div className="flex items-center gap-4">
+            <nav className="hidden md:flex items-center gap-4 sm:gap-6">
+              <Link className="text-sm font-medium hover:underline underline-offset-4" href="#features">
+                Recursos
+              </Link>
+              <Link className="text-sm font-medium hover:underline underline-offset-4" href="#how-it-works">
+                Como Funciona
+              </Link>
+              <Link className="text-sm font-medium hover:underline underline-offset-4" href="#pricing">
+                Preços
+              </Link>
+              <Link href="https://forms.gle/9KKkaRSKpsaHNqz67" target="_blank" rel="noopener noreferrer">
+                <Button size="sm" variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-100">
+                  <Bug className="h-4 w-4 mr-2" />
+                  Reportar Bug
+                </Button>
+              </Link>
+            </nav>
+            <Link href="/auth-page">
+              <Button size="sm" className="bg-purple-600 hover:bg-purple-700">Entrar / Registrar</Button>
+            </Link>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="md:hidden">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-white">
+                <nav className="flex flex-col gap-4">
+                  <Link className="text-sm font-medium hover:underline underline-offset-4" href="#features">
+                    Recursos
+                  </Link>
+                  <Link className="text-sm font-medium hover:underline underline-offset-4" href="#how-it-works">
+                    Como Funciona
+                  </Link>
+                  <Link className="text-sm font-medium hover:underline underline-offset-4" href="#pricing">
+                    Preços
+                  </Link>
+                  <Link href="https://forms.gle/9KKkaRSKpsaHNqz67" target="_blank" rel="noopener noreferrer">
+                    <Button size="sm" variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-100">
+                      <Bug className="h-4 w-4 mr-2" />
+                      Reportar Bug
+                    </Button>
+                  </Link>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </header>
       <main className="flex-1 w-full">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-          <div className="container px-4 md:px-6">
+          <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-purple-800">
@@ -85,7 +87,7 @@ export default function LandingPage() {
           </div>
         </section>
         <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-white">
-          <div className="container px-4 md:px-6">
+          <div className="container mx-auto px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12 text-purple-800">
               Recursos Incríveis
             </h2>
@@ -121,7 +123,7 @@ export default function LandingPage() {
           </div>
         </section>
         <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-purple-50">
-          <div className="container px-4 md:px-6">
+          <div className="container mx-auto px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12 text-purple-800">
               Como Funciona
             </h2>
@@ -151,7 +153,7 @@ export default function LandingPage() {
           </div>
         </section>
         <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 bg-white">
-          <div className="container px-4 md:px-6">
+          <div className="container mx-auto px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12 text-purple-800">
               Planos e Preços
             </h2>
@@ -203,7 +205,7 @@ export default function LandingPage() {
           </div>
         </section>
         <section id="cta" className="w-full py-12 md:py-24 lg:py-32 bg-purple-600 text-white">
-          <div className="container px-4 md:px-6">
+          <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -216,9 +218,11 @@ export default function LandingPage() {
               <div className="w-full max-w-sm space-y-2">
                 <form className="flex space-x-2">
                   <Input className="max-w-lg flex-1 bg-purple-50 text-purple-900" placeholder="Seu melhor email" type="email" />
-                  <Button type="submit" className="bg-white text-purple-600 hover:bg-purple-100">
-                    Começar
-                  </Button>
+                  <Link href="/auth-page">
+                    <Button type="submit" className="bg-white text-purple-600 hover:bg-purple-100">
+                      Criar sua conta grátis
+                    </Button>
+                  </Link>
                 </form>
                 <p className="text-xs text-purple-100">
                   Ao se inscrever, você concorda com nossos{" "}
@@ -231,16 +235,20 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t bg-purple-50">
-        <p className="text-xs text-gray-500">© 2023 MeContrata.ai - Todos os direitos reservados.</p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Termos de Serviço
-          </Link>
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Privacidade
-          </Link>
-        </nav>
+      <footer className="w-full py-6 bg-purple-50">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex flex-col gap-2 sm:flex-row items-center justify-between">
+            <p className="text-xs text-gray-500">© 2023 MeContrata.ai - Todos os direitos reservados.</p>
+            <nav className="flex gap-4 sm:gap-6">
+              <Link className="text-xs hover:underline underline-offset-4" href="#">
+                Termos de Serviço
+              </Link>
+              <Link className="text-xs hover:underline underline-offset-4" href="#">
+                Privacidade
+              </Link>
+            </nav>
+          </div>
+        </div>
       </footer>
     </div>
   )
