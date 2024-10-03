@@ -19,6 +19,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { useResumeStore } from '@/stores/resumeStore'
 import { useQuotaStore } from '@/stores/quotaStore'
 import { useUserDataStore } from '@/stores/userDataStore'
+import { useToast } from '@/hooks/use-toast'
 
 export default function ResumePreviewPage() {
 
@@ -28,6 +29,7 @@ export default function ResumePreviewPage() {
   const { userData } = useUserDataStore();
   const { resumes, loading, updateResume, deleteResume } = useResumeStore();
   const { quotas, decreaseQuota } = useQuotaStore();
+  const { toast } = useToast();
 
   const [resume, setResume] = useState<ResumeType>()
   const [resumeBody, setResumeBody] = useState<ResumeBodyType>()
@@ -64,9 +66,9 @@ export default function ResumePreviewPage() {
     setIsEditing(false)
     const resumeData = { ...resume, contentJSON: JSON.stringify(localResumeBody) }
     if (resumeData.contentJSON) {
-      console.log('Updating resume with data:', resumeData)
       try {
         const response = await updateResume(resumeId, resumeData)
+        
         console.log('Update response:', response)
         setResumeBody(localResumeBody)
       } catch (error) {
@@ -120,6 +122,10 @@ export default function ResumePreviewPage() {
   const handleAccept = async () => {
     await updateResume(resumeId, { isAccepted: true } as Partial<ResumeType>)
     await decreaseQuota('resumes')
+    toast({
+      title: "Currículo salvo",
+      description: `Voce ainda tem mais ${quotas.resumes-1} currículo(s)`,
+    });
   }
 
   const updateResumeData = (path: string[], value: string) => {

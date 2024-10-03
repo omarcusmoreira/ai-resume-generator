@@ -13,6 +13,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useQuotaStore } from '@/stores/quotaStore'
 import { useProfileStore } from '@/stores/profileStore'
 import { generateKeywords } from '@/aiPrompts/generateKeywords'
+import { useToast } from '@/hooks/use-toast'
  
 const initialState: ProfileType = {
   id: '',
@@ -78,8 +79,9 @@ export default function ProfileCreationDialog({ isOpen, onClose }: ProfileWizard
   const totalSteps = 6
 
   const { user } = useAuthStore();
-  const { decreaseQuota } = useQuotaStore();
+  const { quotas, decreaseQuota } = useQuotaStore();
   const { loading, addProfile } = useProfileStore();
+  const { toast } = useToast();
 
   const handleNext = () => {
     if (isStepValid() && step < totalSteps) {
@@ -146,6 +148,10 @@ export default function ProfileCreationDialog({ isOpen, onClose }: ProfileWizard
       const profileId = v4();
       await addProfile(profileId, profile)
       await decreaseQuota('profiles')
+      toast({
+        title: "Perfil salvo",
+        description: `Voce ainda tem mais ${quotas.profiles-1} perfis`,
+      });
       onClose();
     }
   }
