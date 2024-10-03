@@ -7,7 +7,8 @@ export type ResumeType = {
     createdAt: Timestamp;
     updatedAt: Timestamp;
     isAccepted: boolean;
-    contentJSON: string; 
+    contentJSON?: string;
+    contentHTML?: string;
   };
 
 export type ResumeBodyType = {

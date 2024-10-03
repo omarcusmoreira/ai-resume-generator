@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { FileCode2, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
+import { Briefcase, FileCode2, Linkedin, Mail, PlusSquare, Sparkles, Users } from "lucide-react"
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
@@ -24,6 +24,7 @@ import { useUserDataStore } from '@/stores/userDataStore'
 import { useProfileStore } from '@/stores/profileStore'
 import { useQuotaStore } from '@/stores/quotaStore'
 import { useResumeStore } from '@/stores/resumeStore'
+import { generateResumeHTML } from '@/aiPrompts/generateResumeHTML'
 
 export default function GenerateResumePage() {
 
@@ -31,6 +32,8 @@ export default function GenerateResumePage() {
   const { profiles } = useProfileStore();
   const { addResume } = useResumeStore();
   const { quotas, decreaseQuota } = useQuotaStore();
+
+  const [isPremiumEditor, setIsPremiumEditor] = useState(false);
 
   const [inputText, setInputText] = useState('')
   const [selectedPrompt, setSelectedPrompt] = useState<number>(0)
@@ -52,7 +55,8 @@ export default function GenerateResumePage() {
     'Gerar um currículo ATS otimizado para algoritmos de recrutamento.',
     'Gerar um currículo baseado em uma vaga específica.',
     'Escrever uma carta de apresentação para enviar para recrutadores.',
-    'Criar Biografia profissional para LinkedIn.'
+    'Criar Biografia profissional para LinkedIn.',
+    'Criar um currículo Tradicional para Recrutadores'
   ]
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -90,6 +94,38 @@ export default function GenerateResumePage() {
     
     const newResumeId = v4();
     setResumeId(newResumeId);
+    
+    if (selectedPrompt === 4){
+      setIsPremiumEditor(true)
+      try{
+        const profile = profiles?.find(p => p.id === selectedProfile);
+        if (!profile) {
+          throw new Error('Selected profile not found');
+        }
+        const result = await generateResumeHTML(profile, userData.personalInfo);
+        const completion = result.completion;
+        console.log(completion)
+        const uniqueId = newResumeId.slice(0, 2); // Use the first 2 characters of the UUID
+        const currentDate = new Date();
+        const formattedDate = `${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getFullYear()}`;
+        const resume = {
+          id: newResumeId,
+          createdAt: Timestamp.now(),
+          resumeName: `CV_${uniqueId}_${formattedDate}_${userData.personalInfo.name.replace(/\s+/g, '_')}_${profile.profileName.replace(/\s+/g, '_')}.pdf`,
+          contentHTML: completion,
+          isAccepted: false,
+          profileName: profile.profileName, 
+          updatedAt: Timestamp.now(),
+        } as ResumeType;
+
+        await addResume(newResumeId, resume);
+        setIsGenerationSuccessful(true)
+        setIsGenerating(false)
+        return;
+      }catch(error){
+        console.log(error)
+      }
+    }
 
     try {
       const profile = profiles?.find(p => p.id === selectedProfile);
@@ -251,7 +287,7 @@ export default function GenerateResumePage() {
               }
               disabled={
                 isGenerating || 
-                ((selectedPrompt === 0 || selectedPrompt === 3) && !selectedProfile) ||
+                ((selectedPrompt === 0 || selectedPrompt === 3 || selectedPrompt === 4) && !selectedProfile) ||
                 ((selectedPrompt === 1 || selectedPrompt === 2) && !inputText)
               }
             >
@@ -280,6 +316,8 @@ export default function GenerateResumePage() {
                   {index === 1 && <Users className="h-4 w-4 text-purple-600" />}
                   {index === 2 && <Mail className="h-4 w-4 text-purple-600" />}
                   {index === 3 && <Linkedin className="h-4 w-4 text-purple-600" />}
+                  {index === 4 && <Briefcase className="h-4 w-4 text-purple-600" />}
+
                 </div>
                 <p className="text-sm text-left text-wrap">{prompt}</p>
               </Button>
@@ -317,6 +355,7 @@ export default function GenerateResumePage() {
         generationAttempt={generationAttempt}
         resumeId={resumeId || ''}
         isGenerating={isGenerating}
+        premiumEditor={isPremiumEditor}
       />
       <BioCoverLetterDialog 
         isOpen={isCoverLetterDialogOpen} 

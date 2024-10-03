@@ -402,7 +402,6 @@ export default function OpportunityForm({ opportunity, editMode = true }: { oppo
               />
               {errors.status && <p className="text-red-500 text-xs">{errors.status.message}</p>}
             </div>
-            {/* <Button onClick={() => setIsNewInterviewStageDialogOpen(true)} variant="secondary" size="sm">Adcionar Nova Intrevista</Button> */}
           </CardContent>
         </Card>
 

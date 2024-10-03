@@ -103,23 +103,23 @@ export const OpportunityCard = ({ opportunity, openDeleteDialog }: OpportunityCa
           
           {/* Right column - Interview Stages */}
           <div className="space-y-2">
-      <h4 className="font-semibold text-purple-700">Entrevistas:</h4>
-      {opportunity.interviewStages && opportunity.interviewStages.length > 0 ? (
-              <div className="columns-2 gap-4 space-y-2 max-h-40 overflow-y-auto p-2 bg-white rounded">
-                {opportunity.interviewStages.map((stage, index) => (
-                  <div key={stage.id} className="text-xs bg-purple-50 p-2 rounded break-inside-avoid-column">
-                    <div className="font-medium text-purple-800">{`${index+1}. ${stage.name}`}</div>
-                    <div className="text-purple-600">
-                      <TimestampRenderer 
-                        fallback='Sem data' 
-                        format='toISODate' 
-                        timestamp={stage.expectedDate} 
-                      />
+            <h4 className="font-semibold text-purple-700">Entrevistas:</h4>
+              {opportunity.interviewStages && opportunity.interviewStages.length > 0 ? (
+                <div className="columns-2 gap-4 space-y-2 max-h-40 overflow-y-auto p-2 bg-white rounded">
+                  {opportunity.interviewStages.map((stage, index) => (
+                    <div key={stage.id} className="text-xs bg-purple-50 p-2 rounded break-inside-avoid-column">
+                      <div className="font-medium text-purple-800">{`${index+1}. ${stage.name}`}</div>
+                      <div className="text-purple-600">
+                        <TimestampRenderer 
+                          fallback='Sem data' 
+                          format='toISODate' 
+                          timestamp={stage.expectedDate} 
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
+                  ))}
+                </div>
+              ) : (
               <div className="text-purple-600 text-xs">Sem entrevistas agendadas</div>
             )}
           </div>

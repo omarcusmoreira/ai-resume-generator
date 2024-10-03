@@ -13,6 +13,7 @@ type ResumeGenerationDialogProps = {
     isGenerationSuccessful: boolean;
     hasGenerationFailed: boolean;
     generationAttempt: number;
+    premiumEditor?: boolean;
 }
 
 export const ResumeGenerationDialog = ({
@@ -22,7 +23,8 @@ export const ResumeGenerationDialog = ({
     isGenerating,
     isGenerationSuccessful,
     hasGenerationFailed,
-    generationAttempt
+    generationAttempt,
+    premiumEditor,
 }: ResumeGenerationDialogProps) => {
   const router = useRouter();
 
@@ -72,7 +74,7 @@ export const ResumeGenerationDialog = ({
                 <Button onClick={handleCloseDialog}>Fechar</Button>
                 )}
                 {isGenerationSuccessful && (
-                <Button onClick={() => router.push(`/resume-preview?resumeId=${resumeId}`)}>
+                <Button onClick={!premiumEditor ? () => router.push(`/resume-preview?resumeId=${resumeId}`) : () => router.push(`/resume-editor?resumeId=${resumeId}`)}>
                     Ver Currículo
                 </Button>
                 )}
