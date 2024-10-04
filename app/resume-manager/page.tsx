@@ -15,6 +15,7 @@ import { CalendarIcon, SearchIcon, FilterIcon, User, Sparkles } from 'lucide-rea
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useResumeStore } from '@/stores/resumeStore'
 import { useQuotaStore } from '@/stores/quotaStore'
+import { Badge } from '@/components/ui/badge'
 
 export default function ResumeManagerPage() {
 
@@ -83,17 +84,25 @@ export default function ResumeManagerPage() {
           </div>
           <div className="space-y-4">
             {filteredResumes.map(resume => (
-              <Link href={`/resume-preview?resumeId=${resume.id}`} key={resume.id} className="block">
+              <Link href={resume.isEditor ? `/resume-editor?resumeId=${resume.id}` : `/resume-preview?resumeId=${resume.id}`} key={resume.id} className="block">
                 <Card className="hover:shadow-md transition-shadow duration-200">
-                    <CardContent className="p-4 grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-                        <div className="font-medium truncate md:col-span-2">
+                    <CardContent className="p-4 grid grid-cols-1 md:grid-cols-6 gap-2 items-center">
+                        <div className="font-medium truncate md:col-span-3">
                             {resume.resumeName}
                         </div>
-                        <div className="flex items-center text-sm text-gray-500 md:col-span-2">
+                        <div className="flex items-center text-sm text-gray-500 md:col-span-1">
                             <User className="mr-2 h-4 w-4" />
                             <span className="truncate">{resume.profileName}</span>
                         </div>
-                        <div className="flex items-center text-sm text-gray-500">
+                        <div className="flex items-center text-sm text-gray-500 md:col-span-1">
+                        <Badge 
+                          variant="secondary" 
+                          className={` ${resume.isEditor ? 'text-yellow-800 bg-yellow-200': 'text-blue-800 bg-blue-200'} px-2 py-1 text-xs font-semibold`}
+                          >
+                            {resume.isEditor ? 'Avançado' : 'ATS'}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500 md:col-span-1">
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {resume.createdAt 
                             ? new Date(resume.createdAt.seconds * 1000).toLocaleDateString() 

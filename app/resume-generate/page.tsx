@@ -116,6 +116,7 @@ export default function GenerateResumePage() {
           isAccepted: false,
           profileName: profile.profileName, 
           updatedAt: Timestamp.now(),
+          isEditor: true,
         } as ResumeType;
 
         await addResume(newResumeId, resume);

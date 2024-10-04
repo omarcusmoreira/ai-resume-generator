@@ -4,16 +4,20 @@ import { useState, useEffect } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Button } from "@/components/ui/button"
-import { Bold, Italic, List, Heading1, Heading2, Heading3, Edit, Save, Download, Sparkles } from 'lucide-react'
+import { Bold, Italic, List, Heading1, Heading2, Heading3, Edit, Save, Download, Sparkles, Trash2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { useResumeStore } from '@/stores/resumeStore'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 
 export default function ResumeEditor() {
-  const { toast } = useToast()
-  const { resumes, addResume } = useResumeStore();
+
+  const { toast } = useToast();
+  const { push } = useRouter();
+  const { resumes, loading, addResume, deleteResume } = useResumeStore();
+
 
   const [isEditing, setIsEditing] = useState(false)
 
@@ -91,6 +95,11 @@ export default function ResumeEditor() {
     URL.revokeObjectURL(url)
   }
 
+  const handleDelete = async() => {
+    await deleteResume(resumeId)
+    push('/resume-manager')
+  }
+
   return (
     <div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
       <Card className="w-full max-w-3xl md:p-6 p-1">
@@ -111,82 +120,109 @@ export default function ResumeEditor() {
             </p>
             <div className="grid gap-2">
               <div className="flex items-center space-x-2">
-                <div className="flex items-center space-x-2 overflow-hidden">
-                  <Button onClick={isEditing ? saveResume : toggleEdit} variant={isEditing ? "default" : "outline"}>
-                    {isEditing ? (
-                      <>
-                        <Save className="h-4 w-4 mr-2" />
-                        Salvar
-                      </>
-                    ) : (
-                      <>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </>
-                    )}
-                  </Button>
-                  <div className={`flex space-x-2 transition-all duration-300 ease-in-out ${isEditing ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0'}`}>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => editor?.chain().focus().toggleBold().run()}
-                      disabled={!editor?.can().chain().focus().toggleBold().run()}
-                    >
-                      <Bold className="h-4 w-4" />
-                      <span className="sr-only">Negrito</span>
+                <div className="flex w-full items-center justify-between space-x-2 overflow-hidden">
+                
+                  <div className="flex items-center space-x-2">
+                    <Button onClick={isEditing ? saveResume : toggleEdit} variant={isEditing ? "default" : "outline"}>
+                      {isEditing ? (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Salvar
+                        </>
+                      ) : (
+                        <>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </>
+                      )}
                     </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => editor?.chain().focus().toggleItalic().run()}
-                      disabled={!editor?.can().chain().focus().toggleItalic().run()}
-                    >
-                      <Italic className="h-4 w-4" />
-                      <span className="sr-only">Itálico</span>
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
-                      disabled={!editor?.can().chain().focus().toggleHeading({ level: 1 }).run()}
-                    >
-                      <Heading1 className="h-4 w-4" />
-                      <span className="sr-only">Título 1</span>
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                      disabled={!editor?.can().chain().focus().toggleHeading({ level: 2 }).run()}
-                    >
-                      <Heading2 className="h-4 w-4" />
-                      <span className="sr-only">Título 2</span>
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
-                      disabled={!editor?.can().chain().focus().toggleHeading({ level: 3 }).run()}
-                    >
-                      <Heading3 className="h-4 w-4" />
-                      <span className="sr-only">Título 3</span>
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                      disabled={!editor?.can().chain().focus().toggleBulletList().run()}
-                    >
-                      <List className="h-4 w-4" />
-                      <span className="sr-only">Lista com Marcadores</span>
-                    </Button>
+                    <div className={`flex space-x-2 transition-all duration-300 ease-in-out ${isEditing ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0'}`}>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => editor?.chain().focus().toggleBold().run()}
+                        disabled={!editor?.can().chain().focus().toggleBold().run()}
+                      >
+                        <Bold className="h-4 w-4" />
+                        <span className="sr-only">Negrito</span>
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => editor?.chain().focus().toggleItalic().run()}
+                        disabled={!editor?.can().chain().focus().toggleItalic().run()}
+                      >
+                        <Italic className="h-4 w-4" />
+                        <span className="sr-only">Itálico</span>
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+                        disabled={!editor?.can().chain().focus().toggleHeading({ level: 1 }).run()}
+                        >
+                        <Heading1 className="h-4 w-4" />
+                        <span className="sr-only">Título 1</span>
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+                        disabled={!editor?.can().chain().focus().toggleHeading({ level: 2 }).run()}
+                      >
+                        <Heading2 className="h-4 w-4" />
+                        <span className="sr-only">Título 2</span>
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
+                        disabled={!editor?.can().chain().focus().toggleHeading({ level: 3 }).run()}
+                        >
+                        <Heading3 className="h-4 w-4" />
+                        <span className="sr-only">Título 3</span>
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                        disabled={!editor?.can().chain().focus().toggleBulletList().run()}
+                      >
+                        <List className="h-4 w-4" />
+                        <span className="sr-only">Lista com Marcadores</span>
+                      </Button>
+                    </div>
                   </div>
                 </div>
-                <Button onClick={downloadResume} variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Baixar
-                </Button>
-              </div>
+
+                <div className="flex items-center space-x-2">
+                  <Button onClick={downloadResume} variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
+                    Baixar
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="bg-white">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Apagar o currículo?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta ação não poderá ser desfeita.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} disabled={loading} className="bg-red-500 hover:bg-red-600 text-white">
+                          Apagar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  </div>
+                </div>
               
               <div className="border rounded-md p-4 relative">
                 <style jsx global>{`

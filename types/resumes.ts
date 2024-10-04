@@ -9,6 +9,7 @@ export type ResumeType = {
     isAccepted: boolean;
     contentJSON?: string;
     contentHTML?: string;
+    isEditor?: boolean;
   };
 
 export type ResumeBodyType = {
