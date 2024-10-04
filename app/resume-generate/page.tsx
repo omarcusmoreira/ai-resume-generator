@@ -56,7 +56,7 @@ export default function GenerateResumePage() {
     'Gerar um currículo baseado em uma vaga específica.',
     'Escrever uma carta de apresentação para enviar para recrutadores.',
     'Criar Biografia profissional para LinkedIn.',
-    'Criar um currículo Tradicional para Recrutadores'
+    'Criar um currículo com o Editor Avançado (maior controle sobre o resultado).'
   ]
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -105,7 +105,7 @@ export default function GenerateResumePage() {
         const result = await generateResumeHTML(profile, userData.personalInfo);
         const completion = result.completion;
         console.log(completion)
-        const uniqueId = newResumeId.slice(0, 2); // Use the first 2 characters of the UUID
+        const uniqueId = newResumeId.slice(0, 2);
         const currentDate = new Date();
         const formattedDate = `${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getFullYear()}`;
         const resume = {
@@ -119,6 +119,7 @@ export default function GenerateResumePage() {
         } as ResumeType;
 
         await addResume(newResumeId, resume);
+        await decreaseQuota('resumes')
         setIsGenerationSuccessful(true)
         setIsGenerating(false)
         return;

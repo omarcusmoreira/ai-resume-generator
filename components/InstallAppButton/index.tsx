@@ -13,7 +13,6 @@ const InstallAppButton: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    // Verifica se o dispositivo é iOS
     //eslint-disable-next-line
     setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream);
 
