@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { FileText, Zap, Target, Rocket, Star, Bug, Menu } from "lucide-react"
 import logo_horizontal from '../../public/assets/images/logo_horizontal.png'
+import InstallAppButton from "@/components/InstallAppButton"
 
 export default function LandingPage() {
   return (
@@ -61,6 +62,7 @@ export default function LandingPage() {
                       Reportar Bug
                     </Button>
                   </Link>
+                  <InstallAppButton />
                 </nav>
               </SheetContent>
             </Sheet>
