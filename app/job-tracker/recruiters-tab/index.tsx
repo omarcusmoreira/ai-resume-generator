@@ -28,7 +28,7 @@ export default function RecruiterTab() {
   const [isUpgradeDialogOpen, setIsUpgradeAlertDialogOpen] = useState(false)
 
   const handleAddButtonAction = ()=>{
-      if (quotas.recruiters > 0){
+      if (quotas.recruiters && quotas.recruiters > 0){
         setIsNewRecruiterOpen(true)
       }
       else{

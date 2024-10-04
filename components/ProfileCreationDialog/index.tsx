@@ -150,7 +150,7 @@ export default function ProfileCreationDialog({ isOpen, onClose }: ProfileWizard
       await decreaseQuota('profiles')
       toast({
         title: "Perfil salvo",
-        description: `Voce ainda tem mais ${quotas.profiles-1} perfis`,
+        description: `Voce ainda tem mais ${quotas.profiles && quotas.profiles-1} perfis`,
       });
       onClose();
     }

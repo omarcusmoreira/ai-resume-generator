@@ -1,6 +1,7 @@
 import { getFirestore, doc, collection, getDocs, orderBy, limit, query, runTransaction, getDoc } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
 import { QuotasType } from "@/types/planHistory";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+
 
 // Call Firestore directly to decrement quotas
 export const decrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'recruiters'): Promise<void> => {
@@ -152,38 +153,46 @@ export const getQuotaByType = async (quotaType: 'profiles' | 'resumes' | 'opport
 
 export const getQuotas = async (): Promise<QuotasType> => {
     const db = getFirestore();
-    const auth = getAuth(); 
-    const user = auth.currentUser;
+    const auth = getAuth();
 
-    if (!user) {
-        throw new Error('User must be authenticated');
-    }
+    return new Promise<QuotasType>((resolve, reject) => {
+        // Subscribe to auth state changes
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                reject(new Error('User must be authenticated'));
+                return;
+            }
 
-    const userId = user.uid;
+            const userId = user.uid;
 
-    const planHistoryRef = collection(db, 'users', userId, 'planHistory');
-    const planHistoryQuery = query(planHistoryRef, orderBy('planChangeDate', 'desc'), limit(1));
+            const planHistoryRef = collection(db, 'users', userId, 'planHistory');
+            const planHistoryQuery = query(planHistoryRef, orderBy('planChangeDate', 'desc'), limit(1));
 
-    const planHistorySnap = await getDocs(planHistoryQuery);
-    
-    const quotas: QuotasType = {
-        profiles: 0,
-        resumes: 0,
-        opportunities: 0,
-        interactions: 0,
-        recruiters: 0,
-    }
+            try {
+                const planHistorySnap = await getDocs(planHistoryQuery);
+                const quotas: QuotasType = {
+                    resumes: 3,
+                    profiles: 3,
+                    recruiters: 10,
+                    interactions: 10,
+                    opportunities: 10,
+                }
 
-    planHistorySnap.forEach((doc) => {
-        const planData = doc.data();
-        if (planData) {
-            quotas.profiles += planData.quotas.profiles;
-            quotas.resumes += planData.quotas.resumes;
-            quotas.opportunities += planData.quotas.opportunities;
-            quotas.interactions += planData.quotas.interactions;
-            quotas.recruiters =+ planData.quotas.recruiters;
-        }
-    })  
+                planHistorySnap.forEach((doc) => {
+                    const planData = doc.data();
+                    if (planData) {
+                        quotas.profiles += planData.quotas.profiles;
+                        quotas.resumes += planData.quotas.resumes;
+                        quotas.opportunities += planData.quotas.opportunities;
+                        quotas.interactions += planData.quotas.interactions;
+                        quotas.recruiters += planData.quotas.recruiters;
+                    }
+                });
 
-    return quotas;
-}   
+                resolve(quotas);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    });
+};

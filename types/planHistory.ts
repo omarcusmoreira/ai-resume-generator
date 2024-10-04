@@ -16,20 +16,20 @@ export { PlanChangeTypeEnum, PlanTypeEnum };
 import { Timestamp } from "firebase/firestore";
 
 export type QuotasType = {
-    interactions: number;
-    profiles: number;
-    resumes: number;
-    opportunities: number;
-    recruiters: number;
+    interactions: number | null;
+    profiles: number | null;
+    resumes: number | null;
+    opportunities: number | null;
+    recruiters: number | null;
   };
   
   const PlanQuotas: { [key in PlanTypeEnum]: QuotasType } = {
     [PlanTypeEnum.FREE]: {
-      interactions: 10,
-      profiles: 2,
       resumes: 3,
-      opportunities: 10,
+      profiles: 2,
       recruiters: 10,
+      interactions: 10,
+      opportunities: 10,
     },
     [PlanTypeEnum.BASIC]: {
       interactions: 30,

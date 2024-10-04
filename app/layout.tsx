@@ -54,7 +54,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
   const { fetchUserData } = useUserDataStore();
   const { fetchProfiles } = useProfileStore();
   const { fetchResumes } = useResumeStore();
-  const { fetchQuotas } = useQuotaStore();
+  const { quotas, fetchQuotas } = useQuotaStore();
   const { fetchRecruiters } = useRecruiterStore();
   const { fetchCurrentPlan } = usePlanHistoryStore();
   const { fetchOpportunities } = useOpportunityStore();
@@ -63,7 +63,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
   
   useEffect(() => {
     const fetchData = async () => {
-      if (user) {
+      if (user && !loading) {  // Ensure data is fetched after login
         try {
           await Promise.all([
             fetchUserData(),
@@ -80,14 +80,12 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
           setIsDataLoaded(true);
         }
       } else if (!loading) {
-        setIsDataLoaded(true);
+        setIsDataLoaded(true);  // Set loaded to true if user is not logged in
       }
     };
-
+  
     fetchData();
-  //eslint-disable-next-line
-  }, [user, loading]); 
-
+  }, [user, loading, fetchUserData, fetchResumes, fetchProfiles, fetchQuotas, fetchCurrentPlan, fetchOpportunities, fetchRecruiters]); // Dependencies should include fetch functions
 
   const [progress, setProgress] = useState(17);
 
@@ -96,8 +94,8 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(timer);
   }, []);
 
-  if (loading || !isDataLoaded) {
-    return (
+  if (loading || !isDataLoaded || !quotas) {
+        return (
       <div className='flex flex-col items-center justify-center h-screen'>
         <span className='text-sm text-gray-500 mb-4'>carregando...</span>
         <Progress value={progress} className='w-1/3 h-1' />

@@ -14,11 +14,11 @@ interface QuotaState {
 
 export const useQuotaStore = create<QuotaState>((set) => ({
   quotas: {
-    profiles: 0,
-    resumes: 0,
-    opportunities: 0,
-    interactions: 0,
-    recruiters: 0,
+    profiles: null,
+    resumes: null,
+    opportunities: null,
+    interactions: null,
+    recruiters: null,
   },
   loading: false,
   error: null,
@@ -49,31 +49,61 @@ export const useQuotaStore = create<QuotaState>((set) => ({
     set({ loading: true, error: null });
     try {
       await incrementQuota(quotaType);
-      set((state) => ({
-        quotas: {
-          ...state.quotas,
-          [quotaType]: state.quotas[quotaType] + 1,
-        },
-        loading: false,
-      }));
+      
+      set((state) => {
+        const currentQuota = state.quotas[quotaType];
+  
+        // Check if the quota is not null or undefined before incrementing
+        if (currentQuota === null || currentQuota === undefined) {
+          return {
+            ...state,
+            loading: false,
+            error: `Cannot increment. Quota for ${quotaType} is not available.`,
+          };
+        }
+  
+        return {
+          quotas: {
+            ...state.quotas,
+            [quotaType]: currentQuota + 1,
+          },
+          loading: false,
+        };
+      });
     } catch (error) {
       set({ error: (error as Error).message, loading: false });
     }
   },
+  
 
   decreaseQuota: async (quotaType: 'profiles' | 'resumes' | 'opportunities' | 'interactions' | 'recruiters') => {
     set({ loading: true, error: null });
     try {
       await decrementQuota(quotaType);
-      set((state) => ({
-        quotas: {
-          ...state.quotas,
-          [quotaType]: state.quotas[quotaType] - 1,
-        },
-        loading: false,
-      }));
+      
+      set((state) => {
+        const currentQuota = state.quotas[quotaType];
+        
+        // Check if the quota is not null before performing the decrement
+        if (currentQuota === null || currentQuota === undefined) {
+          return {
+            ...state,
+            loading: false,
+            error: `Cannot decrement. Quota for ${quotaType} is not available.`,
+          };
+        }
+        
+        return {
+          quotas: {
+            ...state.quotas,
+            [quotaType]: currentQuota - 1,
+          },
+          loading: false,
+        };
+      });
     } catch (error) {
       set({ error: (error as Error).message, loading: false });
     }
   },
+  
 }));

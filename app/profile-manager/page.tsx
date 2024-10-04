@@ -30,6 +30,9 @@ export default function ProfileManagement() {
   const { profiles, updateProfile, deleteProfile  } = useProfileStore();
   const { quotas, increaseQuota } = useQuotaStore();
 
+  console.log('Fetched Quotas: ', quotas)
+
+
   useEffect(()=>{
     const updateProfiles = ()=>{
       if (profiles.length > 0 && !activeProfile) {

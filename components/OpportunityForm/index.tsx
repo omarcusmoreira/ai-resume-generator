@@ -124,7 +124,7 @@ export default function OpportunityForm({ opportunity, editMode = true }: { oppo
       }
     } else {
       try {
-        if (quotas.opportunities <= 0) {
+        if (quotas.opportunities && quotas.opportunities <= 0) {
           throw new Error("Quota exceeded");
         }
         const opportunityId = v4();
@@ -143,7 +143,7 @@ export default function OpportunityForm({ opportunity, editMode = true }: { oppo
         await decreaseQuota('opportunities');
         toast({
           title: `Processo Seletivo adicionado`,
-          description: `Você tem mais ${quotas.opportunities-1} processos disponíveis`,
+          description: `Você tem mais ${quotas.opportunities && quotas.opportunities-1} processos disponíveis`,
         });
         reset();
         //eslint-disable-next-line

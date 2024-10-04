@@ -76,7 +76,7 @@ export default function GenerateResumePage() {
   }
 
   const handleGenerateResume = async () => {
-    if (quotas.resumes <= 0) {
+    if (quotas.resumes && quotas.resumes <= 0) {
       setUpgradeDialogTitle('Currículos')
       setIsUpgradeDialogOpen(true)
       return;
@@ -189,7 +189,7 @@ export default function GenerateResumePage() {
   }
 
   const handleGenerateCoverLetter = async () => {
-    if (quotas.interactions <= 0) {
+    if (quotas.interactions &&  quotas.interactions <= 0) {
       setUpgradeDialogTitle('Interações')
       setIsUpgradeDialogOpen(true)
       return;
@@ -215,7 +215,7 @@ export default function GenerateResumePage() {
   } 
 
   const handleGenerateLinkedinBio = async () => {
-    if (quotas.interactions <= 0) {
+    if (quotas.interactions && quotas.interactions <= 0) {
       setIsUpgradeDialogOpen(true)
       return;
     }
@@ -245,7 +245,7 @@ export default function GenerateResumePage() {
         <Card className="w-full max-w-3xl p-4 md:p-6">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Olá, <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 inline-block text-transparent bg-clip-text">{userData?.personalInfo.name || 'Usuário'}</span></h1>
           <h2 className="text-xl md:text-2xl font-semibold mb-4">Vamos criar seu currículo?</h2>
-          <p className="text-gray-500 mb-6 md:mb-8">Escolha um dos prompts abaixo, selecione um perfil desejado e cole a descrição do cargo para criar seu currículo.</p>
+          <p className="text-gray-500 mb-6 md:mb-8">Selecione o perfil desejado, escolha um dos prompts abaixo e, caso deseje, forneça a descrição do cargo para criar seu currículo.</p>
 
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <div className="flex items-center">

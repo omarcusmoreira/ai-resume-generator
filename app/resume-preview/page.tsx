@@ -124,7 +124,7 @@ export default function ResumePreviewPage() {
     await decreaseQuota('resumes')
     toast({
       title: "Currículo salvo",
-      description: `Voce ainda tem mais ${quotas.resumes-1} currículo(s)`,
+      description: `Voce ainda tem mais ${quotas.resumes && quotas.resumes-1} currículo(s)`,
     });
   }
 

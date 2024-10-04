@@ -64,7 +64,7 @@ export function RecruiterFormDialog({
       await decreaseQuota('recruiters');
       toast({
         title: `${recruiter.name} salvo com sucesso`,
-        description: `Voce tem mais ${quotas.recruiters-1} contatos disponíveis`,
+        description: `Voce tem mais ${quotas.recruiters && quotas.recruiters-1} contatos disponíveis`,
       })
     }
     catch(error){
