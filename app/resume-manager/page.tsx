@@ -31,7 +31,7 @@ export default function ResumeManagerPage() {
   ) : [];
 
   return (
-    <div className="flex-1 p-2 md:p-8 overflow-auto flex items-center justify-center">
+    <div className="flex-1 p-2 md:p-8 overflow-auto flex items-center justify-center mb-20">
 
       <Card className='w-full max-w-3xl p-2 md:p-6'>
         <div className="container mx-auto p-2 md:p-4 space-y-6">

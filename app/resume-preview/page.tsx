@@ -221,7 +221,7 @@ export default function ResumePreviewPage() {
   )
 
   return (
-    <div className="w-full max-w-4xl mx-auto relative pb-8 mt-4">
+    <div className="w-full max-w-4xl mx-auto relative pb-20 mt-4 p-2 md:p-6">
       <div className={`p-4 mb-4 rounded-lg ${resume?.isAccepted ? 'bg-purple-400' : 'bg-yellow-100'}`}>
         <div className="flex justify-between items-center mb-2">
           <h2 className={`font-medium text-lg ${resume?.isAccepted ? 'text-white' : 'text-yellow-800'}`}>

@@ -241,7 +241,7 @@ export default function GenerateResumePage() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="flex-1 p-2 md:p-8 overflow-auto flex items-center justify-center">
+      <div className="flex-1 p-2 md:p-8 overflow-auto flex items-center justify-center mb-20">
         <Card className="w-full max-w-3xl p-4 md:p-6">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Olá, <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 inline-block text-transparent bg-clip-text">{userData?.personalInfo.name || 'Usuário'}</span></h1>
           <h2 className="text-xl md:text-2xl font-semibold mb-4">Vamos criar seu currículo?</h2>

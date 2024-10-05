@@ -120,7 +120,7 @@ export default function ProfileManagement() {
     )
   }
   return (
-    <div className="flex-1 p-2 md:p-8 overflow-auto flex items-center justify-center">
+    <div className="flex-1 p-2 md:p-8 overflow-auto flex items-center justify-center pb-20">
       <Card className="w-full max-w-3xl p-2 md:p-6">
     <div className="container mx-auto p-2 md:p-4 space-y-6">
       <h1 className="text-3xl font-bold mb-6">Meus Perfis</h1>
@@ -137,7 +137,7 @@ export default function ProfileManagement() {
       ) : (
       <Tabs value={activeProfile} onValueChange={setActiveProfile} className="w-full" >
         <div className="flex justify-between items-center mb-4">
-          <TabsList>
+          <TabsList className='flex-nowrap overflow-y-auto h-full'>
             {profiles.map((profile) => (
               <TabsTrigger key={profile.id} value={profile.id}>
                 {profile.profileName}
