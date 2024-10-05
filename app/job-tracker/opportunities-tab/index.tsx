@@ -11,6 +11,7 @@ import { useQuotaStore } from '@/stores/quotaStore'
 import OpportunityForm from '@/components/OpportunityForm'
 import { OpportunityCard } from '@/components/OpportunityCard'
 import { OpportunityType } from '@/types/opportunities'
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 
 export const OpportunitiesTab = () => {
 
@@ -43,7 +44,7 @@ export const OpportunitiesTab = () => {
       };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 mb-20">
           <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-purple-800 px-2 sm:px-0">Processos seletivos</h2>
               <OpportunityForm editMode={false} />
@@ -64,21 +65,30 @@ export const OpportunitiesTab = () => {
             </CardHeader>
             <CardContent className="p-4">
             {opportunities.length === 0 && 
-            <div className='flex flex-col w-full items-center justify-center py-10'>
-              <Handshake className='h-20 w-20 text-gray-300 mb-4'/>
-              <p className="text-2xl text-gray-400 text-center">Voce ainda não está participando de nenhum processo seletivo.</p>
-            </div>}
-              <div className="space-y-4">
-                {filteredOpportunities.map((opportunity) => (
-                  <OpportunityCard
-                    key={opportunity.id}
-                    opportunity={opportunity}
-                    openDeleteDialog={() => openDeleteDialog(opportunity)}
-                  />
-              ))}
-              </div>
-            </CardContent>
-          </Card>
+              <div className='flex flex-col w-full items-center justify-center py-10'>
+                <Handshake className='h-20 w-20 text-gray-300 mb-4'/>
+                <p className="text-2xl text-gray-400 text-center">Voce ainda não está participando de nenhum processo seletivo.</p>
+              </div>}
+
+                <div className="space-y-4 ">
+                  <Carousel>
+                    <CarouselContent>
+                      {filteredOpportunities.map((opportunity) => (
+                      <CarouselItem  key={opportunity.id} className="sm:basis-1/3">
+                        <OpportunityCard
+                          key={opportunity.id}
+                          opportunity={opportunity}
+                          openDeleteDialog={() => openDeleteDialog(opportunity)}
+                        />
+                      </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                  <CarouselPrevious/>
+                  <CarouselNext />
+                  </Carousel>
+                </div>
+              </CardContent>
+            </Card>
 
           <DeleteDialog 
               isOpen={isDeleteDialogOpen} 

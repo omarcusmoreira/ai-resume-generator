@@ -1,3 +1,4 @@
+import React from 'react';
 import { Timestamp } from "firebase/firestore";
 
 type TimestampLike = {
@@ -7,7 +8,7 @@ type TimestampLike = {
 
 type TimestampRendererProps = {
   timestamp: Timestamp | Date | string | number | TimestampLike | null | undefined;
-  format: 'toLocale' | 'toDateString' | 'toString' | 'toISODate';
+  format: 'toLocale' | 'toDateString' | 'toString' | 'toISODate' | 'time';
   fallback: string;
 };
 
@@ -23,13 +24,19 @@ const isTimestampLike = (value: any): value is TimestampLike => {
   );
 };
 
-// Utility function to adjust for UTC to YYYY-MM-DD format
+// Utility function to format date
 const formatToISODate = (date: Date): string => {
-  // Convert the date to the correct YYYY-MM-DD format in UTC
   const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
   const day = String(date.getUTCDate()).padStart(2, '0');
-  return `${day}/${month}/${year}`
+  return `${day}/${month}/${year}`;
+};
+
+// New utility function to format time
+const formatTime = (date: Date): string => {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
 };
 
 export const TimestampRenderer: React.FC<TimestampRendererProps> = ({ timestamp, format, fallback }) => {
@@ -56,19 +63,17 @@ export const TimestampRenderer: React.FC<TimestampRendererProps> = ({ timestamp,
   }
 
   // Handle formatting options
-  if (format === 'toLocale') {
-    return <>{date.toLocaleDateString('pt-BR')}</>;
+  switch (format) {
+    case 'toLocale':
+      return <>{date.toLocaleDateString('pt-BR')}</>;
+    case 'toDateString':
+      return <>{date.toDateString()}</>;
+    case 'toISODate':
+      return <>{formatToISODate(date)}</>;
+    case 'time':
+      return <>{formatTime(date)}</>;
+    case 'toString':
+    default:
+      return <>{date.toString()}</>;
   }
-
-  if (format === 'toDateString') {
-    return <>{date.toDateString()}</>;
-  }
-
-  // Format as YYYY-MM-DD (ISO format), but in UTC to avoid the timezone shift
-  if (format === 'toISODate') {
-    return <>{formatToISODate(date)}</>;
-  }
-
-  // Default to full date string
-  return <>{date.toString()}</>;
 };
