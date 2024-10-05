@@ -31,10 +31,10 @@ export default function ResumeManagerPage() {
   ) : [];
 
   return (
-    <div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
+    <div className="flex-1 p-2 md:p-8 overflow-auto flex items-center justify-center">
 
-      <Card className='w-full max-w-3xl p-4 md:p-6'>
-        <div className="container mx-auto p-4 space-y-6">
+      <Card className='w-full max-w-3xl p-2 md:p-6'>
+        <div className="container mx-auto p-2 md:p-4 space-y-6">
           <div className='flex w-full justify-between'>
 
           <h1 className="text-3xl font-bold">Meus Currículos</h1>

@@ -120,9 +120,9 @@ export default function ProfileManagement() {
     )
   }
   return (
-    <div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
-      <Card className="w-full max-w-3xl p-4 md:p-6">
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="flex-1 p-2 md:p-8 overflow-auto flex items-center justify-center">
+      <Card className="w-full max-w-3xl p-2 md:p-6">
+    <div className="container mx-auto p-2 md:p-4 space-y-6">
       <h1 className="text-3xl font-bold mb-6">Meus Perfis</h1>
       { profiles.length === 0 ? (
         <div className="flex justify-center items-center flex-col">
@@ -159,7 +159,7 @@ export default function ProfileManagement() {
           </TooltipProvider>
         </div>
         {profiles.map((profile) => (
-          <TabsContent key={profile.id} value={profile.id} className="space-y-6">
+          <TabsContent key={profile.id} value={profile.id} className="space-y-2">
             <Card className="relative overflow-hidden">
               <CardHeader>
                 <CardTitle className='flex justify-between'>

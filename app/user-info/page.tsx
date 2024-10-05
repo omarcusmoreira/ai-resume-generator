@@ -67,8 +67,8 @@ export default function UserInfo() {
   }
 
   return (
-    <div className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center">
-      <Card className="w-full max-w-3xl p-4 md:p-6">
+    <div className="flex-1 p-2 md:p-8 overflow-auto flex items-center justify-center">
+      <Card className="w-full max-w-3xl p-2 md:p-6">
         <CardHeader>
           <CardTitle className="text-2xl text-heading">Informações Pessoais</CardTitle>
         </CardHeader>
