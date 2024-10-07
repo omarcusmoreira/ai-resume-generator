@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { useUserDataStore } from '@/stores/userDataStore';
 import { PersonalInfoType } from '@/types/users';
 import { useToast } from '@/hooks/use-toast';
+import EnhancedQuotaDisplay from '@/components/EnhancedQuotaDisplay';
 
 export default function UserInfo() {
   const { toast } = useToast();
@@ -67,7 +68,7 @@ export default function UserInfo() {
   }
 
   return (
-    <div className="flex-1 p-2 md:p-8 overflow-auto flex items-center justify-center">
+    <div className="flex-1 p-2 md:p-8 overflow-auto flex items-center justify-center flex-col">
       <Card className="w-full max-w-3xl p-2 md:p-6">
         <CardHeader>
           <CardTitle className="text-2xl text-heading">Informações Pessoais</CardTitle>
@@ -96,10 +97,10 @@ export default function UserInfo() {
             </div>
             <Field
               key="name"
-              label="Name"
+              label="Nome"
               id="name"
               value={userData?.personalInfo?.name || ''}
-              placeholder="Enter your name"
+              placeholder="Digite seu nome"
               onChange={(e) => handleChange('name', e.target.value)}
             />
             <Field
@@ -107,24 +108,24 @@ export default function UserInfo() {
               label="Email"
               id="email"
               value={userData?.personalInfo?.email || ''}
-              placeholder="Enter your email"
+              placeholder="Digite seu email"
               onChange={(e) => handleChange('email', e.target.value)}
               disabled
             />
             <Field
               key="phone"
-              label="Phone Number"
+              label="Telefone"
               id="phoneNumber"
               value={userData?.personalInfo?.phone || ''}
-              placeholder="Enter your phone number"
+              placeholder="Digite seu número de telefone"
               onChange={(e) => handleChange('phone', e.target.value)}
             />
             <Field
               key="birthDate"
-              label="Birth Date"
+              label="Data de Nascimento"
               id="birthDate"
               value={userData?.personalInfo?.birthDate || ''}
-              placeholder="Enter your birth date"
+              placeholder="Digite sua data de nascimento"
               type="date"
               onChange={(e) => handleChange('birthDate', e.target.value)}
             />
@@ -133,16 +134,16 @@ export default function UserInfo() {
               label="LinkedIn"
               id="linkedin"
               value={userData?.personalInfo?.linkedinURL || ''}
-              placeholder="Enter your LinkedIn URL"
+              placeholder="Digite a URL do seu perfil"
               type="text"
               onChange={(e) => handleChange('linkedinURL', e.target.value)}
             />
             <Field
               key="city"
-              label="City"
+              label="Cidade"
               id="city"
               value={userData?.personalInfo?.city || ''}
-              placeholder="Enter your city"
+              placeholder="Digite sua Cidade"
               type="text"
               onChange={(e) => handleChange('city', e.target.value)}    
             />
@@ -151,7 +152,6 @@ export default function UserInfo() {
         <CardFooter className="flex justify-end">
           <Button onClick={handleSavePersonalInfo} className="text-button text-white" disabled={isSaving}>
             
-              
               {isSaving ? (
                 <>
                 <Loader className={'block animate-spin mr-2 h-4 w-4'} />
@@ -167,6 +167,7 @@ export default function UserInfo() {
           </Button>
         </CardFooter>
       </Card>
+      <EnhancedQuotaDisplay />
     </div>
   );
 }

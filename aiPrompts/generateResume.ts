@@ -14,7 +14,8 @@ IMPORTANTE: RETORNE APENAS OBJETOS JSON COMPLETOS. NÃO RETORNE NENHUM OUTRO TEX
 
 Use as seguintes palavras-chave para popular as informações faltantes do currículo: ${profile.sections.keywords}
 
-Abaixo estão as informações fornecidas sobre a experiência profissional do candidato. Organize essas informações de maneira estruturada e gere o JSON correspondente.
+Abaixo estão as informações fornecidas sobre a minha experiência profissional.
+Organize essas informações de maneira estruturada e gere o JSON correspondente.
 
 ### Informações Profissionais fornecidas:
 "${profile.sections.professionalExperience}"
@@ -27,7 +28,7 @@ Abaixo estão as informações fornecidas sobre a experiência profissional do c
       "position": "Extraia o cargo do candidato",
       "dates": "Extraia o período de tempo corretamente",
       "responsibilities": [
-        "Crie uma lista de 7-8 responsabilidades relevantes e impactantes para a posição, detalhando cada uma com exemplos específicos de resultados alcançados e habilidades aplicadas.",
+        "Crie uma lista de exatamente 7-8 responsabilidades relevantes e impactantes para a posição, detalhando cada uma com exemplos específicos de resultados alcançados e habilidades aplicadas.",
         "Invente projetos importantes que o candidato tenha liderado ou participado, com uma descrição mais rica das tarefas e resultados."
       ]
     }

@@ -27,13 +27,13 @@ interface InterviewStageDialogProps {
 }
 
 const encouragingWords = [
-  "You've got this! One step closer to your dream job!",
-  "Believe in yourself! Your preparation will pay off!",
-  "Stay confident! Your skills and experience shine through!",
-  "Keep going strong! You're making great progress!",
-  "Almost there! Your hard work is about to bear fruit!",
-  "You're doing great! Each stage brings you closer to success!",
-  "Stay focused! Your dedication is truly impressive!",
+  "Você consegue! Um passo mais perto do emprego dos seus sonhos!",
+  "Acredite em si mesmo! Sua preparação vai valer a pena!",
+  "Mantenha a confiança! Suas habilidades e experiência se destacam!",
+  "Continue firme! Você está fazendo um ótimo progresso!",
+  "Está quase lá! Seu esforço está prestes a dar frutos!",
+  "Você está indo muito bem! Cada etapa te aproxima do sucesso!",
+  "Mantenha o foco! Sua dedicação é realmente impressionante!"
 ];
 
 export default function InterviewStageDialog({ onSave }: InterviewStageDialogProps) {
@@ -70,7 +70,7 @@ export default function InterviewStageDialog({ onSave }: InterviewStageDialogPro
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Nova Entrevista</Button>
+        <Button variant="outline">Entrevistas</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-white">
         <DialogHeader>

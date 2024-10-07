@@ -84,7 +84,7 @@ export default function ResumeManagerPage() {
           </div>
           <div className="space-y-4">
             {filteredResumes.map(resume => (
-              <Link href={resume.isEditor ? `/resume-editor?resumeId=${resume.id}` : `/resume-preview?resumeId=${resume.id}`} key={resume.id} className="block">
+              <Link href={`/resume-editor?resumeId=${resume.id}`} key={resume.id} className="block">
                 <Card className="hover:shadow-md transition-shadow duration-200">
                     <CardContent className="p-4 grid grid-cols-1 md:grid-cols-6 gap-2 items-center">
                         <div className="font-medium truncate md:col-span-3">
@@ -97,9 +97,9 @@ export default function ResumeManagerPage() {
                         <div className="flex items-center text-sm text-gray-500 md:col-span-1">
                         <Badge 
                           variant="secondary" 
-                          className={` ${resume.isEditor ? 'text-yellow-800 bg-yellow-200': 'text-blue-800 bg-blue-200'} px-2 py-1 text-xs font-semibold`}
+                          className={` ${resume.hasJobDescription ? 'text-yellow-800 bg-yellow-200': 'text-blue-800 bg-blue-200'} px-2 py-1 text-xs font-semibold`}
                           >
-                            {resume.isEditor ? 'Avançado' : 'ATS'}
+                            {resume.hasJobDescription ? 'Customizado' : 'ATS'}
                           </Badge>
                         </div>
                         <div className="flex items-center text-sm text-gray-500 md:col-span-1">

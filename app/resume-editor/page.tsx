@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Button } from "@/components/ui/button"
@@ -11,21 +11,106 @@ import { useResumeStore } from '@/stores/resumeStore'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import { ResumeType } from '@/types/resumes'
+import { useUserDataStore } from '@/stores/userDataStore'
+
+// Define interfaces for our resume data structure
+interface Job {
+  company: string;
+  position: string;
+  dates: string;
+  responsibilities: string[];
+}
+
+interface Education {
+  degree: string;
+  institution: string;
+  graduationYear: string;
+}
+
+interface Language {
+  language: string;
+  fluency: string;
+}
+
+interface ResumeData {
+  summary: string;
+  professionalExperience: Job[];
+  academicBackground: Education[];
+  languages: Language[];
+  extraCurricular: string;
+}
+
+interface Resume {
+  id: string;
+  contentJSON: string;
+  contentHTML?: string;
+}
 
 export default function ResumeEditor() {
 
+  const resumeRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast();
   const { push } = useRouter();
+  const { userData } = useUserDataStore()
   const { resumes, loading, addResume, deleteResume } = useResumeStore();
 
-
   const [isEditing, setIsEditing] = useState(false)
+
 
   const searchParams = useSearchParams()
   const resumeId = searchParams.get('resumeId') as string
 
   const resume = resumes.find(resume => resume.id === resumeId)
-  const resumeContent = resume?.contentHTML || ''
+  
+  const parseJSONToHTML = (jsonContent: string): string => {
+    try {
+      const content: ResumeData = JSON.parse(jsonContent);
+      let html = '';
+
+      html += `<h2>${userData?.personalInfo.name}</h2>`;
+      html += `<p>${userData?.personalInfo.email}</p>`;
+      html += `<p>${userData?.personalInfo.phone || ''}</p>`;
+      html += `<p>${userData?.personalInfo.linkedinURL || ''}</p>`;
+      // Summary
+      html += `<h2>Resumo</h1><p>${content.summary}</p>`;
+
+      // Professional Experience
+      html += '<h2>Experiência Profissional</h1>';
+      content.professionalExperience.forEach((job: Job) => {
+        html += `<h3>${job.company} - ${job.position}</h2>`;
+        html += `<p>${job.dates}</p>`;
+        html += '<ul>';
+        job.responsibilities.forEach(resp => {
+          html += `<li>${resp}</li>`;
+        });
+        html += '</ul>';
+      });
+
+      // Academic Background
+      html += '<h2>Formação Acadêmica</h1>';
+      content.academicBackground.forEach((edu: Education) => {
+        html += `<p>${edu.degree} - ${edu.institution}, ${edu.graduationYear}</p>`;
+      });
+
+      // Languages
+      html += '<h2>Idiomas</h1>';
+      content.languages.forEach((lang: Language) => {
+        html += `<p>${lang.language}: ${lang.fluency}</p>`;
+      });
+
+      // Extra Curricular
+      html += '<h2>Atividades Extracurriculares</h1>';
+      html += `<p>${content.extraCurricular}</p>`;
+
+      return html;
+    } catch (error) {
+      console.error('Error parsing JSON:', error);
+      return '<p>Error parsing resume content</p>';
+    }
+  };
+
+  const resumeContent = resume?.contentJSON ? parseJSONToHTML(resume.contentJSON) : '';
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -59,13 +144,14 @@ export default function ResumeEditor() {
   const saveResume = async () => {
     if (!editor || !resume) return;
 
-    const updatedResume = {
+    const updatedResume: Resume = {
       ...resume,
-      contentHTML: editor.getHTML()
+      contentHTML: editor.getHTML(),
+      contentJSON: resume.contentJSON || '' // Keep the original JSON
     }
 
     try {
-      await addResume(updatedResume.id, updatedResume)
+      await addResume(updatedResume.id, updatedResume as ResumeType)
       setIsEditing(false)
       toast({
         title: "Sucesso",
@@ -81,8 +167,13 @@ export default function ResumeEditor() {
       })
     }
   }
+  
+  const handleDelete = async() => {
+    await deleteResume(resumeId)
+    push('/resume-manager')
+  }
 
-  const downloadResume = () => {
+  const handleDownloadHTML = () => {
     const content = editor?.getHTML()
     const blob = new Blob([content || ''], { type: 'text/html' })
     const url = URL.createObjectURL(blob)
@@ -95,9 +186,32 @@ export default function ResumeEditor() {
     URL.revokeObjectURL(url)
   }
 
-  const handleDelete = async() => {
-    await deleteResume(resumeId)
-    push('/resume-manager')
+
+  const handleDownloadPDF = () => {
+    if (resumeRef.current && typeof window !== 'undefined') {
+      console.log('Downloading PDF...')
+      const element = resumeRef.current;
+      if (userData && resume) {
+        const opt = {
+          margin: 5,
+          filename: resume.resumeName,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: 'css', before: '.page-break' },
+          footer: {
+            height: '10mm',
+            contents: {
+              default: '<div style="text-align: center; font-size: 10px; color: #888;">Gerado por MeContrata.ai</div>'
+            }
+          }
+        };
+        console.log('opt...', opt)
+        import('html2pdf.js').then((html2pdfModule) => {
+          html2pdfModule.default().set(opt).from(element).save();
+        });
+      }
+    }
   }
 
   return (
@@ -196,9 +310,13 @@ export default function ResumeEditor() {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Button onClick={downloadResume} variant="outline">
+                  <Button onClick={handleDownloadPDF} variant="outline">
                     <Download className="h-4 w-4 mr-2" />
-                    Baixar
+                    PDF
+                  </Button>
+                  <Button onClick={handleDownloadHTML} variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
+                    HTML
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -224,7 +342,7 @@ export default function ResumeEditor() {
                   </div>
                 </div>
               
-              <div className="border rounded-md p-4 relative">
+              <div className="border rounded-md p-4 relative" ref={resumeRef}>
                 <style jsx global>{`
                   .ProseMirror h1 {
                     font-size: 2em;

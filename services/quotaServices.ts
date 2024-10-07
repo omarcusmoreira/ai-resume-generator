@@ -29,6 +29,7 @@ export const decrementQuota = async (quotaType: 'profiles' | 'resumes' | 'opport
 
         const latestPlanDoc = planHistorySnap.docs[0];
         const latestPlanDocRef = doc(db, 'users', userId, 'planHistory', latestPlanDoc.id);
+        console.log(latestPlanDocRef)
 
         // Run a transaction to ensure atomicity
         await runTransaction(db, async (transaction) => {
@@ -181,11 +182,11 @@ export const getQuotas = async (): Promise<QuotasType> => {
                 planHistorySnap.forEach((doc) => {
                     const planData = doc.data();
                     if (planData) {
-                        quotas.profiles += planData.quotas.profiles;
-                        quotas.resumes += planData.quotas.resumes;
-                        quotas.opportunities += planData.quotas.opportunities;
-                        quotas.interactions += planData.quotas.interactions;
-                        quotas.recruiters += planData.quotas.recruiters;
+                        quotas.profiles = planData.quotas.profiles;
+                        quotas.resumes = planData.quotas.resumes;
+                        quotas.opportunities = planData.quotas.opportunities;
+                        quotas.interactions = planData.quotas.interactions;
+                        quotas.recruiters = planData.quotas.recruiters;
                     }
                 });
 

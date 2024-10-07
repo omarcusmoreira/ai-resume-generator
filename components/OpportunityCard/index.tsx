@@ -70,25 +70,7 @@ export const OpportunityCard = ({ opportunity, openDeleteDialog }: OpportunityCa
       push(`/resume-preview?resumeId=${resumeId}`)
     }
   }
-
-  // const formatDate = (date: Date) => {
-  //   return new Intl.DateTimeFormat('pt-BR', { 
-  //     day: '2-digit', 
-  //     month: 'short', 
-  //     year: 'numeric' 
-  //   }).format(date);
-  // }
-
-  // const getNextInterviewDate = () => {
-  //   if (opportunity.interviewStages && opportunity.interviewStages.length > 0) {
-  //     const nextInterview = opportunity.interviewStages.find(stage => stage.status === 'In Progress');
-  //     if (nextInterview) {
-  //       return formatDate(nextInterview.expectedDate.toDate());
-  //     }
-  //   }
-  //   return 'Não agendada';
-  // }
-
+  
   return (
     <Card className="w-full max-w-md mx-auto h-full flex flex-col justify-between">
       <div>
@@ -97,6 +79,9 @@ export const OpportunityCard = ({ opportunity, openDeleteDialog }: OpportunityCa
         <div className="flex justify-between items-start">
           <div>
             <h2 className="text-2xl font-bold text-gray-800 truncate max-w-[160px]">{opportunity.companyName}</h2>
+            <p className="text-sm text-gray-400">
+              <TimestampRenderer format='toLocale' timestamp={opportunity.createdAt} fallback="sem data"/>
+            </p>
           </div>
           <Badge 
             variant="secondary" 

@@ -8,9 +8,9 @@ export async function generateLinkedinBio(profile: ProfileType) {
     Use as informações fornecidas para criar uma biografia atrativa, SEMPRE RESPONDENDO EM PORTUGUÊS.`;
   
     const userPrompt = `
-    IMPORTANTE: NÃO RETORNE NENHUM OUTRO TEXTO ALEM DA CARTA DE APRESENTAÇÕES. SEMPRE RESPONDA EM PORTUGUÊS.
+    IMPORTANTE: NÃO RETORNE NENHUM OUTRO TEXTO ALEM DA BIOGRAFIA. SEMPRE RESPONDA EM PORTUGUÊS.
     Use as informações do meu perfil para gerar uma biografia criativa e cativante para meu LinkedIn. Use uma linguagem informal e criativa em no MAXIMO 2000 caracteres.
-    E retorne com espaçamento e quebras de linha que fique bem legível no meu perfil do LinkedIn.
+    E retorne com espaçamento e quebras de linha que fique bem legível no meu perfil do LinkedIn. Pode usar Emojis.
     Aqui estão algumas informações:
   
     Use ${profile.sections.summary} para gerar a introdução.
@@ -26,7 +26,7 @@ export async function generateLinkedinBio(profile: ProfileType) {
     Use ${profile.sections.extraCurricular === "" ? "Não há atividades extracurriculares" : profile.sections.extraCurricular} para gerar as atividades extracurriculares: 
       
     IMPORTANTE: 
-    - NÃO RETORNE NADA ALÉM DA CARTA.`;
+    - NÃO RETORNE NADA ALÉM DA BIOGRAFIA.`;
   
     const completion = await openAiService.generateChatCompletion([
       { role: 'system', content: systemPrompt },
