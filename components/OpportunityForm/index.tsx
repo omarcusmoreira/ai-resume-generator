@@ -13,7 +13,7 @@ import { useRecruiterStore } from '@/stores/recruiterStore'
 import { useResumeStore } from '@/stores/resumeStore'
 import { useProfileStore } from '@/stores/profileStore'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { Building, CalendarDays, Handshake, Loader, PlusCircle, Radar, User } from 'lucide-react'
+import { Building, CalendarDays, Handshake, Loader, Pen, PlusCircle, Radar, User } from 'lucide-react'
 import { useOpportunityStore } from '@/stores/opportunityStore'
 import { v4 } from 'uuid'
 import { Timestamp } from 'firebase/firestore'
@@ -173,7 +173,10 @@ export default function OpportunityForm({ opportunity, editMode = true }: { oppo
       <SheetTrigger asChild>
         {editMode ?
           <Button variant='outline'>
-            Editar          
+            <Pen className='h-4 w-4 mr-0 md:mr-2 block md:hidden' />
+            <span className='hidden md:block'>
+              Editar          
+            </span>
           </Button> :
           <Button className="bg-purple-600 hover:bg-purple-700 text-white">
             <PlusCircle className="h-5 w-5 sm:mr-2" /> 

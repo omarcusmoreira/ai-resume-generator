@@ -20,7 +20,7 @@ export const useUserDataStore = create<UserState>((set) => ({
   fetchUserData: async () => {
     set({ loading: true, error: null });
     try {
-      const userData = await getUserData(); // No need to pass userId
+      const userData = await getUserData();
       set({ userData: userData, loading: false });
     } catch (error) {
       set({ error: (error as Error).message, loading: false });
@@ -32,7 +32,7 @@ export const useUserDataStore = create<UserState>((set) => ({
   updateUserData: async (userData) => {
     set({ loading: true, error: null });
     try {
-      await updateUser(userData); // No need to pass userId
+      await updateUser(userData);
       set({ userData, loading: false });
     } catch (error) {
       set({ error: (error as Error).message, loading: false });

@@ -1,69 +1,161 @@
-'use client';
-import { ChangeEvent, useEffect, useState } from 'react';
+'use client'
+import { ChangeEvent, useEffect, useState, useCallback, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader, Save, Upload } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUserDataStore } from '@/stores/userDataStore';
-import { PersonalInfoType } from '@/types/users';
+import { PersonalInfoType, UserDataType } from '@/types/users';
 import { useToast } from '@/hooks/use-toast';
 import EnhancedQuotaDisplay from '@/components/EnhancedQuotaDisplay';
+import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
+
+function centerAspectCrop(
+  mediaWidth: number,
+  mediaHeight: number,
+  aspect: number,
+) {
+  return centerCrop(
+    makeAspectCrop(
+      {
+        unit: '%',
+        width: 90,
+      },
+      aspect,
+      mediaWidth,
+      mediaHeight,
+    ),
+    mediaWidth,
+    mediaHeight,
+  )
+}
 
 export default function UserInfo() {
   const { toast } = useToast();
-  const { userData, fetchUserData, setUserData, updateUserData } = useUserDataStore();
+  const { userData, fetchUserData, updateUserData } = useUserDataStore();
+  const [localUserData, setLocalUserData] = useState<UserDataType | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [imgSrc, setImgSrc] = useState('');
+  const [crop, setCrop] = useState<Crop>();
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  const [showCropModal, setShowCropModal] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const aspect = 1;
 
   useEffect(() => {
     if (!userData) {
       fetchUserData();
+    } else {
+      setLocalUserData(userData);
     }
   }, [userData, fetchUserData]);
 
-  const handlePictureUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+  useEffect(() => {
+    if (userData && localUserData) {
+      setHasChanges(JSON.stringify(userData) !== JSON.stringify(localUserData));
+    }
+  }, [userData, localUserData]);
+
+  const onSelectFile = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        if (userData) {
-          setUserData({
-            ...userData,
-            personalInfo: {
-              ...userData.personalInfo,
-              profilePicture: reader.result as string,
-            },
-          });
-        }
-      };
-      reader.readAsDataURL(file);
+      reader.addEventListener('load', () =>
+        setImgSrc(reader.result?.toString() || ''),
+      );
+      reader.readAsDataURL(e.target.files[0]);
+      setShowCropModal(true);
     }
   };
 
+  const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { width, height } = e.currentTarget;
+    setCrop(centerAspectCrop(width, height, aspect));
+  }, [aspect]);
+
+  const handleSaveCrop = useCallback(() => {
+    if (completedCrop?.width && completedCrop?.height && imgSrc && imgRef.current && localUserData) {
+      const image = imgRef.current;
+      const scaleX = image.naturalWidth / image.width;
+      const scaleY = image.naturalHeight / image.height;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = completedCrop.width;
+      canvas.height = completedCrop.height;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        throw new Error('No 2d context');
+      }
+
+      ctx.drawImage(
+        image,
+        completedCrop.x * scaleX,
+        completedCrop.y * scaleY,
+        completedCrop.width * scaleX,
+        completedCrop.height * scaleY,
+        0,
+        0,
+        completedCrop.width,
+        completedCrop.height
+      );
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setLocalUserData({
+              ...localUserData,
+              personalInfo: {
+                ...localUserData.personalInfo,
+                profilePicture: reader.result as string,
+              },
+            });
+            setShowCropModal(false);
+            setHasChanges(true);
+          };
+          reader.readAsDataURL(blob);
+        }
+      });
+    }
+  }, [completedCrop, imgSrc, localUserData]);
+
   const handleSavePersonalInfo = async () => {
-    setIsSaving(true);
-    console.log("Saving personal info:", userData);
-    if (userData) {
-      await updateUserData(userData); 
-      toast({
-        title: `Suas informações foram atualizadas com sucesso.`,
-      });    }
-    setIsSaving(false);
+    if (localUserData) {
+      setIsSaving(true);
+      try {
+        await updateUserData(localUserData);
+        toast({
+          title: "Suas informações foram atualizadas com sucesso.",
+        });
+        setHasChanges(false);
+      } catch (error) {
+        toast({
+          title: "Error updating user information",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSaving(false);
+      }
+    }
   };
 
   const handleChange = (key: keyof PersonalInfoType, value: string) => {
-    if (userData) {
-      setUserData({
-        ...userData,
+    if (localUserData) {
+      setLocalUserData({
+        ...localUserData,
         personalInfo: {
-          ...userData.personalInfo,
+          ...localUserData.personalInfo,
           [key]: value,
         },
       });
     }
   };
 
-  if (!userData) {
+  if (!localUserData) {
     return <div>Loading User Data...</div>;
   }
 
@@ -78,9 +170,9 @@ export default function UserInfo() {
             <div className="md:col-span-2 flex items-center justify-center mb-4">
               <div className="relative">
                 <Avatar className="w-32 h-32">
-                  <AvatarImage src={userData?.personalInfo?.profilePicture || ''} alt="Profile picture" />
+                  <AvatarImage src={localUserData?.personalInfo?.profilePicture || ''} alt="Profile picture" />
                   <AvatarFallback>
-                    {userData?.personalInfo?.profilePicture ? '' : 'Upload'}
+                    {localUserData?.personalInfo?.profilePicture ? '' : 'Sem Foto'}
                   </AvatarFallback>
                 </Avatar>
                 <label htmlFor="picture-upload" className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-2 cursor-pointer">
@@ -91,58 +183,52 @@ export default function UserInfo() {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={handlePictureUpload}
+                  onChange={onSelectFile}
                 />
               </div>
             </div>
             <Field
-              key="name"
               label="Nome"
               id="name"
-              value={userData?.personalInfo?.name || ''}
+              value={localUserData?.personalInfo?.name || ''}
               placeholder="Digite seu nome"
               onChange={(e) => handleChange('name', e.target.value)}
             />
             <Field
-              key="email"
               label="Email"
               id="email"
-              value={userData?.personalInfo?.email || ''}
+              value={localUserData?.personalInfo?.email || ''}
               placeholder="Digite seu email"
               onChange={(e) => handleChange('email', e.target.value)}
               disabled
             />
             <Field
-              key="phone"
               label="Telefone"
               id="phoneNumber"
-              value={userData?.personalInfo?.phone || ''}
+              value={localUserData?.personalInfo?.phone || ''}
               placeholder="Digite seu número de telefone"
               onChange={(e) => handleChange('phone', e.target.value)}
             />
             <Field
-              key="birthDate"
               label="Data de Nascimento"
               id="birthDate"
-              value={userData?.personalInfo?.birthDate || ''}
+              value={localUserData?.personalInfo?.birthDate || ''}
               placeholder="Digite sua data de nascimento"
               type="date"
               onChange={(e) => handleChange('birthDate', e.target.value)}
             />
             <Field
-              key="linkedinURL"
               label="LinkedIn"
               id="linkedin"
-              value={userData?.personalInfo?.linkedinURL || ''}
+              value={localUserData?.personalInfo?.linkedinURL || ''}
               placeholder="Digite a URL do seu perfil"
               type="text"
               onChange={(e) => handleChange('linkedinURL', e.target.value)}
             />
             <Field
-              key="city"
               label="Cidade"
               id="city"
-              value={userData?.personalInfo?.city || ''}
+              value={localUserData?.personalInfo?.city || ''}
               placeholder="Digite sua Cidade"
               type="text"
               onChange={(e) => handleChange('city', e.target.value)}    
@@ -150,24 +236,55 @@ export default function UserInfo() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-end">
-          <Button onClick={handleSavePersonalInfo} className="text-button text-white" disabled={isSaving}>
-            
-              {isSaving ? (
-                <>
+          <Button 
+            onClick={handleSavePersonalInfo} 
+            className={`text-button text-white ${hasChanges ? 'bg-green-500 hover:bg-green-600' : ''}`} 
+            disabled={isSaving || !hasChanges}
+          >
+            {isSaving ? (
+              <>
                 <Loader className={'block animate-spin mr-2 h-4 w-4'} />
                 Salvar
-                </>
-              
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
                 Salvar
-                </>
-                )}
+              </>
+            )}
           </Button>
         </CardFooter>
       </Card>
       <EnhancedQuotaDisplay />
+      
+      {showCropModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg overflow-hidden max-w-full max-h-full flex flex-col">
+            <div className="p-4 flex-grow overflow-auto">
+              {Boolean(imgSrc) && (
+                <ReactCrop
+                  crop={crop}
+                  onChange={(_, percentCrop) => setCrop(percentCrop)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  aspect={aspect}
+                >
+                  <img
+                    ref={imgRef}
+                    src={imgSrc}
+                    alt="Crop me"
+                    onLoad={onImageLoad}
+                    className="max-w-full h-auto"
+                  />
+                </ReactCrop>
+              )}
+            </div>
+            <div className="p-4 flex justify-end bg-gray-100">
+              <Button onClick={() => setShowCropModal(false)} className="mr-2">Cancel</Button>
+              <Button onClick={handleSaveCrop}>Save</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
