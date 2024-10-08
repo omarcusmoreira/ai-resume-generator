@@ -141,8 +141,6 @@ export default function AuthPage() {
     }
   }
 
-  // Handle Google Sign-In
-
   // Handle Google Sign-In (with signup check)
   const handleGoogleSignIn = async () => {
     setIsCreatingWithGoogle(true)
@@ -183,6 +181,7 @@ export default function AuthPage() {
       }
   
       router.push('/')
+      //eslint-disable-next-line
     } catch (error: any) {
       console.error('Google sign-in error', error)
     }
