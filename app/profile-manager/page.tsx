@@ -43,7 +43,7 @@ export default function ProfileManagement() {
   }, [profiles, activeProfile])
 
   const ProfileSectionTitle: Record<keyof ProfileSectionType, string> = {
-    keywords: "Keywords",
+    keywords: "Palavras-chave",
     summary: "Resumo de Qualificações",
     professionalExperience: "Experiência Profissional",
     academicBackground: "Formação Acadêmica",
