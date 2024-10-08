@@ -1,12 +1,12 @@
 'use client'
 
 import { ProtectedRoute } from '@/components/ProtectedRouter';
-import JobTrackerDashboard from './job-tracker/page';
+import GenerateResumePage from './resume-generate/page';
 
 export default function HomePage() {
   return (
     <ProtectedRoute>
-      <JobTrackerDashboard />
+      <GenerateResumePage />
     </ProtectedRoute>
   );
 }

@@ -70,16 +70,16 @@ export const OpportunityCard = ({ opportunity, openDeleteDialog }: OpportunityCa
       push(`/resume-preview?resumeId=${resumeId}`)
     }
   }
-  
+
   return (
     <Card className="w-full max-w-md mx-auto h-full flex flex-col justify-between">
       <div>
 
       <CardHeader className="pb-4 mb-2 bg-purple-100 max-h-[80px]">
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold text-gray-800 truncate max-w-[160px]">{opportunity.companyName}</h2>
-            <p className="text-sm text-gray-400">
+            <p className="text-[.7rem] text-gray-400">
               <TimestampRenderer format='toLocale' timestamp={opportunity.createdAt} fallback="sem data"/>
             </p>
           </div>

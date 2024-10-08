@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { PlusSquare } from "lucide-react"
+import { PlusSquare, Settings } from "lucide-react"
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useUserDataStore } from '@/stores/userDataStore'
@@ -14,6 +14,7 @@ import { GenerateATSResumeCard } from './components/GenerateAtsResumeCard'
 import { GenerateResumeWithJobDescriptionCard } from './components/GenerateResumeWithJobDescription Card'
 import { GenerateCoverLetterCard } from './components/GenerateCoverLetterCard'
 import { GenerateLinkedInBioCard } from './components/GenerateLinkedinBioCard'
+import Link from 'next/link'
 
 
 export default function GenerateResumePage() {
@@ -89,6 +90,10 @@ export default function GenerateResumePage() {
             <GenerateATSResumeCard selectedProfile={selectedProfile} isAdvanced={false}/>
             <GenerateLinkedInBioCard selectedProfile={selectedProfile}/>
           </div>
+          <Link href='/user-info' className='flex flex-row justify-center items-center'>
+            <Settings className='h=4 w-4 mr-2 text-gray-500'/>
+            <p className="text-gray-500 text-[0.7rem]">Atualize seus Dados Pessoais e visualize suas cotas <span className='text-purple-800'>clicando aqui.</span></p>
+          </Link>
         </Card>
       </div>
       <ProfileCreationDialogComponent 
