@@ -35,6 +35,7 @@ import logoHorizontal from '../../public/assets/images/logo_horizontal.png'
 import { PersonalInfoType, UserDataType } from '@/types/users'
 import { addUser } from '@/services/userServices'
 import { addPlanHistory } from '@/services/planHistoryService'
+import { getUserById } from '@/services/userServices' // Import a service to check if the user exists
 import { GoogleIcon } from '@/components/ui/google-icon'
 import { PlanChangeTypeEnum, PlanHistory, PlanTypeEnum } from '@/types/planHistory'
 import { v4 } from 'uuid'
@@ -141,40 +142,53 @@ export default function AuthPage() {
   }
 
   // Handle Google Sign-In
+
+  // Handle Google Sign-In (with signup check)
   const handleGoogleSignIn = async () => {
     setIsCreatingWithGoogle(true)
     const provider = new GoogleAuthProvider()
     try {
       const result = await signInWithPopup(auth, provider)
       const user = result.user
+  
       if (!user.displayName || !user.email) {
         throw new Error('Nome ou e-mail não disponíveis')
       }
-      const personalInfo: PersonalInfoType = {
-          name: user.displayName ,
+  
+      // Check if the user already exists in your database
+      const existingUser = await getUserById(user.uid)
+  
+      if (!existingUser) {
+        // If user does not exist, treat this as a sign-up
+        const personalInfo: PersonalInfoType = {
+          name: user.displayName,
           email: user.email,
+        }
+        const userState: UserDataType = {
+          userId: user.uid,
+          personalInfo: personalInfo,
+        }
+        
+        await addUser(userState)
+  
+        const planHistoryId = v4()
+        const planHistory = new PlanHistory({
+          id: planHistoryId,
+          plan: PlanTypeEnum.FREE,
+          changeType: PlanChangeTypeEnum.NEW,
+          amountPaid: 0,
+        })
+  
+        await addPlanHistory(planHistoryId, planHistory)
       }
-      const userState: UserDataType = {
-        userId: user.uid,
-        personalInfo: personalInfo,
-      }
-      await addUser(userState)
-      const planHistoryId = v4()
-      const planHistory = new PlanHistory({
-        id: planHistoryId,
-        plan: PlanTypeEnum.FREE,
-        changeType: PlanChangeTypeEnum.NEW,
-        amountPaid: 0,
-      })
-
-      await addPlanHistory(planHistoryId, planHistory)
+  
       router.push('/')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Google sign-in error', error)
     }
     setIsCreatingWithGoogle(false)
   }
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">

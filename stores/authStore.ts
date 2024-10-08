@@ -17,7 +17,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
   setLoading: (loading) => set({ loading }),
 }));
 
-// Initialize listener for Firebase auth state changes
 export const initializeAuth = () => {
   const { setUser, setLoading } = useAuthStore.getState();
 

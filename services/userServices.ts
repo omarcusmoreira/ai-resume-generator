@@ -1,8 +1,6 @@
 import { UserDataType } from "@/types/users";
 import { db } from "@/firebaseConfig";
-import { 
-    doc, getDoc, setDoc, updateDoc, deleteDoc, 
-} from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { getAuth } from "firebase/auth";
 
 const getUserId = () => {
@@ -48,6 +46,17 @@ export const getUserData = async (): Promise<UserDataType | null> => {
         return userData;
     }
     return null;
+};
+
+// New function to get a user by their ID
+export const getUserById = async (userId: string): Promise<UserDataType | null> => {
+    const docRef = doc(db, 'users', userId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+        return docSnap.data() as UserDataType; // Return user data if exists
+    }
+    return null; // Return null if user does not exist
 };
 
 export const updateUser = async (user: UserDataType): Promise<void> => {
