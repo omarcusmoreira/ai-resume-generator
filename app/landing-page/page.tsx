@@ -70,7 +70,7 @@ export default function LandingPage() {
         </div>
       </header>
       <main className="flex-1 w-full">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+        <section className="w-full pt-12 md:pt-24 lg:pt-32 xl:pt-48">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
@@ -88,6 +88,18 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+        <section className="py-6">
+          <div className="relative w-full aspect-[1.57] max-h-[80vh] max-h-[80svh] overflow-hidden">
+            <iframe 
+              src="https://app.supademo.com/embed/cm21v9u9o1vu613b31lkbz8ri?embed_v=2" 
+              loading="lazy" 
+              title="mecontrata.ai" 
+              allow="clipboard-write" 
+              className="absolute top-0 left-0 w-full h-full border-0"
+              allowFullScreen
+            />
+          </div>
+        </section>  
         <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-white">
           <div className="container mx-auto px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-12 text-purple-800">
