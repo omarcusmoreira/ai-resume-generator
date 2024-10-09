@@ -33,7 +33,7 @@ export default function RootLayout({
         {/* Meta tags para PWA */}
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
-        <meta name="description" content="Gerencie seus processos seletivos com o MeContrata.ai" />
+        <meta name="description" content="Crie Currículos com IA e gerencie seus processos seletivos com o MeContrata.ai" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

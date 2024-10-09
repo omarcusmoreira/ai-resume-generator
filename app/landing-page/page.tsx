@@ -78,7 +78,7 @@ export default function LandingPage() {
                   Encontre seu emprego dos sonhos com IA
                 </h1>
                 <p className="mx-auto max-w-[700px] text-gray-600 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Gerencie suas candidaturas, crie currículos personalizados e aumente suas chances de sucesso com o poder da Inteligência Artificial.
+                  Gerencie suas candidaturas, crie currículos personalizados com IA e aumente suas chances de sucesso com o poder da Inteligência Artificial.
                 </p>
               </div>
               <div className="space-x-4">
