@@ -79,6 +79,7 @@ export async function POST(req: Request) {
 
   try {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
+    //eslint-disable-next-line
   } catch (err: any) {
     console.error('Error verifying webhook signature:', err.message);
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
