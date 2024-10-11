@@ -39,6 +39,7 @@ import { getUserById } from '@/services/userServices' // Import a service to che
 import { GoogleIcon } from '@/components/ui/google-icon'
 import { PlanChangeTypeEnum, PlanHistory, PlanTypeEnum } from '@/types/planHistory'
 import { v4 } from 'uuid'
+import { createStripeCustomer } from '@/services/stripe'
 
 export default function AuthPage() {
   // State Variables for Login
@@ -87,64 +88,75 @@ export default function AuthPage() {
 
   // Handle Sign Up
   const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSignupError('') 
-    setIsCreating(true)
-    
+    e.preventDefault();
+    setSignupError('');
+    setIsCreating(true);
+  
     if (!signupName || !signupEmail || !signupPassword || !signupConfirmPassword) {
-      setSignupError('Por favor, preencha todos os campos.')
-      return
+      setSignupError('Por favor, preencha todos os campos.');
+      return;
     }
-
+  
     if (signupPassword !== signupConfirmPassword) {
-      setSignupError('As senhas não coincidem.')
-      return
+      setSignupError('As senhas não coincidem.');
+      return;
     }
-
+  
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        signupEmail,
-        signupPassword
-      )
-      const user = userCredential.user
-
-      console.log('Sign-up successful')
-
+      const userCredential = await createUserWithEmailAndPassword(auth, signupEmail, signupPassword);
+      const user = userCredential.user;
+      console.log('Sign-up successful');
+  
+      // Create a Stripe customer via the API route in the app directory
+      const response = await fetch('/api/create-stripe-customer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: signupName, email: signupEmail }),
+      });
+  
+      const { customerId } = await response.json();
+  
       const initialPersonalInfo: PersonalInfoType = {
         name: signupName,
         email: signupEmail,
-        }
-
+      };
+  
       const initialUserData: UserDataType = {
         userId: user.uid,
         personalInfo: initialPersonalInfo,
-      }
-
-      await addUser(initialUserData)
-      const planHistoryId = v4()
+        stripeCustomerId: customerId, // Store the Stripe customer ID in the user data
+      };
+  
+      await addUser(initialUserData);
+  
+      const planHistoryId = v4();
       const planHistory = new PlanHistory({
         id: planHistoryId,
         plan: PlanTypeEnum.FREE,
         changeType: PlanChangeTypeEnum.NEW,
         amountPaid: 0,
-      })
-
-      await addPlanHistory(planHistoryId, planHistory)
-
-      router.push('/')
-      setIsCreating(false)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      });
+  
+      await addPlanHistory(user.uid, planHistoryId, planHistory);
+  
+      router.push('/');
+      setIsCreating(false);
+      //eslin-disable-next-line
     } catch (error: any) {
-      console.error('Sign-up error', error)
-      setSignupError(error.message || 'Erro ao criar conta.')
+      console.error('Sign-up error', error);
+      setSignupError(error.message || 'Erro ao criar conta.');
     }
-  }
+  };
+  
+  
 
   // Handle Google Sign-In (with signup check)
   const handleGoogleSignIn = async () => {
     setIsCreatingWithGoogle(true)
     const provider = new GoogleAuthProvider()
+    
     try {
       const result = await signInWithPopup(auth, provider)
       const user = result.user
@@ -157,14 +169,19 @@ export default function AuthPage() {
       const existingUser = await getUserById(user.uid)
   
       if (!existingUser) {
+        // Create a Stripe customer for new users
+        const stripeCustomerId = await createStripeCustomer(user.displayName, user.email)
+  
         // If user does not exist, treat this as a sign-up
         const personalInfo: PersonalInfoType = {
           name: user.displayName,
           email: user.email,
         }
+        
         const userState: UserDataType = {
           userId: user.uid,
           personalInfo: personalInfo,
+          stripeCustomerId, // Add the Stripe customer ID to the user data
         }
         
         await addUser(userState)
@@ -177,7 +194,7 @@ export default function AuthPage() {
           amountPaid: 0,
         })
   
-        await addPlanHistory(planHistoryId, planHistory)
+        await addPlanHistory(user.uid, planHistoryId, planHistory)
       }
   
       router.push('/')
@@ -185,8 +202,10 @@ export default function AuthPage() {
     } catch (error: any) {
       console.error('Google sign-in error', error)
     }
+  
     setIsCreatingWithGoogle(false)
   }
+  
   
 
   return (

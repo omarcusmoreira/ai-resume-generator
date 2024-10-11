@@ -28,12 +28,11 @@ const setSessionData = (data: PlanHistory[]) => {
 };
 
 // Add plan history
-export const addPlanHistory = async (planHistoryId: string, planHistory: PlanHistory): Promise<void> => {
-    const userId = getUserId();
+export const addPlanHistory = async (userId: string, planHistoryId: string, planHistory: PlanHistory): Promise<void> => {
     const planHistoryCollection = collection(db, 'users', userId, 'planHistory');
     const docRef = doc(planHistoryCollection, planHistoryId);
     
-    const newPlanHistory: PlanHistory   = {
+    const newPlanHistory: PlanHistory = {
       id: planHistoryId,
       plan: planHistory.plan,
       quotas: planHistory.quotas,
