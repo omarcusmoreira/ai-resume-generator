@@ -32,7 +32,6 @@ export const GenerateATSResumeCard: React.FC<GenerateATSResumeCardProps> = ({ se
       setIsUpgradeDialogOpen(true);
       return;
     }else{
-      console.log('To achando que tem cota sim: ', quotas.resumes)
       setIsDialogOpen(true)
     }
   }

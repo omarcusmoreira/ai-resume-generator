@@ -9,8 +9,8 @@ export async function generateLinkedinBio(profile: ProfileType) {
   
     const userPrompt = `
     IMPORTANTE: NÃO RETORNE NENHUM OUTRO TEXTO ALEM DA BIOGRAFIA. SEMPRE RESPONDA EM PORTUGUÊS.
-    Use as informações do meu perfil para gerar uma biografia criativa e cativante para meu LinkedIn. Use uma linguagem informal e criativa em no MAXIMO 2000 caracteres.
-    E retorne com espaçamento e quebras de linha que fique bem legível no meu perfil do LinkedIn. Pode usar Emojis.
+    Use as informações do meu perfil para gerar uma biografia profissional e interessante para meu LinkedIn. Use uma linguagem informal e criativa em no MAXIMO 2000 caracteres.
+    E retorne com espaçamento e quebras de linha que fique bem legível no meu perfil do LinkedIn.
     Aqui estão algumas informações:
   
     Use ${profile.sections.summary} para gerar a introdução.

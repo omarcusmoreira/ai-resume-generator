@@ -5,33 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { ShoppingCart } from 'lucide-react'
-import { PlanTypeEnum, QuotasType } from '@/types/planHistory'
+import { PlanQuotas, PlanTypeEnum, QuotasType } from '@/types/planHistory'
 import { useQuotaStore } from '@/stores/quotaStore'
 import { usePlanHistoryStore } from '@/stores/planHistoryStore'
-
-const PlanQuotas: { [key in PlanTypeEnum]: QuotasType } = {
-  [PlanTypeEnum.FREE]: {
-    resumes: 3,
-    profiles: 2,
-    recruiters: 10,
-    interactions: 10,
-    opportunities: 10,
-  },
-  [PlanTypeEnum.BASIC]: {
-    interactions: 30,
-    profiles: 5,
-    resumes: 10,
-    opportunities: 30,
-    recruiters: 30,
-  },
-  [PlanTypeEnum.PREMIUM]: {
-    interactions: 60,
-    profiles: 10,
-    resumes: 20,
-    opportunities: 100,
-    recruiters: 200,
-  },
-}
 
 export default function EnhancedQuotaDisplay() {
   const { quotas } = useQuotaStore()

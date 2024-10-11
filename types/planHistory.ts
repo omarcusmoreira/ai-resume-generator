@@ -23,27 +23,27 @@ export type QuotasType = {
     recruiters: number | null;
   };
   
-  const PlanQuotas: { [key in PlanTypeEnum]: QuotasType } = {
+ export const PlanQuotas: { [key in PlanTypeEnum]: QuotasType } = {
     [PlanTypeEnum.FREE]: {
-      resumes: 3,
-      profiles: 2,
+      resumes: 2,
+      profiles: 1,
       recruiters: 10,
       interactions: 10,
       opportunities: 10,
     },
     [PlanTypeEnum.BASIC]: {
-      interactions: 30,
-      profiles: 5,
-      resumes: 10,
-      opportunities: 30,
+      resumes: 6,
+      profiles: 3,
       recruiters: 30,
+      interactions: 30,
+      opportunities: 30,
     },
     [PlanTypeEnum.PREMIUM]: {
-      interactions: 60,
-      profiles: 10,
       resumes: 20,
-      opportunities: 100,
+      profiles: 10,
       recruiters: 200,
+      interactions: 60,
+      opportunities: 200,
     },
   };
 

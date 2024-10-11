@@ -20,6 +20,7 @@ import Logo from '@/public/assets/images/logo_horizontal.png';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { usePlanHistoryStore } from '@/stores/planHistoryStore';
 import { PlanTypeEnum } from '@/types/planHistory';
+import CheckoutButton from '../CheckoutButton';
 
 export default function UserMenu() {
     const router = useRouter();
@@ -87,7 +88,7 @@ export default function UserMenu() {
             <p className="text-xs text-muted-foreground mb-2">Faça um upgrade para Premium para aumentar o limite de mensagens.</p>
             <Button className="w-full" variant="ai">
               <Sparkles className="mr-2 h-4 w-4" />
-              Virar Premium
+              <CheckoutButton planType={PlanTypeEnum.BASIC}/>
             </Button>
           </div>
           <DropdownMenuSeparator />

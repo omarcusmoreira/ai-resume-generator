@@ -172,8 +172,8 @@ export const getQuotas = async (): Promise<QuotasType> => {
             try {
                 const planHistorySnap = await getDocs(planHistoryQuery);
                 const quotas: QuotasType = {
-                    resumes: 3,
-                    profiles: 3,
+                    resumes: 2,
+                    profiles: 1,
                     recruiters: 10,
                     interactions: 10,
                     opportunities: 10,

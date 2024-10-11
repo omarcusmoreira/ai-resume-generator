@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import EnhancedQuotaDisplay from '@/components/EnhancedQuotaDisplay';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import Image from 'next/image';
 
 function centerAspectCrop(
   mediaWidth: number,
@@ -268,7 +269,7 @@ export default function UserInfo() {
                   onComplete={(c) => setCompletedCrop(c)}
                   aspect={aspect}
                 >
-                  <img
+                  <Image
                     ref={imgRef}
                     src={imgSrc}
                     alt="Crop me"
