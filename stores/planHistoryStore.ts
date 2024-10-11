@@ -15,7 +15,7 @@ interface PlanHistoryStore {
   loading: boolean;
   fetchPlanHistory: () => Promise<void>;
   fetchCurrentPlan: () => Promise<void>;
-  addPlanHistory: (planHistoryId: string, planHistory: PlanHistory) => Promise<void>;
+  addPlanHistory: (userId: string, planHistoryId: string, planHistory: PlanHistory) => Promise<void>;
   updatePlanHistory: (planHistoryId: string, planHistory: Partial<PlanHistory>) => Promise<void>;
   deletePlanHistory: (planHistoryId: string) => Promise<void>;
 }
@@ -45,8 +45,8 @@ export const usePlanHistoryStore = create<PlanHistoryStore>((set) => ({
     }
   },
   
-  addPlanHistory: async (planHistoryId: string, planHistory: PlanHistory) => {
-    await apiAddPlanHistory(planHistoryId, planHistory);
+  addPlanHistory: async (userId: string, planHistoryId: string, planHistory: PlanHistory) => {
+    await apiAddPlanHistory(userId, planHistoryId, planHistory);
     set((state) => ({ planHistory: [...state.planHistory, planHistory] }));
   },
   

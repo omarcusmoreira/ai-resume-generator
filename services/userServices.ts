@@ -1,6 +1,6 @@
 import { UserDataType } from "@/types/users";
 import { db } from "@/firebaseConfig";
-import { doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { getAuth } from "firebase/auth";
 
 const getUserId = () => {
@@ -72,3 +72,18 @@ export const deleteUser = async (): Promise<void> => {
     await deleteDoc(docRef);
     sessionStorage.removeItem(SESSION_KEY); // Clear session storage on delete
 };
+
+export const getUserByStripeCustomerId = async (stripeCustomerId: string) => {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("stripeCustomerId", "==", stripeCustomerId));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      return null;
+    }
+    
+    return {
+      id: querySnapshot.docs[0].id,
+      ...querySnapshot.docs[0].data()
+    };
+  }

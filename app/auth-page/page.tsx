@@ -143,7 +143,8 @@ export default function AuthPage() {
   
       router.push('/');
       setIsCreating(false);
-      //eslin-disable-next-line
+      
+      //eslint-disable-next-line
     } catch (error: any) {
       console.error('Sign-up error', error);
       setSignupError(error.message || 'Erro ao criar conta.');
@@ -198,8 +199,8 @@ export default function AuthPage() {
       }
   
       router.push('/')
-      //eslint-disable-next-line
-    } catch (error: any) {
+        //eslint-disable-next-line
+      } catch (error: any) {
       console.error('Google sign-in error', error)
     }
   
