@@ -118,6 +118,8 @@ export default function AuthPage() {
   
       const { customerId } = await response.json();
   
+      console.log('Stripe Customer Id: ', customerId)
+
       const initialPersonalInfo: PersonalInfoType = {
         name: signupName,
         email: signupEmail,
@@ -126,7 +128,7 @@ export default function AuthPage() {
       const initialUserData: UserDataType = {
         userId: user.uid,
         personalInfo: initialPersonalInfo,
-        stripeCustomerId: customerId, // Store the Stripe customer ID in the user data
+        stripeCustomerId: customerId,
       };
   
       await addUser(initialUserData);
