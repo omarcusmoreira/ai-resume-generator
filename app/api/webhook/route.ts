@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { PlanHistory, PlanTypeEnum, PlanChangeTypeEnum, PlanHistoryData } from '@/types/planHistory';
 import { addPlanHistory } from '@/services/planHistoryService';
-import { getUserById, getUserByStripeCustomerId } from '@/services/userServices';
+import { getUserById } from '@/services/userServices';
 
 const stripe = new Stripe(`${process.env.STRIPE_SECRET_KEY!}`);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -12,13 +12,6 @@ const stripePlanToPlanType: { [key: string]: PlanTypeEnum } = {
   'price_premium': PlanTypeEnum.PREMIUM,
   // Add other plan mappings as needed
 };
-
-function getPlanChangeType(oldPlanType: PlanTypeEnum, newPlanType: PlanTypeEnum): PlanChangeTypeEnum {
-  if (oldPlanType === newPlanType) {
-    return PlanChangeTypeEnum.RENEWAL;
-  }
-  return newPlanType > oldPlanType ? PlanChangeTypeEnum.UPGRADE : PlanChangeTypeEnum.DOWNGRADE;
-}
 
 async function handleSubscriptionChange(
   subscription: Stripe.Subscription,
@@ -80,6 +73,7 @@ export async function POST(req: Request) {
 
   try {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
+    //eslint-disable-next-line
   } catch (err: any) {
     console.error('Error verifying webhook signature:', err.message);
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
@@ -113,25 +107,6 @@ export async function POST(req: Request) {
     console.error('Error processing webhook:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
-
-async function handleSubscriptionDeletion(subscription: Stripe.Subscription) {
-  const planHistoryData: PlanHistoryData = {
-    id: subscription.id,
-    plan: PlanTypeEnum.FREE,
-    changeType: PlanChangeTypeEnum.DOWNGRADE,
-    amountPaid: 0,
-  };
-
-  const newPlanHistory = new PlanHistory(planHistoryData);
-
-  // Get the user ID based on the Stripe customer ID
-  const user = await getUserByStripeCustomerId(subscription.customer as string);
-  if (!user) {
-    throw new Error(`User not found for Stripe customer ID: ${subscription.customer}`);
-  }
-
-  await addPlanHistory(user.id, subscription.id, newPlanHistory);
 }
 
 // export async function POST(req: Request) {
