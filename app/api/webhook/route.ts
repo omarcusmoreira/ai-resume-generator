@@ -3,9 +3,9 @@ import Stripe from 'stripe';
 import { PlanHistory, PlanTypeEnum, PlanChangeTypeEnum, PlanHistoryData } from '@/types/planHistory';
 import { addPlanHistory } from '@/services/planHistoryService';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = new Stripe(`${process.env.STRIPE_SECRET_KEY!}`);
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const webhookSecret = `${process.env.STRIPE_WEBHOOK_SECRET!}`;
 
 const stripePlanToPlanType: { [key: string]: PlanTypeEnum } = {
   'price_basic': PlanTypeEnum.BASIC,
