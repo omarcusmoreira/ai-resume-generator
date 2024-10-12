@@ -3,9 +3,8 @@ import Stripe from 'stripe';
 import { headers } from 'next/headers';
 import { db } from '@/firebaseConfig';
 import { collection, addDoc, doc, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { createPlanHistoryObject, PlanChangeTypeEnum, PlanHistory, PlanHistoryData, PlanQuotas, PlanTypeEnum } from '@/types/planHistory';
+import { createPlanHistoryObject, PlanChangeTypeEnum, PlanHistory, PlanHistoryData, PlanTypeEnum } from '@/types/planHistory';
 import { v4 } from 'uuid';
-import { Timestamp } from '@google-cloud/firestore';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
