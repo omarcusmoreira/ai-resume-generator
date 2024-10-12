@@ -3,8 +3,9 @@ import Stripe from 'stripe';
 import { headers } from 'next/headers';
 import { db } from '@/firebaseConfig';
 import { collection, addDoc, doc, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { PlanChangeTypeEnum, PlanHistory, PlanTypeEnum } from '@/types/planHistory';
+import { PlanChangeTypeEnum, PlanHistory, PlanHistoryData, PlanQuotas, PlanTypeEnum } from '@/types/planHistory';
 import { v4 } from 'uuid';
+import { Timestamp } from '@google-cloud/firestore';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -14,6 +15,34 @@ const relevantEvents = new Set([
   'customer.subscription.deleted',
   'invoice.payment_failed',
 ]);
+
+const planRanking = {
+  [PlanTypeEnum.FREE]: 0,
+  [PlanTypeEnum.BASIC]: 1,
+  [PlanTypeEnum.PREMIUM]: 2,
+};
+
+
+function comparePlans(plan1: PlanTypeEnum, plan2: PlanTypeEnum): number {
+  return planRanking[plan1] - planRanking[plan2];
+}
+
+export function createPlanHistoryObject(data: PlanHistoryData): Record<string, any> {
+  const planChangeDate = Timestamp.now();
+  const expiration = new Date();
+  expiration.setDate(expiration.getDate() + 30);
+  const expirationDate = Timestamp.fromDate(expiration);
+
+  return {
+    id: data.id,
+    plan: data.plan,
+    changeType: data.changeType,
+    amountPaid: data.amountPaid,
+    planChangeDate: planChangeDate,
+    expirationDate: expirationDate,
+    quotas: PlanQuotas[data.plan],
+  };
+}
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -47,6 +76,10 @@ export async function POST(req: Request) {
       }
     } catch (error) {
       console.error(`Error processing event ${event.type}:`, error);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
       return NextResponse.json(
         { error: `Error processing event ${event.type}` },
         { status: 500 }
@@ -95,49 +128,54 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   }
 }
 
+
 async function determineChangeType(subscription: Stripe.Subscription): Promise<PlanChangeTypeEnum> {
-  if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
-    return PlanChangeTypeEnum.DOWNGRADE;
+  if (!subscription.metadata || !subscription.metadata.userId) {
+    throw new Error('determineChangeType: Subscription metadata or userId is missing.');
   }
-  console.log('Suscription from determineChangeType with metadata: ',subscription);
-  let userId = ''
-  let retries = 3;
-  while (retries > 0) {
-    if (subscription.metadata && subscription.metadata.userId) {
-      userId = subscription.metadata.userId;
-      const userDocRef = doc(db, 'users', userId);
-      const planHistoryRef = collection(userDocRef, 'planHistory');
-      const q = query(planHistoryRef, orderBy('planChangeDate', 'desc'), limit(1));
-      const querySnapshot = await getDocs(q);
-    
-      if (querySnapshot.empty) {
-        return PlanChangeTypeEnum.NEW;
-      }
-    
-      const lastPlanHistory = querySnapshot.docs[0].data() as PlanHistory;
-      
-      if (!subscription.items.data.length) {
-        throw new Error('determineChangeType: No items found in subscription.');
-      }
-      const currentPlan = mapStripePlanToPlanType(subscription.items.data[0].price.id);
-    
-      if (currentPlan === lastPlanHistory.plan) {
-        return PlanChangeTypeEnum.RENEWAL;
-      }
-    
-      return currentPlan > lastPlanHistory.plan ? PlanChangeTypeEnum.UPGRADE : PlanChangeTypeEnum.DOWNGRADE;
+  const userId = subscription.metadata.userId;
+
+  const userDocRef = doc(db, 'users', userId);
+  const planHistoryRef = collection(userDocRef, 'planHistory');
+  const q = query(planHistoryRef, orderBy('planChangeDate', 'desc'), limit(1));
+  
+  try {
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return PlanChangeTypeEnum.NEW;
     }
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
-    subscription = await stripe.subscriptions.retrieve(subscription.id);
-    retries--;
-  }
-  throw new Error('determineChangeType: Subscription metadata or userId is missing.');
-  }
 
+    const lastPlanHistory = querySnapshot.docs[0].data() as PlanHistory;
+    
+    if (!subscription.items.data.length) {
+      throw new Error('determineChangeType: No items found in subscription.');
+    }
+    const currentPlan = mapStripePlanToPlanType(subscription.items.data[0].price.id);
 
+    if (currentPlan === lastPlanHistory.plan) {
+      return PlanChangeTypeEnum.RENEWAL;
+    }
+
+    const comparison = comparePlans(currentPlan, lastPlanHistory.plan);
+    if (comparison > 0) {
+      return PlanChangeTypeEnum.UPGRADE;
+    } else if (comparison < 0) {
+      return PlanChangeTypeEnum.DOWNGRADE;
+    } else {
+      // This case should not occur if the plans are different and correctly mapped
+      console.warn('Unexpected plan comparison result', { currentPlan, lastPlan: lastPlanHistory.plan });
+      return PlanChangeTypeEnum.RENEWAL;
+    }
+  } catch (error) {
+    console.error('Error in determineChangeType:', error);
+    // Default to NEW if there's an error
+    return PlanChangeTypeEnum.NEW;
+  }
+}
+
+// Make sure this function correctly maps Stripe price IDs to PlanTypeEnum
 function mapStripePlanToPlanType(stripePlanId: string): PlanTypeEnum {
-
-
   switch (stripePlanId) {
     case process.env.STRIPE_BASIC_PRICE_ID:
       return PlanTypeEnum.BASIC;
@@ -154,19 +192,18 @@ async function saveSubscription(
   subscription: Stripe.Subscription,
   changeType: PlanChangeTypeEnum
 ) {
-
   const stripePlanId = subscription.items.data[0].price.id;
   const planType = mapStripePlanToPlanType(stripePlanId);
-  const amountPaid = subscription.items.data[0].price.unit_amount! / 100; // Convert cents to dollars
+  const amountPaid = subscription.items.data[0].price.unit_amount! / 100;
 
-  const planHistoryData = {
+  const planHistoryData: PlanHistoryData = {
     id: subscriptionId,
     plan: planType,
     changeType: changeType,
     amountPaid: amountPaid,
   };
 
-  const newPlanHistory = new PlanHistory(planHistoryData);
+  const newPlanHistory = createPlanHistoryObject(planHistoryData);
 
   const userDocRef = doc(db, 'users', userId);
   const planHistoryRef = collection(userDocRef, 'planHistory');
