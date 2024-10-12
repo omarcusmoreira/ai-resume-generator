@@ -4,7 +4,6 @@ import { headers } from 'next/headers';
 import { db } from '@/firebaseConfig';
 import { collection, addDoc, doc, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { PlanChangeTypeEnum, PlanHistory, PlanTypeEnum } from '@/types/planHistory';
-import { getUserByStripeCustomerId } from '@/services/userServices';
 import { v4 } from 'uuid';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -69,10 +68,10 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
   const changeType = await determineChangeType(subscription);
-  await saveSubscription(subscription.customer as string, subscription.id, subscription, changeType);
+  await saveSubscription(subscription.metadata.userId as string, subscription.id, subscription, changeType);
 
   if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
-    await downgradeToFreePlan(subscription.customer as string);
+    await downgradeToFreePlan(subscription.metadata.userId as string);
   }
 }
 
@@ -90,13 +89,9 @@ async function determineChangeType(subscription: Stripe.Subscription): Promise<P
     return PlanChangeTypeEnum.DOWNGRADE;
   }
 
-  const customer = await stripe.customers.retrieve(subscription.customer as string);
-  const user = await getUserByStripeCustomerId(customer.id);
-  if (!user) {
-    throw new Error(`User not found for Stripe customer ID: ${customer.id}`);
-  }
+  const userId = subscription.metadata.userId;
 
-  const userDocRef = doc(db, 'users', user.id);
+  const userDocRef = doc(db, 'users', userId);
   const planHistoryRef = collection(userDocRef, 'planHistory');
   const q = query(planHistoryRef, orderBy('planChangeDate', 'desc'), limit(1));
   const querySnapshot = await getDocs(q);
