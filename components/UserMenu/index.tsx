@@ -84,7 +84,7 @@ export default function UserMenu() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <div className="bg-pink-50 p-3 rounded-md mx-1 my-2">
-            <p className="text-sm font-medium">Acabou as mensagens?</p>
+            <p className="text-sm font-medium">Acabou os recursos?</p>
             <p className="text-xs text-muted-foreground mb-2">Faça um upgrade para Premium para aumentar o limite de mensagens.</p>
             <Button className="w-full" variant="ai">
               <Sparkles className="mr-2 h-4 w-4" />
