@@ -27,6 +27,7 @@ function comparePlans(plan1: PlanTypeEnum, plan2: PlanTypeEnum): number {
   return planRanking[plan1] - planRanking[plan2];
 }
 
+//eslint-disable-next-line
 export function createPlanHistoryObject(data: PlanHistoryData): Record<string, any> {
   const planChangeDate = Timestamp.now();
   const expiration = new Date();
