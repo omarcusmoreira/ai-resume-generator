@@ -180,13 +180,13 @@ async function determineChangeType(subscription: Stripe.Subscription): Promise<P
 
 function mapStripePlanToPlanType(stripePriceId: string): PlanTypeEnum {
   console.log(`Mapping Stripe Price ID: ${stripePriceId}`);
-  console.log(`STRIPE_BASIC_PRICE_ID: ${process.env.STRIPE_BASIC_PRICE_ID}`);
-  console.log(`STRIPE_PREMIUM_PRICE_ID: ${process.env.STRIPE_PREMIUM_PRICE_ID}`);
+  console.log(`NEXT_PUBLIC_STRIPE_BASIC_PRICE_ID: ${process.env.NEXT_PUBLIC_STRIPE_BASIC_PRICE_ID}`);
+  console.log(`NEXT_PUBLIC_STRIPE_PREMIUM_PRICE_ID: ${process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PRICE_ID}`);
   
-  if (stripePriceId === process.env.STRIPE_BASIC_PRICE_ID) {
+  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_BASIC_PRICE_ID) {
     console.log('Mapped to BASIC plan');
     return PlanTypeEnum.BASIC;
-  } else if (stripePriceId === process.env.STRIPE_PREMIUM_PRICE_ID) {
+  } else if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PRICE_ID) {
     console.log('Mapped to PREMIUM plan');
     return PlanTypeEnum.PREMIUM;
   } else {
