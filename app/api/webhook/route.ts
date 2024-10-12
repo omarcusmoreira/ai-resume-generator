@@ -60,6 +60,9 @@ export async function POST(req: Request) {
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   if (session.mode === 'subscription') {
     const subscriptionId = session.subscription as string;
+    if (!session.metadata || !session.metadata.userId) {
+      throw new Error('handleCheckoutSessionCompleted: Session metadata or userId is missing.');
+    }    
     const userId = session.metadata!.userId as string;
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     await saveSubscription(userId, subscriptionId, subscription, PlanChangeTypeEnum.NEW);
@@ -71,6 +74,9 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
   await saveSubscription(subscription.metadata.userId as string, subscription.id, subscription, changeType);
 
   if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
+    if (!subscription.metadata || !subscription.metadata.userId) {
+      throw new Error('handleSubscriptionUpdate: Subscription metadata or userId is missing.');
+    }    
     await downgradeToFreePlan(subscription.metadata.userId as string);
   }
 }
@@ -88,9 +94,12 @@ async function determineChangeType(subscription: Stripe.Subscription): Promise<P
   if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
     return PlanChangeTypeEnum.DOWNGRADE;
   }
-
+  
+  if (!subscription.metadata || !subscription.metadata.userId) {
+    throw new Error('determineChangeType: Subscription metadata or userId is missing.');
+  }
   const userId = subscription.metadata.userId;
-
+  
   const userDocRef = doc(db, 'users', userId);
   const planHistoryRef = collection(userDocRef, 'planHistory');
   const q = query(planHistoryRef, orderBy('planChangeDate', 'desc'), limit(1));
@@ -101,6 +110,10 @@ async function determineChangeType(subscription: Stripe.Subscription): Promise<P
   }
 
   const lastPlanHistory = querySnapshot.docs[0].data() as PlanHistory;
+  
+  if (!subscription.items.data.length) {
+    throw new Error('determineChangeType: No items found in subscription.');
+  }
   const currentPlan = mapStripePlanToPlanType(subscription.items.data[0].price.id);
 
   if (currentPlan === lastPlanHistory.plan) {
@@ -111,6 +124,8 @@ async function determineChangeType(subscription: Stripe.Subscription): Promise<P
 }
 
 function mapStripePlanToPlanType(stripePlanId: string): PlanTypeEnum {
+
+
   switch (stripePlanId) {
     case process.env.STRIPE_BASIC_PRICE_ID:
       return PlanTypeEnum.BASIC;
