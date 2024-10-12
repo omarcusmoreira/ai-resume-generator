@@ -65,6 +65,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     }    
     const userId = session.metadata!.userId as string;
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    await stripe.subscriptions.update(subscriptionId, {
+      metadata: { userId: userId }, 
+    });
     await saveSubscription(userId, subscriptionId, subscription, PlanChangeTypeEnum.NEW);
   }
 }
