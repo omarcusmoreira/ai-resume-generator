@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { headers } from 'next/headers';
 import { db } from '@/firebaseConfig';
 import { collection, addDoc, doc, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { PlanChangeTypeEnum, PlanHistory, PlanHistoryData, PlanQuotas, PlanTypeEnum } from '@/types/planHistory';
+import { createPlanHistoryObject, PlanChangeTypeEnum, PlanHistory, PlanHistoryData, PlanQuotas, PlanTypeEnum } from '@/types/planHistory';
 import { v4 } from 'uuid';
 import { Timestamp } from '@google-cloud/firestore';
 
@@ -25,24 +25,6 @@ const planRanking = {
 
 function comparePlans(plan1: PlanTypeEnum, plan2: PlanTypeEnum): number {
   return planRanking[plan1] - planRanking[plan2];
-}
-
-//eslint-disable-next-line
-export function createPlanHistoryObject(data: PlanHistoryData): Record<string, any> {
-  const planChangeDate = Timestamp.now();
-  const expiration = new Date();
-  expiration.setDate(expiration.getDate() + 30);
-  const expirationDate = Timestamp.fromDate(expiration);
-
-  return {
-    id: data.id,
-    plan: data.plan,
-    changeType: data.changeType,
-    amountPaid: data.amountPaid,
-    planChangeDate: planChangeDate,
-    expirationDate: expirationDate,
-    quotas: PlanQuotas[data.plan],
-  };
 }
 
 export async function POST(req: Request) {

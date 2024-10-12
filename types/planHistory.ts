@@ -76,3 +76,21 @@ export class PlanHistory implements PlanHistoryData {
     this.quotas = PlanQuotas[this.plan];
   }
 }
+
+//eslint-disable-next-line
+export function createPlanHistoryObject(data: PlanHistoryData): Record<string, any> {
+  const planChangeDate = Timestamp.now();
+  const expiration = new Date();
+  expiration.setDate(expiration.getDate() + 30);
+  const expirationDate = Timestamp.fromDate(expiration);
+
+  return {
+    id: data.id,
+    plan: data.plan,
+    changeType: data.changeType,
+    amountPaid: data.amountPaid,
+    planChangeDate: planChangeDate,
+    expirationDate: expirationDate,
+    quotas: PlanQuotas[data.plan],
+  };
+}
