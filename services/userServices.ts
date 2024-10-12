@@ -56,8 +56,8 @@ export const getUserById = async (userId: string): Promise<UserDataType | null> 
     if (docSnap.exists()) {
         return docSnap.data() as UserDataType; // Return user data if exists
     }
-    return null; // Return null if user does not exist
-};
+    return null;
+}
 
 export const updateUser = async (user: UserDataType): Promise<void> => {
     const userId = getUserId();
