@@ -100,34 +100,40 @@ async function determineChangeType(subscription: Stripe.Subscription): Promise<P
     return PlanChangeTypeEnum.DOWNGRADE;
   }
   console.log('Suscription from determineChangeType with metadata: ',subscription);
-
-  if (!subscription.metadata || !subscription.metadata.userId) {
-    throw new Error('determineChangeType: Subscription metadata or userId is missing.');
+  let userId = ''
+  let retries = 3;
+  while (retries > 0) {
+    if (subscription.metadata && subscription.metadata.userId) {
+      userId = subscription.metadata.userId;
+      const userDocRef = doc(db, 'users', userId);
+      const planHistoryRef = collection(userDocRef, 'planHistory');
+      const q = query(planHistoryRef, orderBy('planChangeDate', 'desc'), limit(1));
+      const querySnapshot = await getDocs(q);
+    
+      if (querySnapshot.empty) {
+        return PlanChangeTypeEnum.NEW;
+      }
+    
+      const lastPlanHistory = querySnapshot.docs[0].data() as PlanHistory;
+      
+      if (!subscription.items.data.length) {
+        throw new Error('determineChangeType: No items found in subscription.');
+      }
+      const currentPlan = mapStripePlanToPlanType(subscription.items.data[0].price.id);
+    
+      if (currentPlan === lastPlanHistory.plan) {
+        return PlanChangeTypeEnum.RENEWAL;
+      }
+    
+      return currentPlan > lastPlanHistory.plan ? PlanChangeTypeEnum.UPGRADE : PlanChangeTypeEnum.DOWNGRADE;
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+    subscription = await stripe.subscriptions.retrieve(subscription.id);
+    retries--;
   }
-  const userId = subscription.metadata.userId;
-  
-  const userDocRef = doc(db, 'users', userId);
-  const planHistoryRef = collection(userDocRef, 'planHistory');
-  const q = query(planHistoryRef, orderBy('planChangeDate', 'desc'), limit(1));
-  const querySnapshot = await getDocs(q);
-
-  if (querySnapshot.empty) {
-    return PlanChangeTypeEnum.NEW;
+  throw new Error('determineChangeType: Subscription metadata or userId is missing.');
   }
 
-  const lastPlanHistory = querySnapshot.docs[0].data() as PlanHistory;
-  
-  if (!subscription.items.data.length) {
-    throw new Error('determineChangeType: No items found in subscription.');
-  }
-  const currentPlan = mapStripePlanToPlanType(subscription.items.data[0].price.id);
-
-  if (currentPlan === lastPlanHistory.plan) {
-    return PlanChangeTypeEnum.RENEWAL;
-  }
-
-  return currentPlan > lastPlanHistory.plan ? PlanChangeTypeEnum.UPGRADE : PlanChangeTypeEnum.DOWNGRADE;
-}
 
 function mapStripePlanToPlanType(stripePlanId: string): PlanTypeEnum {
 
