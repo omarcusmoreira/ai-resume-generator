@@ -65,6 +65,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     }    
     const userId = session.metadata!.userId as string;
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    console.log('Sbscription from handleCheckoutSessionCompleted: ',subscription);
     await stripe.subscriptions.update(subscriptionId, {
       metadata: { userId: userId }, 
     });
@@ -97,7 +98,8 @@ async function determineChangeType(subscription: Stripe.Subscription): Promise<P
   if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
     return PlanChangeTypeEnum.DOWNGRADE;
   }
-  
+  console.log('Sbscription from determineChangeType: ',subscription);
+
   if (!subscription.metadata || !subscription.metadata.userId) {
     throw new Error('determineChangeType: Subscription metadata or userId is missing.');
   }
