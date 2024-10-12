@@ -113,7 +113,7 @@ export default function AuthPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name: signupName, email: signupEmail }),
+        body: JSON.stringify({ name: signupName, email: signupEmail, uid: user.uid }),
       });
   
       const { customerId } = await response.json();

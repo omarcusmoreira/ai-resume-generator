@@ -61,9 +61,9 @@ export async function POST(req: Request) {
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   if (session.mode === 'subscription') {
     const subscriptionId = session.subscription as string;
-    const customerId = session.customer as string;
+    const userId = session.metadata!.userId as string;
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    await saveSubscription(customerId, subscriptionId, subscription, PlanChangeTypeEnum.NEW);
+    await saveSubscription(userId, subscriptionId, subscription, PlanChangeTypeEnum.NEW);
   }
 }
 
@@ -80,7 +80,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   if (invoice.subscription) {
     const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
     if (subscription.status === 'past_due' || subscription.status === 'unpaid') {
-      await downgradeToFreePlan(subscription.customer as string);
+      await downgradeToFreePlan(subscription.metadata.userId as string);
     }
   }
 }
@@ -127,15 +127,11 @@ function mapStripePlanToPlanType(stripePlanId: string): PlanTypeEnum {
 }
 
 async function saveSubscription(
-  customerId: string,
+  userId: string,
   subscriptionId: string,
   subscription: Stripe.Subscription,
   changeType: PlanChangeTypeEnum
 ) {
-  const user = await getUserByStripeCustomerId(customerId);
-  if (!user) {
-    throw new Error(`User not found for Stripe customer ID: ${customerId}`);
-  }
 
   const stripePlanId = subscription.items.data[0].price.id;
   const planType = mapStripePlanToPlanType(stripePlanId);
@@ -150,16 +146,12 @@ async function saveSubscription(
 
   const newPlanHistory = new PlanHistory(planHistoryData);
 
-  const userDocRef = doc(db, 'users', user.id);
+  const userDocRef = doc(db, 'users', userId);
   const planHistoryRef = collection(userDocRef, 'planHistory');
   await addDoc(planHistoryRef, newPlanHistory);
 }
 
-async function downgradeToFreePlan(customerId: string) {
-  const user = await getUserByStripeCustomerId(customerId);
-  if (!user) {
-    throw new Error(`User not found for Stripe customer ID: ${customerId}`);
-  }
+async function downgradeToFreePlan(userId: string) {
 
   const planHistoryData = {
     id: v4(),
@@ -170,7 +162,7 @@ async function downgradeToFreePlan(customerId: string) {
 
   const newPlanHistory = new PlanHistory(planHistoryData);
 
-  const userDocRef = doc(db, 'users', user.id);
+  const userDocRef = doc(db, 'users', userId);
   const planHistoryRef = collection(userDocRef, 'planHistory');
   await addDoc(planHistoryRef, newPlanHistory);
 }
