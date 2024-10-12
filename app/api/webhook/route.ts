@@ -64,11 +64,12 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       throw new Error('handleCheckoutSessionCompleted: Session metadata or userId is missing.');
     }    
     const userId = session.metadata!.userId as string;
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    console.log('Sbscription from handleCheckoutSessionCompleted: ',subscription);
+    let subscription = await stripe.subscriptions.retrieve(subscriptionId);
     await stripe.subscriptions.update(subscriptionId, {
       metadata: { userId: userId }, 
     });
+    subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    console.log('Sbscription from handleCheckoutSessionCompleted without metadata: ',subscription);
     await saveSubscription(userId, subscriptionId, subscription, PlanChangeTypeEnum.NEW);
   }
 }
@@ -98,7 +99,7 @@ async function determineChangeType(subscription: Stripe.Subscription): Promise<P
   if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
     return PlanChangeTypeEnum.DOWNGRADE;
   }
-  console.log('Sbscription from determineChangeType: ',subscription);
+  console.log('Suscription from determineChangeType with metadata: ',subscription);
 
   if (!subscription.metadata || !subscription.metadata.userId) {
     throw new Error('determineChangeType: Subscription metadata or userId is missing.');
