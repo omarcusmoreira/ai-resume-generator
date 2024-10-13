@@ -63,6 +63,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ sessionId: session.id });
+    //eslint-disable-next-line
   } catch (error: any) {
     console.error('Error creating checkout session:', error);
     return NextResponse.json({ error: error.message || 'Error creating checkout session' }, { status: 500 });
