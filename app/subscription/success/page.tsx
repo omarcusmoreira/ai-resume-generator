@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { usePlanHistoryStore } from '@/stores/planHistoryStore';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle } from 'lucide-react';
-import { Button } from 'react-day-picker';
+import { Button } from '@/components/ui/button';
 
 export default function SubscriptionSuccess() {
   const router = useRouter();
