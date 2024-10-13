@@ -16,9 +16,7 @@ const CancelSubscriptionButton = () => {
     }
   if (userData?.stripeCustomerId){
         stripeCustomerId = userData.stripeCustomerId || ''
-  } else {
-    throw new Error('No stripeCustomerId associated to this user.')
-  }    
+  }   
 
   const handleCancelSubscription = async () => {
     setIsLoading(true);
