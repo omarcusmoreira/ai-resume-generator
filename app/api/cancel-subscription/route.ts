@@ -8,9 +8,11 @@ import { v4 } from 'uuid';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: Request) {
-  const { userId } = await req.json();
+  const { userId, stripeCustomerId } = await req.json();
 
-  if (!userId) {
+  console.log('stripeCustomerId from client', stripeCustomerId)
+
+  if (!stripeCustomerId || stripeCustomerId === '') {
     return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
   }
 
@@ -22,14 +24,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const userData = userDoc.data();
-    const stripeCustomerId = userData.stripeCustomerId;
+    // const userData = userDoc.data();
+    // const stripeCustomerId = userData.stripeCustomerId;
 
-    if (!stripeCustomerId) {
-      return NextResponse.json({ error: 'User has no associated Stripe customer' }, { status: 400 });
-    }
+    // if (!stripeCustomerId) {
+    //   return NextResponse.json({ error: 'User has no associated Stripe customer' }, { status: 400 });
+    // }
 
     // Retrieve the customer's subscriptions
+
     const subscriptions = await stripe.subscriptions.list({
       customer: stripeCustomerId,
       status: 'active',

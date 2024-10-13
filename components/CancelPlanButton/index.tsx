@@ -9,9 +9,16 @@ const CancelSubscriptionButton = () => {
   const { userData } = useUserDataStore();
 
   let userId = ''
+  let stripeCustomerId = ''
+
   if (userData){
       userId = userData.userId
-  }
+    }
+  if (userData?.stripeCustomerId){
+        stripeCustomerId = userData.stripeCustomerId || ''
+  } else {
+    throw new Error('No stripeCustomerId associated to this user.')
+  }    
 
   const handleCancelSubscription = async () => {
     setIsLoading(true);
@@ -23,7 +30,7 @@ const CancelSubscriptionButton = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId, stripeCustomerId }),
       });
 
       if (!response.ok) {
