@@ -8,6 +8,7 @@ import { ShoppingCart } from 'lucide-react'
 import { PlanQuotas, PlanTypeEnum, QuotasType } from '@/types/planHistory'
 import { useQuotaStore } from '@/stores/quotaStore'
 import { usePlanHistoryStore } from '@/stores/planHistoryStore'
+import CancelSubscriptionButton from '../CancelPlanButton'
 
 export default function EnhancedQuotaDisplay() {
   const { quotas } = useQuotaStore()
@@ -67,8 +68,9 @@ export default function EnhancedQuotaDisplay() {
             })}
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end">
-          <Button variant='ai' className="rounded-full">
+        <CardFooter className="flex justify-end gap-2">
+          <CancelSubscriptionButton/>
+          <Button variant='ai'>
             <ShoppingCart className="mr-2 h-4 w-4" />
             Renovar Plano
           </Button>
