@@ -44,7 +44,6 @@ export async function POST(req: Request) {
 
   if (relevantEvents.has(event.type)) {
     try {
-      // Check if this event has been processed before
       const eventId = event.id;
       const processedEventsRef = collection(db, 'processedEvents');
       const eventDoc = doc(processedEventsRef, eventId);
@@ -62,8 +61,6 @@ export async function POST(req: Request) {
         console.log(`Event ${eventId} has already been processed. Skipping.`);
         return NextResponse.json({ received: true, status: 'skipped' });
       }
-
-      // Process the event
       switch (event.type) {
         case 'checkout.session.completed':
           await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
@@ -167,13 +164,11 @@ async function determineChangeType(subscription: Stripe.Subscription): Promise<P
     } else if (comparison < 0) {
       return PlanChangeTypeEnum.DOWNGRADE;
     } else {
-      // This case should not occur if the plans are different and correctly mapped
       console.warn('Unexpected plan comparison result', { currentPlan, lastPlan: lastPlanHistory.plan });
       return PlanChangeTypeEnum.RENEWAL;
     }
   } catch (error) {
     console.error('Error in determineChangeType:', error);
-    // Default to NEW if there's an error
     return PlanChangeTypeEnum.NEW;
   }
 }
@@ -230,7 +225,6 @@ async function saveSubscription(
   const userDocRef = doc(db, 'users', userId);
   const planHistoryRef = collection(userDocRef, 'planHistory');
 
-  // Use a transaction to ensure idempotency
   await runTransaction(db, async (transaction) => {
     const existingDoc = await transaction.get(doc(planHistoryRef, subscriptionId));
     if (!existingDoc.exists()) {

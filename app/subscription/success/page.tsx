@@ -36,7 +36,7 @@ export default function SubscriptionSuccess() {
         <div className="mx-auto mb-4 bg-purple-100 rounded-full p-3 w-16 h-16 flex items-center justify-center">
           <CheckCircle className="w-8 h-8 text-purple-500" />
         </div>
-        <CardTitle className="text-2xl font-bold text-purple-700">Assinatura cancelada com sucesso!</CardTitle>
+        <CardTitle className="text-2xl font-bold text-purple-700">Assinatura efetuada com sucesso!</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-center text-gray-600">
