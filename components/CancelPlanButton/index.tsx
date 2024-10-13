@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useUserDataStore } from '@/stores/userDataStore';
 
 const CancelSubscriptionButton = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const { userData } = useUserDataStore();
+  const router = useRouter();
 
   let userId = ''
   let stripeCustomerId = ''
@@ -36,12 +38,12 @@ const CancelSubscriptionButton = () => {
         throw new Error(errorData.error || 'Failed to cancel subscription');
       }
 
-      // Handle successful cancellation (e.g., show a success message, update UI)
-      alert('Subscription cancelled successfully');
+      // Handle successful cancellation by redirecting
+      router.push('/subscription/cancel');
 
-      //eslint-disable-next-line
+    //eslint-disable-next-line
     } catch (err: any) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Erro ao cancelar o plano, entre em contato para resolver.');
     } finally {
       setIsLoading(false);
     }

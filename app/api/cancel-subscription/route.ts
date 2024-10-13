@@ -24,15 +24,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // const userData = userDoc.data();
-    // const stripeCustomerId = userData.stripeCustomerId;
-
-    // if (!stripeCustomerId) {
-    //   return NextResponse.json({ error: 'User has no associated Stripe customer' }, { status: 400 });
-    // }
-
-    // Retrieve the customer's subscriptions
-
     const subscriptions = await stripe.subscriptions.list({
       customer: stripeCustomerId,
       status: 'active',

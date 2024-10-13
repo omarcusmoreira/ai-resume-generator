@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { usePlanHistoryStore } from '@/stores/planHistoryStore';
 
-export default function SubscriptionSuccess() {
+export default function SubscriptionCancel() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { fetchCurrentPlan, currentPlan } = usePlanHistoryStore();
@@ -28,7 +28,7 @@ export default function SubscriptionSuccess() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">Assinatura efetuada com sucesso!</h1>
+      <h1 className="text-3xl font-bold mb-4">Assinatura cancelada com sucesso!</h1>
       <p className="mb-4">Muito Obrigado! Voce agora é {currentPlan}.</p>
       <button
         className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
