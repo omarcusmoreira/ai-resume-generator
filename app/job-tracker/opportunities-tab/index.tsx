@@ -72,7 +72,7 @@ export const OpportunitiesTab = () => {
 
                 <div className="space-y-4 ">
                   <Carousel>
-                    <CarouselContent>
+                    <CarouselContent className='gap-2'>
                       {filteredOpportunities.map((opportunity) => (
                       <CarouselItem  key={opportunity.id} className="sm:basis-1/3">
                         <OpportunityCard

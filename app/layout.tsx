@@ -63,7 +63,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
   
   useEffect(() => {
     const fetchData = async () => {
-      if (user && !loading) {  // Ensure data is fetched after login
+      if (user && !loading) { 
         try {
           await Promise.all([
             fetchUserData(),
@@ -80,7 +80,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
           setIsDataLoaded(true);
         }
       } else if (!loading) {
-        setIsDataLoaded(true);  // Set loaded to true if user is not logged in
+        setIsDataLoaded(true);  
       }
     };
   

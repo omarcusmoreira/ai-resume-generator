@@ -20,7 +20,6 @@ import Logo from '@/public/assets/images/logo_horizontal.png';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { usePlanHistoryStore } from '@/stores/planHistoryStore';
 import { PlanTypeEnum } from '@/types/planHistory';
-import CheckoutButton from '../CheckoutButton';
 
 export default function UserMenu() {
     const router = useRouter();
@@ -85,11 +84,12 @@ export default function UserMenu() {
           <DropdownMenuSeparator />
           <div className="bg-pink-50 p-3 rounded-md mx-1 my-2">
             <p className="text-sm font-medium">Acabou os recursos?</p>
-            <p className="text-xs text-muted-foreground mb-2">Faça um upgrade para Premium para aumentar o limite de mensagens.</p>
-            <Button className="w-full" variant="ai">
-              <Sparkles className="mr-2 h-4 w-4" />
-              <CheckoutButton planType={PlanTypeEnum.BASIC}/>
-            </Button>
+            <p className="text-xs text-muted-foreground mb-2">Faça um upgrade para aumentar o limite de mensagens.</p>
+            <Link href='/upgrade-page'>
+              <Button className="w-full" variant="ai">
+                <Sparkles className="mr-2 h-4 w-4" /> Escolha seu plano!
+              </Button>
+            </Link>
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => console.log('Billing clicked')}>

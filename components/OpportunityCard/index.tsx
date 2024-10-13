@@ -75,7 +75,7 @@ export const OpportunityCard = ({ opportunity, openDeleteDialog }: OpportunityCa
     <Card className="w-full min-w-[320px] mx-auto h-full flex flex-col justify-between">
       <div>
 
-      <CardHeader className="pb-4 mb-2 bg-purple-100 max-h-[80px]">
+      <CardHeader className="py-4 mb-2 bg-purple-100 max-h-[80px]">
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold text-gray-800 truncate max-w-[160px]">{opportunity.companyName}</h2>

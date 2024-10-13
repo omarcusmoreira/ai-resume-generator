@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   console.log('stripeCustomerId from client', stripeCustomerId)
 
   if (!stripeCustomerId || stripeCustomerId === '') {
-    return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    return NextResponse.json({ error: 'Erro ao cancelar o plano. Entre em contato para resolvermos o problema.' }, { status: 400 });
   }
 
   try {

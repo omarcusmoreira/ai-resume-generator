@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 interface UpgradeDialogProps {
   title: "Perfis" | "Currículos" | "Interações" | "Vagas" | "Contatos"
@@ -50,7 +51,7 @@ export function UpgradeDialog({ title, isOpen, onClose }: UpgradeDialogProps) {
               <div className="flex items-center gap-4 mb-4">
                 <Icon className="h-8 w-8 flex-shrink-0" />
                 <span className="text-sm">
-                  Aumente seu limite de {title.toLowerCase()} e aproveite todos os recursos premium
+                  Aumente seu limite de {title.toLowerCase()} e aproveite mais recursos.
                 </span>
               </div>
             </DialogDescription>
@@ -63,12 +64,14 @@ export function UpgradeDialog({ title, isOpen, onClose }: UpgradeDialogProps) {
             >
               Agora não
             </Button>
-            <Button
-              onClick={handleUpgrade}
-              className="bg-white text-purple-700 hover:bg-purple-100 hover:text-purple-800 transition-colors font-semibold"
-            >
-              Fazer Upgrade Agora
-            </Button>
+            <Link href='/upgrade-page'>
+              <Button
+                onClick={handleUpgrade}
+                className="bg-white text-purple-700 hover:bg-purple-100 hover:text-purple-800 transition-colors font-semibold"
+                >
+                Fazer Upgrade Agora
+              </Button>
+            </Link>
           </DialogFooter>
         </div>
       </DialogContent>

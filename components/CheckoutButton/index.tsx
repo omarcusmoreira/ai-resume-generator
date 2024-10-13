@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { PlanTypeEnum } from '@/types/planHistory';
 import { useAuthStore } from '@/stores/authStore';
+import { Button } from '../ui/button';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -75,11 +76,9 @@ export default function CheckoutButton({ planType }: { planType: PlanTypeEnum })
     }
   };
 
-  const plan = plans.find(p => p.type === planType);
-
   return (
-    <button onClick={handleCheckout} disabled={loading}>
-      {loading ? 'Processando...' : `Assinar plano ${planType} ($${plan?.displayPrice}/mês)`}
-    </button>
+    <Button variant='ai' onClick={handleCheckout} disabled={loading} className='w-full'>
+      {loading ? 'Processando...' : `Assinar plano ${planType}`}
+    </Button>
   );
 }
