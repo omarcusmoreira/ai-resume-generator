@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { usePlanHistoryStore } from '@/stores/planHistoryStore';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle } from 'lucide-react';
+import { Button } from 'react-day-picker';
 
-export default function SubscriptionCancel() {
+export default function SubscriptionSuccess() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { fetchCurrentPlan, currentPlan } = usePlanHistoryStore();
@@ -27,15 +30,28 @@ export default function SubscriptionCancel() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">Assinatura cancelada com sucesso!</h1>
-      <p className="mb-4">Muito Obrigado! Voce agora é {currentPlan}.</p>
-      <button
-        className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-        onClick={() => router.push('/')}
-      >
-        Início
-      </button>
-    </div>
+    <div className="min-h-screen bg-gradient-to-b from-purple-100 to-white flex items-center justify-center p-4">
+    <Card className="w-full max-w-md">
+      <CardHeader className="text-center">
+        <div className="mx-auto mb-4 bg-purple-100 rounded-full p-3 w-16 h-16 flex items-center justify-center">
+          <CheckCircle className="w-8 h-8 text-purple-500" />
+        </div>
+        <CardTitle className="text-2xl font-bold text-purple-700">Assinatura efetuada com sucesso!</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-center text-gray-600">
+          Muito obrigado! Você agora é <span className="font-semibold text-purple-600">{currentPlan}</span>.
+        </p>
+      </CardContent>
+      <CardFooter className="flex justify-center">
+        <Button 
+          onClick={() => router.push('/')}
+          className="bg-purple-500 hover:bg-purple-700 text-white"
+        >
+          Voltar ao Início
+        </Button>
+      </CardFooter>
+    </Card>
+  </div>
   );
 }
