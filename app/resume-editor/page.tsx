@@ -41,12 +41,6 @@ interface ResumeData {
   extraCurricular: string;
 }
 
-interface Resume {
-  id: string;
-  contentJSON: string;
-  contentHTML?: string;
-}
-
 export default function ResumeEditor() {
 
   const resumeRef = useRef<HTMLDivElement>(null)
@@ -116,9 +110,7 @@ export default function ResumeEditor() {
       return '<p>Error parsing resume content</p>';
     }
   };
-
-  const resumeContent = resume?.contentJSON ? parseJSONToHTML(resume.contentJSON) : '';
-
+  
   const getInitialContent = (resume: ResumeType | undefined): string => {
     if (!resume) return '';
     if (resume.contentHTML) return resume.contentHTML;
