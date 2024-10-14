@@ -1,9 +1,11 @@
 import { db } from "@/firebaseConfig";
 import { 
-    collection, deleteDoc, doc, getDocs, setDoc, updateDoc, query, orderBy, limit 
+    collection, deleteDoc, doc, getDocs, setDoc, updateDoc, query, orderBy, limit, 
+    Timestamp
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { PlanHistory, PlanTypeEnum } from "@/types/planHistory";
+import { PlanChangeTypeEnum, PlanHistory, PlanTypeEnum } from "@/types/planHistory";
+import { v4 } from "uuid";
 
 const getUserId = () => {
     const auth = getAuth();
@@ -65,8 +67,8 @@ export const getPlanHistory = async (): Promise<PlanHistory[]> => {
     return planHistory;
 };
 
-export const getCurrentPlan = async (): Promise<PlanTypeEnum> => {
-    const userId = getUserId();
+export const getCurrentPlan = async (): Promise<{ currentPlan: PlanTypeEnum, planHistory: PlanHistory[] }> => {
+    const userId = getUserId()
     const planHistoryQuery = query(
         collection(db, 'users', userId, 'planHistory'),
         orderBy('planChangeDate', 'desc'),
@@ -74,12 +76,43 @@ export const getCurrentPlan = async (): Promise<PlanTypeEnum> => {
     );
 
     const querySnapshot = await getDocs(planHistoryQuery);
-    if (querySnapshot.empty) {
-        return PlanTypeEnum.FREE;
+    let currentPlan = PlanTypeEnum.FREE;
+    let planHistory: PlanHistory[] = [];
+
+    if (!querySnapshot.empty) {
+        const planData = querySnapshot.docs[0].data() as PlanHistory;
+        currentPlan = planData.plan;
+        planHistory = [planData];
+
+        const now = Timestamp.now();
+        if (now.toMillis() > planData.expirationDate.toMillis()) {
+            console.log('Plan expired. Renewing planHistory...');
+            const newPlanHistory = new PlanHistory({
+                id: v4(),
+                plan: PlanTypeEnum.FREE,
+                changeType: PlanChangeTypeEnum.FREE_RENEWAL,
+                amountPaid: 0,
+            });
+
+            await addPlanHistory(userId, newPlanHistory.id, newPlanHistory);
+            currentPlan = PlanTypeEnum.FREE;
+            planHistory = [newPlanHistory, ...planHistory];
+        }
+    } else {
+        // If no plan history exists, create a new FREE plan
+        const newPlanHistory = new PlanHistory({
+            id: v4(),
+            plan: PlanTypeEnum.FREE,
+            changeType: PlanChangeTypeEnum.FREE_RENEWAL,
+            amountPaid: 0,
+        });
+
+        await addPlanHistory(userId, newPlanHistory.id, newPlanHistory);
+        currentPlan = PlanTypeEnum.FREE;
+        planHistory = [newPlanHistory];
     }
 
-    const planData = querySnapshot.docs[0].data();
-    return planData.plan as PlanTypeEnum;
+    return { currentPlan, planHistory };
 }
 
 // Update plan history

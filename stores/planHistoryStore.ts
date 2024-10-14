@@ -1,6 +1,6 @@
 // stores/planHistoryStore.ts
 import { create } from 'zustand';
-import { PlanHistory, PlanTypeEnum } from '@/types/planHistory';
+import { PlanHistory, PlanTypeEnum, PlanChangeTypeEnum, createPlanHistoryObject } from '@/types/planHistory';
 import {
   addPlanHistory as apiAddPlanHistory,
   getPlanHistory as apiGetPlanHistory,
@@ -8,6 +8,8 @@ import {
   deletePlanHistory as apiDeletePlanHistory,
   getCurrentPlan as apiGetCurrentPlan,
 } from '@/services/planHistoryService';
+import { Timestamp } from 'firebase/firestore';
+import { v4 } from 'uuid';
 
 interface PlanHistoryStore {
   planHistory: PlanHistory[];
@@ -18,9 +20,10 @@ interface PlanHistoryStore {
   addPlanHistory: (userId: string, planHistoryId: string, planHistory: PlanHistory) => Promise<void>;
   updatePlanHistory: (planHistoryId: string, planHistory: Partial<PlanHistory>) => Promise<void>;
   deletePlanHistory: (planHistoryId: string) => Promise<void>;
+  checkAndRenewPlan: (userId: string) => Promise<boolean>;
 }
 
-export const usePlanHistoryStore = create<PlanHistoryStore>((set) => ({
+export const usePlanHistoryStore = create<PlanHistoryStore>((set, get) => ({
   planHistory: [],
   currentPlan: PlanTypeEnum.FREE,
   loading: false,
@@ -38,8 +41,8 @@ export const usePlanHistoryStore = create<PlanHistoryStore>((set) => ({
   fetchCurrentPlan: async () => {
     set({ loading: true });
     try {
-      const plan = await apiGetCurrentPlan();
-      set({ currentPlan: plan });
+      const { currentPlan, planHistory } = await apiGetCurrentPlan();
+      set({ currentPlan, planHistory });
     } finally {
       set({ loading: false });
     }
@@ -47,7 +50,10 @@ export const usePlanHistoryStore = create<PlanHistoryStore>((set) => ({
   
   addPlanHistory: async (userId: string, planHistoryId: string, planHistory: PlanHistory) => {
     await apiAddPlanHistory(userId, planHistoryId, planHistory);
-    set((state) => ({ planHistory: [...state.planHistory, planHistory] }));
+    set((state) => ({ 
+      planHistory: [...state.planHistory, planHistory],
+      currentPlan: planHistory.plan
+    }));
   },
   
   updatePlanHistory: async (planHistoryId: string, planHistory: Partial<PlanHistory>) => {
@@ -62,5 +68,31 @@ export const usePlanHistoryStore = create<PlanHistoryStore>((set) => ({
     set((state) => ({
       planHistory: state.planHistory.filter((ph) => ph.id !== planHistoryId),
     }));
+  },
+
+  checkAndRenewPlan: async (userId: string) => {
+    const state = get();
+    if (state.planHistory.length === 0) {
+      await state.fetchPlanHistory();
+    }
+    
+    const currentPlan = state.planHistory[state.planHistory.length - 1];
+    const now = Timestamp.now();
+
+    if (now.toMillis() > currentPlan.expirationDate.toMillis()) {
+      
+      console.log('Plan expired. Renewing planHistory...')
+      const newPlanHistory = new PlanHistory({
+        id: v4(),
+        plan: PlanTypeEnum.FREE,
+        changeType: PlanChangeTypeEnum.FREE_RENEWAL,
+        amountPaid: 0,
+      });
+      
+      await state.addPlanHistory(userId, newPlanHistory.id, newPlanHistory);
+      return true;
+    }
+
+    return false;
   },
 }));

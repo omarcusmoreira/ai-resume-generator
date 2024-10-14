@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import CheckoutButton from "@/components/CheckoutButton";
+import { SelectSeparator } from "@/components/ui/select";
 
 enum PlanTypeEnum {
   FREE = 'free',
@@ -105,6 +106,7 @@ export default function PricingPage() {
               </CardHeader>
               <CardContent className="
               space-y-4">
+                <SelectSeparator />
                 <ul className="space-y-2">
                   {Object.entries(PlanQuotas[plan.type]).map(([feature, value]) => (
                     <li key={feature} className="flex items-center justify-between">
@@ -113,6 +115,7 @@ export default function PricingPage() {
                     </li>
                   ))}
                 </ul>
+                <SelectSeparator />
               </CardContent>
               <CardFooter>
                 {plan.type === PlanTypeEnum.FREE ? 

@@ -8,6 +8,7 @@ const stripe = new Stripe(`${process.env.STRIPE_SECRET_KEY!}`);
 export async function POST(request: Request) {
   try {
     const { priceId, userId, email } = await request.json();
+    console.log('PriceId from checkout component', priceId)
 
     if (!priceId || !userId || !email) {
       return NextResponse.json({ error: 'Missing priceId, userId, or email' }, { status: 400 });

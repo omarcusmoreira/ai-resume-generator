@@ -8,7 +8,8 @@ enum PlanChangeTypeEnum {
   NEW = 'new',  
   UPGRADE = 'upgrade',
   DOWNGRADE = 'downgrade',
-  RENEWAL = 'renewal'
+  RENEWAL = 'renewal',
+  FREE_RENEWAL = 'free renewal'
 }
 
 export { PlanChangeTypeEnum, PlanTypeEnum };

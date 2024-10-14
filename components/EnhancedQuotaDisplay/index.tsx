@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { ShoppingCart } from 'lucide-react'
+import { Crown } from 'lucide-react'
 import { PlanQuotas, PlanTypeEnum, QuotasType } from '@/types/planHistory'
 import { useQuotaStore } from '@/stores/quotaStore'
 import { usePlanHistoryStore } from '@/stores/planHistoryStore'
@@ -71,8 +71,8 @@ export default function EnhancedQuotaDisplay() {
         <CardFooter className="flex justify-end gap-2">
           <CancelSubscriptionButton/>
           <Button variant='ai'>
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            Renovar Plano
+            <Crown className="mr-2 h-4 w-4" />
+            Faça upgrade do seu plano
           </Button>
         </CardFooter>
       </Card>

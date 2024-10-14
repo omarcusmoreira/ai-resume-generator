@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { CreditCard, LogOut, Settings, Sparkles, Crown, Bug } from 'lucide-react';
+import { CreditCard, LogOut, Settings, Crown, Bug } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/firebaseConfig';
@@ -87,7 +87,7 @@ export default function UserMenu() {
             <p className="text-xs text-muted-foreground mb-2">Faça um upgrade para aumentar o limite de mensagens.</p>
             <Link href='/upgrade-page'>
               <Button className="w-full" variant="ai">
-                <Sparkles className="mr-2 h-4 w-4" /> Escolha seu plano!
+                <Crown className="mr-2 h-4 w-4" /> Faça upgrade do seu plano
               </Button>
             </Link>
           </div>

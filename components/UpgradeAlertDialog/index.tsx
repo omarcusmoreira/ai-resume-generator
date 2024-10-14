@@ -69,7 +69,7 @@ export function UpgradeDialog({ title, isOpen, onClose }: UpgradeDialogProps) {
                 onClick={handleUpgrade}
                 className="bg-white text-purple-700 hover:bg-purple-100 hover:text-purple-800 transition-colors font-semibold"
                 >
-                Fazer Upgrade Agora
+                Fazer upgrade
               </Button>
             </Link>
           </DialogFooter>
