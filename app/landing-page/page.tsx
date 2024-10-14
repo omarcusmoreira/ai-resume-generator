@@ -210,7 +210,7 @@ export default function LandingPage() {
                 </CardContent>
                 <CardFooter>
                   <Link href="/auth-page" className="w-full">
-                    <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">Assinar plano basic</Button>
+                    <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">Assinar basic por R$ 9,90</Button>
                   </Link>
                 </CardFooter>
               </Card>
@@ -230,7 +230,7 @@ export default function LandingPage() {
                 </CardContent>
                 <CardFooter>
                   <Link href="/auth-page" className="w-full">
-                    <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">Assinar plano premium</Button>
+                    <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">Assinar premium por R$ 29,90</Button>
                   </Link>
                 </CardFooter>
               </Card>

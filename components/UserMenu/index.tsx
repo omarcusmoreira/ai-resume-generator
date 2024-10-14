@@ -92,19 +92,17 @@ export default function UserMenu() {
             </Link>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => console.log('Billing clicked')}>
+          <DropdownMenuItem onSelect={() => router.push('https://billing.stripe.com/p/login/dR64ia11I6rrba8dQQ')}>
             <CreditCard className="mr-2 h-4 w-4" />
             Cobrança
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => console.log('Pricing clicked')}>
+          <DropdownMenuItem onSelect={() => router.push('/upgrade-page')}>
             <Crown className="mr-2 h-4 w-4" />
             Preços
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href={'https://forms.gle/9KKkaRSKpsaHNqz67'}>
-              <Bug className="mr-2 h-4 w-4" />
-              Relatar Problema
-            </Link>
+          <DropdownMenuItem onSelect={() => router.push('https://forms.gle/9KKkaRSKpsaHNqz67')}>
+            <Bug className="mr-2 h-4 w-4" />
+            Relatar Problema
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem 

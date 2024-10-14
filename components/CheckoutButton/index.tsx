@@ -23,6 +23,12 @@ export default function CheckoutButton({ planType }: { planType: PlanTypeEnum })
   const [loading, setLoading] = useState(false);
   const { user } = useAuthStore();
 
+  const plan = plans.find(p => p.type === planType);
+  if (!plan) {
+    console.error('Invalid plan type');
+    setLoading(false);
+    return;
+  }
   const handleCheckout = async () => {
     if (!user) {
       console.error('User not authenticated');
@@ -78,7 +84,7 @@ export default function CheckoutButton({ planType }: { planType: PlanTypeEnum })
 
   return (
     <Button variant='ai' onClick={handleCheckout} disabled={loading} className='w-full'>
-      {loading ? 'Processando...' : `Assinar plano ${planType}`}
+      {loading ? 'Processando...' : `Assinar ${planType} por R$ ${plan.displayPrice}0`}
     </Button>
   );
 }
