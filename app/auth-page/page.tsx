@@ -39,7 +39,6 @@ import { getUserById } from '@/services/userServices' // Import a service to che
 import { GoogleIcon } from '@/components/ui/google-icon'
 import { PlanChangeTypeEnum, PlanHistory, PlanTypeEnum } from '@/types/planHistory'
 import { v4 } from 'uuid'
-import { createStripeCustomer } from '@/services/stripe'
 
 export default function AuthPage() {
   // State Variables for Login
@@ -157,57 +156,70 @@ export default function AuthPage() {
 
   // Handle Google Sign-In (with signup check)
   const handleGoogleSignIn = async () => {
-    setIsCreatingWithGoogle(true)
-    const provider = new GoogleAuthProvider()
+    setIsCreatingWithGoogle(true);
+    const provider = new GoogleAuthProvider();
     
     try {
-      const result = await signInWithPopup(auth, provider)
-      const user = result.user
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
   
       if (!user.displayName || !user.email) {
-        throw new Error('Nome ou e-mail não disponíveis')
+        throw new Error('Nome ou e-mail não disponíveis');
       }
   
       // Check if the user already exists in your database
-      const existingUser = await getUserById(user.uid)
+      const existingUser = await getUserById(user.uid);
   
       if (!existingUser) {
-        // Create a Stripe customer for new users
-        const stripeCustomerId = await createStripeCustomer(user.displayName, user.email)
-  
         // If user does not exist, treat this as a sign-up
+        // Create a Stripe customer via the API route
+        const response = await fetch('/api/create-stripe-customer', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: user.displayName, email: user.email, uid: user.uid }),
+        });
+  
+        const { customerId } = await response.json();
+  
+        console.log('Stripe Customer Id: ', customerId);
+  
         const personalInfo: PersonalInfoType = {
           name: user.displayName,
           email: user.email,
-        }
+        };
         
         const userState: UserDataType = {
           userId: user.uid,
           personalInfo: personalInfo,
-          stripeCustomerId, // Add the Stripe customer ID to the user data
-        }
+          stripeCustomerId: customerId, // Add the Stripe customer ID to the user data
+        };
         
-        await addUser(userState)
+        await addUser(userState);
   
-        const planHistoryId = v4()
+        const planHistoryId = v4();
         const planHistory = new PlanHistory({
           id: planHistoryId,
           plan: PlanTypeEnum.FREE,
           changeType: PlanChangeTypeEnum.NEW,
           amountPaid: 0,
-        })
+        });
   
-        await addPlanHistory(user.uid, planHistoryId, planHistory)
+        await addPlanHistory(user.uid, planHistoryId, planHistory);
       }
   
-      router.push('/')
-        //eslint-disable-next-line
-      } catch (error: any) {
-      console.error('Google sign-in error', error)
+      router.push('/');
+
+      //eslint-disable-next-line
+    } catch (error: any) {
+      console.error('Google sign-in error', error);
+      setSignupError(error.message || 'Erro ao entrar com Google.');
+      // You might want to set an error state here to display to the user
     }
   
-    setIsCreatingWithGoogle(false)
-  }
+    setIsCreatingWithGoogle(false);
+  };
   
   
 
