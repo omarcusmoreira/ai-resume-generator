@@ -53,15 +53,22 @@ export default function ResumeEditor() {
   const { toast } = useToast();
   const { push } = useRouter();
   const { userData } = useUserDataStore()
-  const { resumes, loading, addResume, deleteResume } = useResumeStore();
+  const { resumes, loading, updateResume, deleteResume } = useResumeStore();
 
   const [isEditing, setIsEditing] = useState(false)
-
-
   const searchParams = useSearchParams()
-  const resumeId = searchParams.get('resumeId') as string
 
+  const resumeId = searchParams.get('resumeId') as string
   const resume = resumes.find(resume => resume.id === resumeId)
+
+  useEffect(() => {
+    toast({
+      title: "Aviso",
+      description: "As informações geradas pela IA podem conter imprecisões. Por favor, verifique cuidadosamente todos os detalhes antes de usar.",
+      variant: 'warning',
+      duration: 6000, 
+    });
+  }, [toast])
   
   const parseJSONToHTML = (jsonContent: string): string => {
     try {
@@ -112,24 +119,22 @@ export default function ResumeEditor() {
 
   const resumeContent = resume?.contentJSON ? parseJSONToHTML(resume.contentJSON) : '';
 
+  const getInitialContent = (resume: ResumeType | undefined): string => {
+    if (!resume) return '';
+    if (resume.contentHTML) return resume.contentHTML;
+    if (resume.contentJSON) return parseJSONToHTML(resume.contentJSON);
+    return '';
+  }
+
   const editor = useEditor({
     extensions: [StarterKit],
-    content: resumeContent,
+    content: getInitialContent(resume),
     editorProps: {
       attributes: {
         class: 'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none',
       },
     },
   })
-
-  useEffect(() => {
-    toast({
-      title: "Aviso",
-      description: "As informações geradas pela IA podem conter imprecisões. Por favor, verifique cuidadosamente todos os detalhes antes de usar.",
-      variant: 'warning',
-      duration: 6000, 
-    });
-  }, [toast])
 
   useEffect(() => {
     if (editor) {
@@ -143,31 +148,30 @@ export default function ResumeEditor() {
 
   const saveResume = async () => {
     if (!editor || !resume) return;
-
-    const updatedResume: Resume = {
-      ...resume,
+  
+    const updatedResume: Partial<ResumeType> = {
       contentHTML: editor.getHTML(),
       contentJSON: resume.contentJSON || '' // Keep the original JSON
     }
-
+  
     try {
-      await addResume(updatedResume.id, updatedResume as ResumeType)
+      await updateResume(resumeId, updatedResume)
       setIsEditing(false)
       toast({
         title: "Sucesso",
-        description: "Currículo salvo com sucesso!",
+        description: "Currículo atualizado com sucesso!",
         variant: 'default',
       })
     } catch (error) {
-      console.error("Error saving resume:", error)
+      console.error("Error updating resume:", error)
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao salvar o currículo. Por favor, tente novamente.",
+        description: "Ocorreu um erro ao atualizar o currículo. Por favor, tente novamente.",
         variant: 'destructive',
       })
     }
   }
-  
+
   const handleDelete = async() => {
     await deleteResume(resumeId)
     push('/resume-manager')
@@ -341,7 +345,6 @@ export default function ResumeEditor() {
                   </AlertDialog>
                   </div>
                 </div>
-              
               <div className="border rounded-md p-4 relative" ref={resumeRef}>
                 <style jsx global>{`
                   .ProseMirror h1 {
