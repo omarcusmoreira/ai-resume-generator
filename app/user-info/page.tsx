@@ -227,10 +227,10 @@ export default function UserInfo() {
               onChange={(e) => handleChange('linkedinURL', e.target.value)}
             />
             <Field
-              label="Cidade"
+              label="Cidade/Estado"
               id="city"
               value={localUserData?.personalInfo?.city || ''}
-              placeholder="Digite sua Cidade"
+              placeholder="Digite sua Cidade/Estado"
               type="text"
               onChange={(e) => handleChange('city', e.target.value)}    
             />
