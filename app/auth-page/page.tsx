@@ -106,18 +106,18 @@ export default function AuthPage() {
       const user = userCredential.user;
       console.log('Sign-up successful');
   
-      // Create a Stripe customer via the API route in the app directory
-      const response = await fetch('/api/create-stripe-customer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: signupName, email: signupEmail, uid: user.uid }),
-      });
+      // // Create a Stripe customer via the API route in the app directory
+      // const response = await fetch('/api/create-stripe-customer', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ name: signupName, email: signupEmail, uid: user.uid }),
+      // });
   
-      const { customerId } = await response.json();
+      // const { customerId } = await response.json();
   
-      console.log('Stripe Customer Id: ', customerId)
+      // console.log('Stripe Customer Id: ', customerId)
 
       const initialPersonalInfo: PersonalInfoType = {
         name: signupName,
@@ -127,7 +127,7 @@ export default function AuthPage() {
       const initialUserData: UserDataType = {
         userId: user.uid,
         personalInfo: initialPersonalInfo,
-        stripeCustomerId: customerId,
+        // stripeCustomerId: customerId,
       };
   
       await addUser(initialUserData);
@@ -173,17 +173,17 @@ export default function AuthPage() {
       if (!existingUser) {
         // If user does not exist, treat this as a sign-up
         // Create a Stripe customer via the API route
-        const response = await fetch('/api/create-stripe-customer', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ name: user.displayName, email: user.email, uid: user.uid }),
-        });
+        // const response = await fetch('/api/create-stripe-customer', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({ name: user.displayName, email: user.email, uid: user.uid }),
+        // });
   
-        const { customerId } = await response.json();
+        // const { customerId } = await response.json();
   
-        console.log('Stripe Customer Id: ', customerId);
+        // console.log('Stripe Customer Id: ', customerId);
   
         const personalInfo: PersonalInfoType = {
           name: user.displayName,
@@ -193,7 +193,7 @@ export default function AuthPage() {
         const userState: UserDataType = {
           userId: user.uid,
           personalInfo: personalInfo,
-          stripeCustomerId: customerId, // Add the Stripe customer ID to the user data
+          // stripeCustomerId: customerId, // Add the Stripe customer ID to the user data
         };
         
         await addUser(userState);
@@ -221,8 +221,6 @@ export default function AuthPage() {
     setIsCreatingWithGoogle(false);
   };
   
-  
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
       <Card className="w-full max-w-md">
